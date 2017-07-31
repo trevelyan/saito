@@ -1,0 +1,11 @@
+{
+  "name": "saito",
+  "version": "3.0.0",
+  "description": "big-data application blockchain",
+  "main": "start.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "David Lancashire",
+  "license": "MIT"
+}
