@@ -1,0 +1,162 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Saito Network: Online Demo</title>
+
+  <script type="text/javascript" src="jquery-3.2.1.min.js"></script>
+  <link rel="stylesheet" href="jquery-ui.min.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="jquery-ui.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/fancybox/jquery.fancybox.pack.js"></script>
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox-buttons.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/fancybox/jquery.fancybox-buttons.js"></script>
+  <script type="text/javascript" src="/fancybox/jquery.fancybox-media.js"></script>
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox-thumbs.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/fancybox/jquery.fancybox-thumbs.js"></script>
+
+
+  <link rel="stylesheet" type="text/css" href="style.css" />
+
+</head>
+<body>
+
+    <div class="header">
+      Saito Header
+    </div>
+
+    <div class="main">
+
+      <div class="sidebar">
+
+        <div class="compose" id="compose">COMPOSE</div>
+        <div class="viewkeys" id="viewkeys">VIEW KEYS</div>
+
+
+        <div class="connections" id="connections">
+	  <table class="connections_table">
+	    <tr class="connection">
+	      <td class="coherence">98%</td>
+	      <td class="address">127.0.0.1</td>
+	      <td class="port">12100</td>
+	    </tr>
+	  </table>
+	</div>
+
+        <div class="connections_add" id="connections_add">+</div>
+
+      </div>
+
+      <div class="mail">
+	<table class="message_table">
+	  <tr class="message" id="message_0">
+	    <td class="checkbox"><input type="checkbox" class="check" name="" id="message_1_checkbox" /></td>
+	    <td class="from">Saito</td>
+	    <td class="title">Welcome to the Saito Network</td>
+	    <td class="time">4:50 pm</td>
+	    <td class="module" style="display:none">Email</td>
+	    <td class="json" style="display:none">
+Do you want to take a leap of faith?
+
+<p></p>
+
+To start interacting with Saito find an application and send it a message. If you aren't sure of what you can do, why not try sending a message to one of the following addresses and see what happens?
+</td>
+	  </tr>
+	</table>
+      </div>
+
+  </div>
+
+
+
+  <div id="lightbox_message" style="display:none">
+    <div class="lightbox_message_from" id="lightbox_message_from">
+      <span class="lightbox_message_from_label">FROM: </span>
+      <span class="lightbox_message_from_address" id="lightbox_message_from_address">FROM878e01d3869713eb3bacb205d4a94b5fe551536a9e0b909537722f9cd376</span>
+    </div>
+    <div class="lightbox_message_to" id="lightbox_message_to">
+      <span class="lightbox_message_to_label">TO: </span>
+      <span class="lightbox_message_to_address" id="lightbox_message_to_address">TO8e878e01d3869713eb3bacb205d4a94b5fe551536a9e0b909537722f9cd376</span>
+    </div>
+    <div class="lightbox_message_text" id="lightbox_message_text">
+      Sample Text
+    </div>
+    <div class="compose" id="reply">REPLY</div>
+  </div>
+
+
+
+  <div id="lightbox_compose" style="display:none">
+    <div class="lightbox_compose_from" id="lightbox_compose_from">
+      <span class="lightbox_compose_from_label">FROM: </span>
+      <input type="text" id="lightbox_compose_from_address" class="lightbox_compose_from_address" value="048e878e01d3869713eb3bacb205d4a94b5fe551536a9e0b909537722f9cd376" />
+    </div>
+    <div class="lightbox_compose_to" id="lightbox_compose_to">
+      <span class="lightbox_compose_to_label">TO: </span>
+      <input type="text" id="lightbox_compose_to_address" class="lightbox_compose_to_address" value="048e878e01d3869713eb3bacb205d4a94b5fe551536a9e0b909537722f9cd376" />
+    </div>
+    <div class="lightbox_compose_module" id="lightbox_compose_module">
+      <div style="float:left">
+        <span class="lightbox_compose_module_select_label">module: </span>
+        <select type="text" class="lightbox_compose_module_select" id="lightbox_compose_module_select">
+          <option value="email">email</option>
+          <option value="authorize">authorize</option>
+          <option value="proxy">proxy</option>
+        </select>
+      </div>
+      <div style="float:left">
+        <span class="lightbox_compose_payment_label">payment: </span>
+        <input type="text" class="lightbox_compose_payment" id="lightbox_compose_payment" value="0.0" />
+      </div>
+      <div style="float:left">
+        <span class="lightbox_compose_fee_label">fee: </span>
+        <input type="text" class="lightbox_compose_fee" id="lightbox_compose_fee" value="0.0001" />
+      </div>
+    </div>
+    <div class="module_editable_space" id="module_editable_space">
+      Payment Transaction
+    </div>
+    <div class="compose" id="send">SEND</div>
+  </div>
+
+
+
+
+
+
+  <div id="lightbox_viewkeys" style="display:none">
+
+    <div id="lightbox_viewkeys_text">
+Your browser is running the full Saito client. In order to allow you to send and receive transactions we have autogenerated the following keypair for you. If your browser supports local storage it may remember this keypair for the next time you login. If you wish to use this account long-term, you should backup this information:
+
+  </div>
+
+    <table style="margin-left: 25px">
+      <tr>
+        <td style="margin-right: 10px;font-weight:bold;">Public Key</td>
+	<td id="lightbox_viewkeys_publickey"></td>
+      </tr>
+      <tr>
+        <td style="margin-right: 10px;font-weight:bold;">Private Key</td>
+	<td id="lightbox_viewkeys_privatekey"></td>
+      </tr>
+    </table>
+
+  </div>
+
+
+
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+
+
+

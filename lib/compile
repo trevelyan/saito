@@ -1,0 +1,6 @@
+browserify start.js -o trust/web/browser.js
+cd trust/web
+./compile
+cd ../../
+
+
