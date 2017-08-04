@@ -1,5 +1,5 @@
-browserify start.js -o trust/web/browser.js
-cd trust/web
+browserify start.js -o saito/web/browser.js
+cd saito/web
 ./compile
 cd ../../
 
