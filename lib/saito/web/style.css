@@ -81,6 +81,16 @@
  width: 190px;
  border: 1px solid black;
 }
+.connections_sync {
+ width: 190px;
+ margin-top:20px;
+ margin-left:auto;
+ margin-right:auto;
+ height: 20px;
+}
+.ui-progressbar-value {
+ background-color: #48A808;
+}
 .connections_add {
  height: 30px;
  width: 23px;

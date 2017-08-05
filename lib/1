@@ -10,8 +10,7 @@ function Browser(app) {
   }
 
   this.app = app || {};
-  this.monitor_timer   = null;
-  this.monitor_speed   = 5000;  // every second
+
 }
 module.exports = Browser;
 
@@ -263,12 +262,12 @@ Browser.prototype.monitorBlockchainSyncing = function monitorBlockchainSyncing(r
   }
 
   var remote_block_id = remote_blkid;
+  var monitor_timer   = null;
+  var monitor_speed   = 5000;  // every second
 
   browser_self = this;
 
   this.monitor_timer = setInterval(function(){
-
-console.log("\n\n\n\nSET INTERVAL TIMER: "+browser_self.monitor_timer);
 
     // count through our indexed blocks to see if our missing blocks 
     // have been added.
@@ -293,18 +292,14 @@ console.log("\n\n\n\nSET INTERVAL TIMER: "+browser_self.monitor_timer);
     console.log("Percent Synced: "+percent_downloaded);
     console.log(local_block_id + " -- " + remote_block_id);
 
-
-console.log("HERE WE ARE PERCENT DOWNLOADED! "+percent_downloaded);
     if (percent_downloaded == 100) {
-console.log("HERE WE ARE PERCENT DOWNLOADED! "+percent_downloaded);
       // ensure we update our options file
       browser_self.app.storage.saveOptions();
 console.log("stopping the interval that updates our monitor");
-console.log("\n\n\n\nCUT INTERVAL TIMER: "+browser_self.monitor_timer);
-      clearInterval(browser_self.monitor_timer);
+      clearInterval(monitor_timer);
     }
 
-  }, this.monitor_speed);
+  }, monitor_speed);
 
 
 

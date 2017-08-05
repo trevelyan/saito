@@ -50,6 +50,7 @@
 	</div>
 
         <div class="connections_add" id="connections_add">+</div>
+        <div class="connections_sync" id="connections_sync"></div>
 
       </div>
 
