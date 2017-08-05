@@ -36,39 +36,39 @@
       <div class="sidebar">
 
         <div class="compose" id="compose">COMPOSE</div>
-        <div class="viewkeys" id="viewkeys">VIEW KEYS</div>
-
-
+        <div class="viewkeys" id="viewkeys">SETTINGS</div>
         <div class="connections" id="connections">
-	  <table class="connections_table">
-	    <tr class="connection">
-	      <td class="coherence">98%</td>
-	      <td class="address">127.0.0.1</td>
-	      <td class="port">12100</td>
-	    </tr>
-	  </table>
-	</div>
-
-        <div class="connections_add" id="connections_add">+</div>
-        <div class="connections_sync" id="connections_sync"></div>
-
+          <div class="connections_sync" id="connections_sync"></div>
+        </div>
       </div>
 
+
+
       <div class="mail">
+
+        <div class="mail_controls_delete" id="mail_controls_delete">delete selected</div>
+
+
 	<table class="message_table">
-	  <tr class="message" id="message_0">
+	  <tr class="outer_message" id="message_0">
 	    <td class="checkbox"><input type="checkbox" class="check" name="" id="message_1_checkbox" /></td>
-	    <td class="from">Saito</td>
-	    <td class="title">Welcome to the Saito Network</td>
-	    <td class="time">4:50 pm</td>
-	    <td class="module" style="display:none">Email</td>
-	    <td class="json" style="display:none">
+	    <td>
+              <table>
+		<tr class="inner_message" id="message_0">
+		  <td class="from">Saito</td>
+	          <td class="title">Welcome to the Saito Network</td>
+	          <td class="time">4:50 pm</td>
+	          <td class="module" style="display:none">Email</td>
+	          <td class="json" style="display:none">
 Do you want to take a leap of faith?
 
 <p></p>
 
 To start interacting with Saito find an application and send it a message. If you aren't sure of what you can do, why not try sending a message to one of the following addresses and see what happens?
 </td>
+                </tr>
+              </table>
+            </td>
 	  </tr>
 	</table>
       </div>
@@ -230,7 +230,18 @@ Email.prototype.onConfirmation = function onConfirmation(tx, conf, app) {
   if (conf == 1) {
 
     if (app.BROWSERIFY == 0) { return; }
-    this.addMessageToInbox(tx, app);
+
+
+    // fetch data from app
+    msg = {};
+    msg.id    = tx.transaction.id;
+    msg.time  = formatDate(tx.transaction.ts);
+    msg.from  = tx.transaction.from[0].returnAddress();
+    msg.module = tx.transaction.msg.module;
+    msg.title = tx.transaction.msg.title;
+    msg.json = tx.transaction.msg.body;
+
+    app.browser.attachMessage(msg);
     app.storage.saveMessage(tx);
 
   }
@@ -316,11 +327,14 @@ Email.prototype.addMessageToInbox = function addMessageToInbox(tx, app) {
     // fetch data from app
     msg = {};
     msg.id    = tx.transaction.id;
-    msg.time  = this.formatDate(tx.transaction.ts);
+    msg.time  = formatDate(tx.transaction.ts);
     msg.from  = tx.transaction.from[0].returnAddress();
     msg.module = tx.transaction.msg.module;
     msg.title = tx.transaction.msg.title;
     msg.json = tx.transaction.msg.body;
+
+console.log("add message to inbox: ");
+console.log(msg);
 
     app.browser.attachMessage(msg);
 
@@ -329,13 +343,9 @@ Email.prototype.addMessageToInbox = function addMessageToInbox(tx, app) {
 
 
 
-
-
-Email.prototype.formatDate = function formatDate(unixtime) {
+formatDate = function formateDate(unixtime) {
 
   x = new Date(unixtime);
-
-  //return x.getDate() + " / " + (x.getMonth()+1) + " / " + x.getFullYear() + " " + x.getHours() + ":" + x.getMinutes();
   return x.getDate() + " / " + (x.getMonth()+1) + " / " + x.getFullYear();
 
 }
@@ -839,8 +849,10 @@ Block.prototype.createBlock = function createBlock(prevblock=null) {
   }
 
 
-  // set our vote for paysplit
-  this.block.paysplit_vote   = -1;  // decrease payout to miners
+  ///////////////////////////////
+  // set our vote for paysplit //
+  ///////////////////////////////
+  this.block.paysplit_vote   = this.app.blockchain.voter.returnPaysplitVote(this.block.paysplit);
 
 
 
@@ -962,14 +974,16 @@ Block.prototype.validateGoldenTicket = function validateGoldenTicket() {
 
   prevblk = this.app.blockchain.returnBlockByHash(this.block.prevhash);
 
+
+  if (prevblk == null) {
+    console.log("Previous Block is NULL -- light clients need to be able to validate GTs");
+    return 1;
+  }
+
   console.log("validating: "+this.hash());
   console.log("prevblk  : "+prevblk.hash());
   console.log("thisblkph: "+this.block.prevhash);
 
-  if (prevblk == null) {
-    console.log("Previous Block is NULL");
-    return 1;
-  }
 
   current_paysplit   = this.returnPaysplit();
   current_difficulty = this.returnDifficulty();
@@ -1787,13 +1801,9 @@ Blockchain.prototype.returnLongestChain = function returnLongestChain(chainlengt
     }
   }
 
-  normalarray = [];
+  reversearray.reverse();
 
-  for (i = reversearray.length-1; i >= 0; i--) {
-    normalarray.push(reversearray[i]);
-  }
-
-  return normalarray;
+  return reversearray;
 
 }
 Blockchain.prototype.returnLongestChainIndex = function returnLongestChainIndex(chainlength=10) {
@@ -1944,6 +1954,28 @@ Browser.prototype.attachEvents = function attachEvents() {
       });
 
 
+
+
+      $('#mail_controls_delete').off('click');
+      $('#mail_controls_delete').on('click', function() {
+
+        $('.check:checked').each(function() {
+
+	  id = $(this).attr('id');
+          trclass = id.substring(0, id.length-9);
+	  msg_id  = trclass.substring(8);
+          domobj = "#"+trclass; 
+	  browser_self.app.storage.removeMessage(msg_id);
+          $(domobj).remove();
+
+        });
+
+      });
+
+
+
+
+
       $('#compose').off();
       $('#compose').on('click', function() {
         $.fancybox({
@@ -1995,12 +2027,12 @@ Browser.prototype.attachEvents = function attachEvents() {
           height          : '600px',
           closeBtn        : true,
           autoSize        : false,
-          closeClick      : false,
+          closeClick      : true,
           openEffect      : 'none',
           closeEffect     : 'none',
           helpers: {
             overlay : {
-              closeClick : false
+              closeClick : true
             }
           },
           keys : {
@@ -2010,11 +2042,15 @@ Browser.prototype.attachEvents = function attachEvents() {
       });
 
 
-      $('.message').off();
-      $('.message').on('click', function() {
+
+
+
+      $('.inner_message').off();
+      $('.inner_message').on('click', function() {
 
         // update message box
-        message_id = $(this).attr('id');
+        message_id    = $(this).attr('id');
+        message_class = $(this).attr('class');
 
         message_text_selector = "#" + message_id + " > .from";
         $('#lightbox_message_from_address').text( $(message_text_selector).text());
@@ -2040,12 +2076,12 @@ Browser.prototype.attachEvents = function attachEvents() {
           height          : '600px',
           closeBtn        : true,
           autoSize        : false,
-          closeClick      : false,
+          closeClick      : true,
           openEffect      : 'none',
           closeEffect     : 'none',
           helpers: {
             overlay : {
-              closeClick : false
+              closeClick : true
             }
           },
           keys : {
@@ -2069,6 +2105,10 @@ Browser.prototype.attachEvents = function attachEvents() {
       });
 
 
+
+      // unbind the checkboxs
+      $('.checkbox').off('click');
+
 }
 
 
@@ -2083,13 +2123,19 @@ Browser.prototype.attachEvents = function attachEvents() {
 
 Browser.prototype.attachMessage = function attachMessage(message) {
 
-      var newrow = '    <tr class="message" id="message_'+message.id+'"> \
+      var newrow = '    <tr class="outer_message" id="message_'+message.id+'"> \
                           <td class="checkbox"><input type="checkbox" class="check" name="" id="message_'+message.id+'_checkbox" /></td> \
-                          <td class="from">'+message.from+'</td> \
-                          <td class="title">'+message.title+'</td> \
-                          <td class="time">'+message.time+'</td> \
-                          <td class="module" style="display:none">'+message.module+'</td> \
-                          <td class="json" style="display:none">'+message.json+'</td> \
+			  <td> \
+			    <table style="border:0px"> \
+			      <tr class="inner_message" id="message_'+message.id+'"> \
+                                <td class="from">'+message.from+'</td> \
+                                <td class="title">'+message.title+'</td> \
+                                <td class="time">'+message.time+'</td> \
+                                <td class="module" style="display:none">'+message.module+'</td> \
+                                <td class="json" style="display:none">'+message.json+'</td> \
+                              </tr> \
+			    </table> \
+			  </td> \
                         </tr>';
       $('.message_table').prepend(newrow);
 
@@ -2101,16 +2147,10 @@ Browser.prototype.attachMessage = function attachMessage(message) {
 
 Browser.prototype.monitorBlockchainSyncing = function monitorBlockchainSyncing(remote_blkid, remote_genesis_blkid) {
 
-  // set to 100% to start
   $( "#connections_sync" ).progressbar({ value: 100 });
 
   var local_block_id  = this.app.options.lastblock;
 
-
-  // if our client.json value is the same as the 
-  // blockId the server tells us is the newest we 
-  // are a new client and should just skip the entire
-  // monitoring effort
   if (local_block_id == remote_blkid) {
     return;
   }
@@ -2126,15 +2166,9 @@ Browser.prototype.monitorBlockchainSyncing = function monitorBlockchainSyncing(r
   }
 
   var remote_block_id = remote_blkid;
-
   browser_self = this;
 
   this.monitor_timer = setInterval(function(){
-
-console.log("\n\n\n\nSET INTERVAL TIMER: "+browser_self.monitor_timer);
-
-    // count through our indexed blocks to see if our missing blocks 
-    // have been added.
     found = 1;
     while (found == 1 && local_block_id <= remote_block_id) {
       if (browser_self.app.blockchain.isBlockIdIndexed(local_block_id) == 1) { local_block_id++; }
@@ -2153,24 +2187,12 @@ console.log("\n\n\n\nSET INTERVAL TIMER: "+browser_self.monitor_timer);
       value: percent_downloaded
     });
 
-    console.log("Percent Synced: "+percent_downloaded);
-    console.log(local_block_id + " -- " + remote_block_id);
-
-
-console.log("HERE WE ARE PERCENT DOWNLOADED! "+percent_downloaded);
     if (percent_downloaded == 100) {
-console.log("HERE WE ARE PERCENT DOWNLOADED! "+percent_downloaded);
       // ensure we update our options file
       browser_self.app.storage.saveOptions();
-console.log("stopping the interval that updates our monitor");
-console.log("\n\n\n\nCUT INTERVAL TIMER: "+browser_self.monitor_timer);
       clearInterval(browser_self.monitor_timer);
     }
-
   }, this.monitor_speed);
-
-
-
 
 }
 
@@ -2650,7 +2672,7 @@ Miner.prototype.attemptSolution = function attemptSolution(prevblock) {
     solution                 = {};
     solution.target          = prevblock.hash();
     solution.difficulty      = prevblock.returnDifficulty();
-    solution.difficulty_vote = 0;
+    solution.difficulty_vote = this.app.blockchain.voter.returnDifficultyVote(solution.difficulty);
     solution.paysplit_vote   = prevblock.returnPaysplitVote();
     solution.pubkey          = ourPublicKey;
     solmsg                   = solution.target+solution.difficulty_vote+solution.paysplit_vote;
@@ -2981,6 +3003,7 @@ Peer.prototype.addSocketEvents = function addSocketEvents() {
         peer_self.sendBlocks(10);
       } else {
         if (peer_self.app.blockchain.longestChain > -1) {
+console.log("\n\nPEER REQUESTS: " + peer_self.app.blockchain.returnLatestBlock().returnId() + " -- " + thispeerlastblockid);
           how_many_blocks_to_send = peer_self.app.blockchain.returnLatestBlock().returnId() - thispeerlastblockid;
           peer_self.sendBlocks(how_many_blocks_to_send);
         } else {
@@ -3915,6 +3938,38 @@ Storage.prototype.purgeOldBlocks = function purgeOldBlockk(blkid) {
 
 
 
+Storage.prototype.removeMessage = function removeMessage(msg_id) {
+
+  if (this.app.BROWSERIFY == 1) {
+
+    for (x = 0; x < this.app.options.messages.length; x++) {
+      tmptx = new saito.transaction(this.app.options.messages[x]);
+      if (tmptx.transaction.id == msg_id) {
+        this.app.options.messages.splice(x, 1);
+        x = this.app.options.messages.length+1;
+      }
+     }
+
+    this.saveOptions();
+
+  } else {
+
+    sql3 = "DELETE FROM messages WHERE id < $id";
+    this.db.run(sql3, {
+      $id: msg_id
+    });
+
+  }
+
+}
+
+
+
+
+
+
+
+
 
 
 
@@ -4472,24 +4527,6 @@ Voter.prototype.initialize = function initialize() {
 
 
 
-Voter.prototype.voteDifficulty = function voteDifficulty(difficulty) {
-  if (this.voter.vote_difficulty == 1) {
-    if (difficulty < target_difficulty) { return 1; }
-    if (difficulty > target_difficulty) { return -1; }
-    return 0;
-  } else {
-    return 0;
-  }
-}
-Voter.prototype.votePaysplit   = function votePaysplit(paysplit) {
-  if (this.voter.vote_paysplit == 1) {
-    if (paysplit < target_paysplit) { return 1; }
-    if (paysplit > target_paysplit) { return -1; }
-    return 0;
-  } else {
-    return 0;
-  }
-}
 // return 1 if block_a is preferred to block_b
 Voter.prototype.prefers = function prefers(block_a, block_b) {
 
@@ -4520,6 +4557,24 @@ Voter.prototype.prefers = function prefers(block_a, block_b) {
 
 
 
+Voter.prototype.returnDifficultyVote = function returnDifficultyVote(difficulty) {
+  if (this.voter.vote_difficulty == 1) {
+    if (difficulty < target_difficulty) { return 1; }
+    if (difficulty > target_difficulty) { return -1; }
+    return 0;
+  } else {
+    return 0;
+  }
+}
+Voter.prototype.returnPaysplitVote   = function returnPaysplitVote(paysplit) {
+  if (this.voter.vote_paysplit == 1) {
+    if (paysplit < target_paysplit) { return 1; }
+    if (paysplit > target_paysplit) { return -1; }
+    return 0;
+  } else {
+    return 0;
+  }
+}
 Voter.prototype.returnVoterJson = function returnVoterJson() {
   return JSON.stringify(this.returnVoter());
 }

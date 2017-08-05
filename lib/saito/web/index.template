@@ -36,39 +36,39 @@
       <div class="sidebar">
 
         <div class="compose" id="compose">COMPOSE</div>
-        <div class="viewkeys" id="viewkeys">VIEW KEYS</div>
-
-
+        <div class="viewkeys" id="viewkeys">SETTINGS</div>
         <div class="connections" id="connections">
-	  <table class="connections_table">
-	    <tr class="connection">
-	      <td class="coherence">98%</td>
-	      <td class="address">127.0.0.1</td>
-	      <td class="port">12100</td>
-	    </tr>
-	  </table>
-	</div>
-
-        <div class="connections_add" id="connections_add">+</div>
-        <div class="connections_sync" id="connections_sync"></div>
-
+          <div class="connections_sync" id="connections_sync"></div>
+        </div>
       </div>
 
+
+
       <div class="mail">
+
+        <div class="mail_controls_delete" id="mail_controls_delete">delete selected</div>
+
+
 	<table class="message_table">
-	  <tr class="message" id="message_0">
+	  <tr class="outer_message" id="message_0">
 	    <td class="checkbox"><input type="checkbox" class="check" name="" id="message_1_checkbox" /></td>
-	    <td class="from">Saito</td>
-	    <td class="title">Welcome to the Saito Network</td>
-	    <td class="time">4:50 pm</td>
-	    <td class="module" style="display:none">Email</td>
-	    <td class="json" style="display:none">
+	    <td>
+              <table>
+		<tr class="inner_message" id="message_0">
+		  <td class="from">Saito</td>
+	          <td class="title">Welcome to the Saito Network</td>
+	          <td class="time">4:50 pm</td>
+	          <td class="module" style="display:none">Email</td>
+	          <td class="json" style="display:none">
 Do you want to take a leap of faith?
 
 <p></p>
 
 To start interacting with Saito find an application and send it a message. If you aren't sure of what you can do, why not try sending a message to one of the following addresses and see what happens?
 </td>
+                </tr>
+              </table>
+            </td>
 	  </tr>
 	</table>
       </div>

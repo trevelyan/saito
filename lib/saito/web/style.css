@@ -28,7 +28,6 @@
  float:left;
  margin-top: 20px;
  width: 1000px;
- background: rgba(243, 243, 243, 0.85) none repeat scroll 0 0;
  cell-padding: 0px;
  cell-spacing: 0px;
 }
@@ -46,28 +45,64 @@
 
 
 .message {
+ background: rgba(243, 243, 243, 0.85) none repeat scroll 0 0;
 }
 .message .checkbox {
  width: 20px;
 }
-.message .from {
+.inner_message .from {
  width: 200px;
  max-width:200px;
  overflow:hidden;
+ border-top:0px;
 }
-.message .title {
+.inner_message .title {
  width:630px;
  max-width:630px;
  padding-left:10px;
+ border-top:0px;
 }
-.message .time {
+.inner_message .time {
  width: 120px;
  max-width: 90px;
  text-align: right;
+ border-top:0px;
 }
 .check {
  width: 18px;
  height: 18px;
+}
+
+
+
+
+.mail_controls_delete {
+ cursor:pointer;
+ margin-bottom: 15px;
+ padding-left:10px;
+ padding-right:10px;
+ padding-top: 5px;
+ padding-bottom: 5px;
+ background-color: #e5e5e5;
+ border: 1px solid #a5a5a5;
+ max-width: 95px;
+ width: 90px;
+ font-size:0.9em;
+ font-weight:bold;
+}
+.mail_controls_delete:hover {
+ cursor:pointer;
+ margin-bottom: 15px;
+ padding-left:10px;
+ padding-right:10px;
+ padding-top: 5px;
+ padding-bottom: 5px;
+ background-color: #b5b5b5;
+ border: 1px solid #a5a5a5;
+ max-width: 95px;
+ width: 90px;
+ font-size:0.9em;
+ font-weight:bold;
 }
 
 
@@ -76,10 +111,6 @@
  width: 200px;
  padding-left: 4px;
  padding-right: 4px;
-}
-.connections_table {
- width: 190px;
- border: 1px solid black;
 }
 .connections_sync {
  width: 190px;
@@ -90,35 +121,6 @@
 }
 .ui-progressbar-value {
  background-color: #48A808;
-}
-.connections_add {
- height: 30px;
- width: 23px;
- background-color: #f5f5f5;
- border: 1px solid #dcdcdc;
- color: #444444;
- padding-left: 6px;
- padding-top: 2px;
- font-size: 30px;
- margin-left: 4px;
- margin-top: 4px;
-}
-.connection {
-}
-.connection .coherence {
- width: 40px;
- padding-left:5px;
- font-weight: bold;
- text-align: left;
-}
-.connection .host {
- font-weight: bold;
- width: 120;
-}
-.connection .port {
- width: 40px;
- text-align: right;
- padding-right:5px;
 }
 
 
@@ -180,7 +182,9 @@
  margin-top:10px;
  padding-top:10px;
  border-top: 1px solid #c5c5c5;
- min-height: 300px;
+ min-height: 420px;
+ height: 420px;
+ overflow-horizontal: scroll;
 }
 .lightbox_message_reply {
  margin-top: 10px;
