@@ -1,1 +1,1 @@
-{"wallet":{"privateKey":"19f9ca17a91d3acd0682bafb650517538d8f9241154681e86d9651ec03f69ca4","publicKey":"02520c94b51e79d6ddab572f3ca93f2c5cf17b474d2875cebb4152a2c8e169ed0f","utxi":[],"utxo":[]},"network":[],"server":{"host":"localhost","port":12100,"publickey":""},"modules":["Email"]}
+{"wallet":{"privateKey":"a2c7daab2af26c6d717ea0ad87b0b89c6251c890f33f1b938ba0a5c34a9f4855","publicKey":"0308c52a2e635a62c876472ca0d39730088951e09c8d26fc1ba98c393073f75794","utxi":[],"utxo":[]},"network":[],"server":{"host":"localhost","port":12100,"publickey":""},"modules":["Email"]}

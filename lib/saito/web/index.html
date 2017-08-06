@@ -644,11 +644,11 @@ function Block(app, blkjson="") {
   /////////////////////////
   this.block.burn_fee         = 2.0;   // this should be set to network consensus levels
   this.block.fee_step         = 0.000165; 
-
-
   this.block.difficulty       = 1.0;   // this should be set to network consensus levels
   this.block.paysplit         = 0.5;   // this should be set to network consensus levels
-  this.block.coinbase         = 0;
+  this.block.treasury         = 21000000.0;  // the amount that still needs to be released
+  this.block.coinbase         = 100;         // the amount for this block -- will be adjusted at first ticket
+
 
 
   ////////////
@@ -777,12 +777,15 @@ Block.prototype.validate = function validate() {
     }
   }
 
-  // check if paysplit and difficulty vote are adequate
+  // check if paysplit and difficulty vote are correct
+  // check if monetary policy is correct
   if (this.validateGoldenTicket() == 0) {
     console.log("Block invalid: contains invalid golden ticket");
     this.app.blockchain.mempool.removeGoldenTicket();
     return 0;
   }
+
+
 
   // if we reach here, the block is OK
   return 1;
@@ -839,6 +842,8 @@ Block.prototype.createBlock = function createBlock(prevblock=null) {
 
   // set values from previous block
   if (prevblock != null) {
+    this.block.coinbase   = prevblock.block.coinbase;  // not adjusted unless golden ticket found below
+    this.block.treasury   = prevblock.block.treasury;  // not adjusted unless golden ticket found below
     this.block.prevhash   = prevblock.hash();
     this.block.difficulty = prevblock.returnDifficulty();
     this.block.paysplit   = prevblock.returnPaysplit();
@@ -856,14 +861,6 @@ Block.prototype.createBlock = function createBlock(prevblock=null) {
 
 
 
-  // calculate our payment, and the two paysplit amounts given our timestamp
-  // our payment is the total amount of fees paid, minus the paysplit amount
-  // which gets distributed to the rest of the transaction network
-  var txfees_total  = parseFloat(0.0 + this.calculateTransactionFees());
-  var txfees_needed = parseFloat(0.0 + this.calculateTransactionFeesNeeded(this.block.prevhash));
-  var miner_share   = parseFloat(txfees_needed * this.block.paysplit);
-  var node_share    = txfees_needed - miner_share;
-  var my_share      = txfees_total - miner_share - node_share;
 
 
 
@@ -871,7 +868,13 @@ Block.prototype.createBlock = function createBlock(prevblock=null) {
   ///////////////////////////////
   // adjust consensus settings //
   ///////////////////////////////
+  //
+  // this also adjusts our coinbase
+  // and our treasury settings if 
+  // needed
   this.handleGoldenTicket();
+
+
 
 
   // add to blockchain and propagate
@@ -946,6 +949,8 @@ Block.prototype.handleGoldenTicket = function handleGoldenTicket() {
   for (i = 0; i < this.transactions.length; i++) {
     if (this.transactions[i].transaction.gt != null) {
 
+      x = this.transactions[i].transaction.gt;
+
       // our two votes
       diffvote = this.transactions[i].transaction.gt.difficulty_vote;
       paysvote = this.transactions[i].transaction.gt.paysplit_vote;
@@ -967,6 +972,40 @@ Block.prototype.handleGoldenTicket = function handleGoldenTicket() {
         this.block.difficulty = this.block.difficulty.toFixed(8);
       }
 
+console.log(x.miner_share + " -- " + x.node_share);
+
+      // because we have a golden ticket, we adjust treasury (amount yet to be released)
+      //
+      // 1. burn fee deducted from treasury
+      //
+console.log(this.block.treasury);
+console.log(x.miner_share - x.node_share);
+console.log(x);
+      this.block.treasury = this.block.treasury - (x.miner_share - x.node_share).toFixed(8);
+console.log(this.block.treasury);
+      this.block.treasury = this.block.treasury.toFixed(8);
+console.log(this.block.treasury);
+
+
+      //
+      // 2. recalculate coinbase (new coinage added to each golden ticket)
+      //
+      // coinbase is the total amount in our treasury divided by the period 
+console.log(this.block.coinbase);
+      this.block.coinbase = (this.block.treasury / this.app.blockchain.genesis_period).toFixed(8);
+console.log(this.block.coinbase);
+
+      //
+      // note that adjustments require the coinbase to be solved as well
+      //
+      // this ensures we are solving golden tickets (miner & node support)
+      // in order to start printing more money. purging old transactions
+      // increases the treasury, but does not immediately affect the coinbase
+      //
+      console.log("We have adjusted the treasury and the coinbase.... FUTURE BLOCKS SHOULD HAVE: ");
+      console.log("Treasury: "+this.block.treasury);
+      console.log("Coinbase: "+this.block.coinbase);
+
     }
   }
 }
@@ -976,13 +1015,29 @@ Block.prototype.validateGoldenTicket = function validateGoldenTicket() {
 
 
   if (prevblk == null) {
-    console.log("Previous Block is NULL -- light clients need to be able to validate GTs");
+    console.log("Previous Block is NULL -- skipping light clients need to be able to validate blocks without checking GT information");
     return 1;
   }
 
-  console.log("validating: "+this.hash());
-  console.log("prevblk  : "+prevblk.hash());
-  console.log("thisblkph: "+this.block.prevhash);
+
+
+
+  // calculate our payment, and the two paysplit amounts given our timestamp
+  // our payment is the total amount of fees paid, minus the paysplit amount
+  // which gets distributed to the rest of the transaction network
+  //
+  // copied right out of miner class -- refactoring needed
+  var txfees_total  = parseFloat(0.0 + prevblk.calculateTransactionFees()).toFixed(8);
+  var txfees_needed = parseFloat(0.0 + prevblk.calculateTransactionFeesNeeded(prevblk.block.prevhash)).toFixed(8);
+  var total_revenue = parseFloat(txfees_needed) + parseFloat(prevblk.block.coinbase);
+console.log("BLOCK CHECK: "+total_revenue + " -- " + prevblk.block.paysplit);
+  var miner_share   = parseFloat(total_revenue * prevblk.block.paysplit).toFixed(8);
+  var node_share    = (total_revenue - miner_share).toFixed(8);
+  if (node_share < 0)             { node_share = 0; }
+
+  //console.log("validating: "+this.hash());
+  //console.log("prevblk  : "+prevblk.hash());
+  //console.log("thisblkph: "+this.block.prevhash);
 
 
   current_paysplit   = this.returnPaysplit();
@@ -990,7 +1045,7 @@ Block.prototype.validateGoldenTicket = function validateGoldenTicket() {
   last_paysplit      = prevblk.returnPaysplit();
   last_difficulty    = prevblk.returnDifficulty();
 
-  console.log(current_paysplit + " --- " + current_difficulty + " --- " + last_paysplit + " --- " + last_difficulty);
+  //console.log(current_paysplit + " --- " + current_difficulty + " --- " + last_paysplit + " --- " + last_difficulty);
 
 
   // check to see if we have a golden ticket in this block
@@ -1001,12 +1056,25 @@ Block.prototype.validateGoldenTicket = function validateGoldenTicket() {
       // we need to validate that it is correct and that the block
       // appropriately adjusted its settings
       x = this.transactions[i].transaction.gt;
-      hashToVerify = this.app.crypt.hash(x.target+x.difficulty_vote+x.paysplit_vote);
-      v = this.app.crypt.verifyMessage((x.target+x.difficulty_vote+x.paysplit_vote), x.signature, x.pubkey);
+      solmsg = x.target+x.difficulty_vote+x.paysplit_vote+x.miner_share+x.node_share;
+      v = this.app.crypt.verifyMessage(solmsg, x.signature, x.pubkey);
       if (v == false) {
         console.log("Golden Ticket does not validate!");
         return 0;
       }
+
+ 
+      // confirm miner and node shares
+      if (miner_share != x.miner_share) {
+        console.log("Miner Share does not equal what it should: "+miner_share + " -- " + x.miner_share);
+        return 0;
+      }
+      if (node_share != x.node_share) {
+        console.log("Node Share does not equal what it should: "+node_share + " -- " + x.node_share);
+        return 0;
+      }
+
+
 
 
       // our two votes
@@ -1039,6 +1107,50 @@ console.log("paysplit is wrong...4" );
           return 0;
         }
       }
+
+
+
+      // we also validate our monetary policy
+      prev_treasury = prevblk.block.treasury;
+      prev_coinbase = prevblk.block.coinbase;
+
+      // because we have a golden ticket, we adjust treasury (amount yet to be released)
+      //
+      // 1. burn fee deducted from treasury
+      //
+      prev_treasury = prev_treasury - (x.miner_share - x.node_share).toFixed(8);
+      prev_treasury = prev_treasury.toFixed(8);
+
+      //
+      // 2. recalculate coinbase (new coinage added to each golden ticket)
+      //
+      // coinbase is the total amount in our treasury divided by the period
+      prev_coinbase = (prev_treasury / this.app.blockchain.genesis_period).toFixed(8);
+
+      //
+      // note that adjustments require the coinbase to be solved as well
+      //
+      // this ensures we are solving golden tickets (miner & node support)
+      // in order to start printing more money. purging old transactions
+      // increases the treasury, but does not immediately affect the coinbase
+      //
+      console.log("\nValidating COINBASE and TREASURY: ");
+      if (prev_treasury != this.block.treasury) { 
+        console.log("Treasury invalid: "+this.block.treasury+ " -- " + prev_treasury);
+        return 0;
+      }
+      if (prev_coinbase != this.block.coinbase) { 
+        console.log("Coinbase invalid: "+this.block.coinbase+ " -- " + prev_coinbase);
+        return 0;
+      }
+
+      console.log("We have successfully adjusted the treasury and the coinbase....");
+      console.log("Treasury: "+this.block.treasury);
+      console.log("Coinbase: "+this.block.coinbase);
+
+
+
+
 
       return 1;
     }
@@ -1808,6 +1920,7 @@ Blockchain.prototype.returnLongestChain = function returnLongestChain(chainlengt
 }
 Blockchain.prototype.returnLongestChainIndex = function returnLongestChainIndex(chainlength=10) {
   if (this.index.hash.length == 0) { return ""; }
+  if (this.index.hash.length < chainlength) { chainlength = this.index.hash.length; }
 
   var bchainIndex = [];
   var chain_pos = this.longestChain;
@@ -2664,20 +2777,40 @@ Miner.prototype.attemptSolution = function attemptSolution(prevblock) {
     // stop mining for now
     this.stopMining();
 
+console.log("About to find a solution: "+prevblock.block.coinbase + " -- " + prevblock.block.treasury);  
+
+    // determine how much money the previous block leaves for us all
+    // and create a transaction that treats the BLOCK itself as an
+    // input with two outputs: one for us and one for charlie.
+    var txfees_total  = parseFloat(0.0 + prevblock.calculateTransactionFees()).toFixed(8);
+    var txfees_needed = parseFloat(0.0 + prevblock.calculateTransactionFeesNeeded(prevblock.block.prevhash)).toFixed(8);
+    var total_revenue = parseFloat(txfees_needed) + parseFloat(prevblock.block.coinbase);
+
+console.log("MINER SHARE CALCS: "+total_revenue + " -- " + prevblock.block.paysplit);
+    var miner_share   = parseFloat(total_revenue * prevblock.block.paysplit).toFixed(8);
+    var node_share    = (total_revenue - miner_share).toFixed(8);
+    if (node_share < 0)             { node_share = 0; }
+
+
     // we have solved the puzzle, to generate the proof we hash and
     // sign the target_hash with our private key. Providing the
     // public key and the hash thus demonstrates proof of our holding
     // a private key that solves the puzzle. We also include our
-    // two votes so that they can be verified as well
+    // two votes and two shares so that they can be verified as well
     solution                 = {};
     solution.target          = prevblock.hash();
     solution.difficulty      = prevblock.returnDifficulty();
     solution.difficulty_vote = this.app.blockchain.voter.returnDifficultyVote(solution.difficulty);
     solution.paysplit_vote   = prevblock.returnPaysplitVote();
     solution.pubkey          = ourPublicKey;
-    solmsg                   = solution.target+solution.difficulty_vote+solution.paysplit_vote;
+    solution.miner_share     = miner_share;
+    solution.node_share      = node_share;
+
+    solmsg                   = solution.target+solution.difficulty_vote+solution.paysplit_vote+solution.miner_share+solution.node_share;
     solution.signature       = this.app.crypt.signMessage(solmsg, ourPrivateKey);
-  
+
+
+
 
     // find which of the previous block transactions is Charlie
     // based on the hexadecimal number in our signature turned
@@ -2688,23 +2821,12 @@ Miner.prototype.attemptSolution = function attemptSolution(prevblock) {
     var winnerInt = parseInt(winner, 16);
     var charlie   = children[winnerInt%children.length];
 
-
-    // determine how much money the previous block leaves for us all
-    // and create a transaction that treats the BLOCK itself as an
-    // input with two outputs: one for us and one for charlie.
-    var txfees_total  = parseFloat(0.0 + prevblock.calculateTransactionFees()).toFixed(8);
-    var txfees_needed = parseFloat(0.0 + prevblock.calculateTransactionFeesNeeded(prevblock.block.prevhash)).toFixed(8);
-    var miner_share   = parseFloat(txfees_needed * prevblock.block.paysplit).toFixed(8);
-    var node_share    = (txfees_needed - miner_share).toFixed(8);
-
-    if (node_share < 0) { node_share = 0; }
-
     var winners    = [];
         winners[0] = new saito.slip(this.app.wallet.returnAddress(), miner_share);
         winners[1] = new saito.slip(charlie, node_share);
 
-    solution.winning_miner = winners[0];
-    solution.winning_node  = winners[1];
+
+console.log("SHARES: "+solution.miner_share + " -- " + solution.node_share);
 
     // create a transaction to claim the reward
     nt = this.app.wallet.createGoldenTransaction(winners, solution);
@@ -3003,7 +3125,6 @@ Peer.prototype.addSocketEvents = function addSocketEvents() {
         peer_self.sendBlocks(10);
       } else {
         if (peer_self.app.blockchain.longestChain > -1) {
-console.log("\n\nPEER REQUESTS: " + peer_self.app.blockchain.returnLatestBlock().returnId() + " -- " + thispeerlastblockid);
           how_many_blocks_to_send = peer_self.app.blockchain.returnLatestBlock().returnId() - thispeerlastblockid;
           peer_self.sendBlocks(how_many_blocks_to_send);
         } else {
@@ -3196,7 +3317,8 @@ Peer.prototype.returnConnectResponse = function createConnectResponse() {
 ///////////////////
 Peer.prototype.sendBlocks = function sendBlocks(blocks_to_send) {
 
-  if (blocks_to_send < 0) { blocks_to_send *= -1; }
+  if (blocks_to_send < 0) { blocks_to_send = 0; }
+
 
 console.log("\n\nBLOCKS TO SEND: "+blocks_to_send);
 
