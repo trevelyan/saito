@@ -895,7 +895,7 @@ Block.prototype.createBlock = function createBlock(prevblock=null) {
 Block.prototype.calculateTransactionFeesNeeded = function calculateTransactionFeesNeeded(prevblockhash) {
 
   var unixtime_original        = this.app.blockchain.returnUnixtime(prevblockhash);
-  var unixtime_current         = new Date().getTime();
+  var unixtime_current         = this.block.unixtime;
   var milliseconds_since_block = unixtime_current - unixtime_original;
   var feesneeded = ( this.returnBurnFee() - (this.returnFeeStep() * milliseconds_since_block) );
   if (feesneeded < 0) { feesneeded = 0; }
@@ -972,17 +972,15 @@ Block.prototype.handleGoldenTicket = function handleGoldenTicket() {
         this.block.difficulty = this.block.difficulty.toFixed(8);
       }
 
-console.log(x.miner_share + " -- " + x.node_share);
 
       // because we have a golden ticket, we adjust treasury (amount yet to be released)
       //
       // 1. burn fee deducted from treasury
       //
+console.log("ADJUSTING TREASURY in BLOCK CREATION");
 console.log(this.block.treasury);
-console.log(x.miner_share - x.node_share);
-console.log(x);
-      this.block.treasury = this.block.treasury - (x.miner_share - x.node_share).toFixed(8);
-console.log(this.block.treasury);
+console.log("deducting " + (x.miner_share + x.node_share) + " from treasury");
+      this.block.treasury = this.block.treasury - (x.miner_share + x.node_share).toFixed(8);
       this.block.treasury = this.block.treasury.toFixed(8);
 console.log(this.block.treasury);
 
@@ -991,9 +989,7 @@ console.log(this.block.treasury);
       // 2. recalculate coinbase (new coinage added to each golden ticket)
       //
       // coinbase is the total amount in our treasury divided by the period 
-console.log(this.block.coinbase);
       this.block.coinbase = (this.block.treasury / this.app.blockchain.genesis_period).toFixed(8);
-console.log(this.block.coinbase);
 
       //
       // note that adjustments require the coinbase to be solved as well
@@ -1030,14 +1026,9 @@ Block.prototype.validateGoldenTicket = function validateGoldenTicket() {
   var txfees_total  = parseFloat(0.0 + prevblk.calculateTransactionFees()).toFixed(8);
   var txfees_needed = parseFloat(0.0 + prevblk.calculateTransactionFeesNeeded(prevblk.block.prevhash)).toFixed(8);
   var total_revenue = parseFloat(txfees_needed) + parseFloat(prevblk.block.coinbase);
-console.log("BLOCK CHECK: "+total_revenue + " -- " + prevblk.block.paysplit);
   var miner_share   = parseFloat(total_revenue * prevblk.block.paysplit).toFixed(8);
   var node_share    = (total_revenue - miner_share).toFixed(8);
   if (node_share < 0)             { node_share = 0; }
-
-  //console.log("validating: "+this.hash());
-  //console.log("prevblk  : "+prevblk.hash());
-  //console.log("thisblkph: "+this.block.prevhash);
 
 
   current_paysplit   = this.returnPaysplit();
@@ -1045,16 +1036,12 @@ console.log("BLOCK CHECK: "+total_revenue + " -- " + prevblk.block.paysplit);
   last_paysplit      = prevblk.returnPaysplit();
   last_difficulty    = prevblk.returnDifficulty();
 
-  //console.log(current_paysplit + " --- " + current_difficulty + " --- " + last_paysplit + " --- " + last_difficulty);
-
 
   // check to see if we have a golden ticket in this block
   for (i = 0; i < this.transactions.length; i++) {
     if (this.transactions[i].transaction.gt != null) {
 
-      // we only reach this if we have a golden ticket, in which case
-      // we need to validate that it is correct and that the block
-      // appropriately adjusted its settings
+      // validate golden ticket signature
       x = this.transactions[i].transaction.gt;
       solmsg = x.target+x.difficulty_vote+x.paysplit_vote+x.miner_share+x.node_share;
       v = this.app.crypt.verifyMessage(solmsg, x.signature, x.pubkey);
@@ -1064,7 +1051,7 @@ console.log("BLOCK CHECK: "+total_revenue + " -- " + prevblk.block.paysplit);
       }
 
  
-      // confirm miner and node shares
+      // validate miner and node shares
       if (miner_share != x.miner_share) {
         console.log("Miner Share does not equal what it should: "+miner_share + " -- " + x.miner_share);
         return 0;
@@ -1076,8 +1063,7 @@ console.log("BLOCK CHECK: "+total_revenue + " -- " + prevblk.block.paysplit);
 
 
 
-
-      // our two votes
+      // validate two votes
       diffvote = x.difficulty_vote;
       paysvote = x.paysplit_vote;
 
@@ -1110,7 +1096,7 @@ console.log("paysplit is wrong...4" );
 
 
 
-      // we also validate our monetary policy
+      // validate monetary policy
       prev_treasury = prevblk.block.treasury;
       prev_coinbase = prevblk.block.coinbase;
 
@@ -1135,6 +1121,7 @@ console.log("paysplit is wrong...4" );
       // increases the treasury, but does not immediately affect the coinbase
       //
       console.log("\nValidating COINBASE and TREASURY: ");
+console.log("we paid out: "+x.miner_share + " -- " + x.node_share);
       if (prev_treasury != this.block.treasury) { 
         console.log("Treasury invalid: "+this.block.treasury+ " -- " + prev_treasury);
         return 0;
@@ -1143,13 +1130,8 @@ console.log("paysplit is wrong...4" );
         console.log("Coinbase invalid: "+this.block.coinbase+ " -- " + prev_coinbase);
         return 0;
       }
-
-      console.log("We have successfully adjusted the treasury and the coinbase....");
       console.log("Treasury: "+this.block.treasury);
       console.log("Coinbase: "+this.block.coinbase);
-
-
-
 
 
       return 1;
@@ -2774,10 +2756,9 @@ Miner.prototype.attemptSolution = function attemptSolution(prevblock) {
 
   if (h1 == h2) {
 
+    console.log("\n\n\nGOLDEN TICKET found when mining....\n");
     // stop mining for now
     this.stopMining();
-
-console.log("About to find a solution: "+prevblock.block.coinbase + " -- " + prevblock.block.treasury);  
 
     // determine how much money the previous block leaves for us all
     // and create a transaction that treats the BLOCK itself as an
@@ -2785,8 +2766,6 @@ console.log("About to find a solution: "+prevblock.block.coinbase + " -- " + pre
     var txfees_total  = parseFloat(0.0 + prevblock.calculateTransactionFees()).toFixed(8);
     var txfees_needed = parseFloat(0.0 + prevblock.calculateTransactionFeesNeeded(prevblock.block.prevhash)).toFixed(8);
     var total_revenue = parseFloat(txfees_needed) + parseFloat(prevblock.block.coinbase);
-
-console.log("MINER SHARE CALCS: "+total_revenue + " -- " + prevblock.block.paysplit);
     var miner_share   = parseFloat(total_revenue * prevblock.block.paysplit).toFixed(8);
     var node_share    = (total_revenue - miner_share).toFixed(8);
     if (node_share < 0)             { node_share = 0; }
@@ -2826,8 +2805,6 @@ console.log("MINER SHARE CALCS: "+total_revenue + " -- " + prevblock.block.paysp
         winners[1] = new saito.slip(charlie, node_share);
 
 
-console.log("SHARES: "+solution.miner_share + " -- " + solution.node_share);
-
     // create a transaction to claim the reward
     nt = this.app.wallet.createGoldenTransaction(winners, solution);
 
@@ -2835,7 +2812,6 @@ console.log("SHARES: "+solution.miner_share + " -- " + solution.node_share);
     this.app.blockchain.mempool.addTransaction(nt);
     this.app.network.propagateGoldenTicket(nt);
 
-    console.log("\n\n\nGOLDEN TICKET found when mining....\n\n\n");
 
   }
 }
