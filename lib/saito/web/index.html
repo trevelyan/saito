@@ -1948,6 +1948,8 @@ Blockchain.prototype.addBlock = function addBlock(blk) {
   // check block validates
   if (! blk.validate() ) {
     console.log("Block does not validate!!!");
+console.log(blk);
+    this.app.blockchain.mempool.removeBlock(blk);
     return 0;
   }
 
@@ -1964,9 +1966,10 @@ Blockchain.prototype.addBlock = function addBlock(blk) {
 }
 Blockchain.prototype.importBlock = function importBlock(blkjson) {
   var nb = new saito.block(this.app, blkjson);
-
 console.log("IMPORTING blk: "+nb.returnId());
-
+console.log(blkjson);
+nb.validate();
+console.log("DONE....");
   this.addBlock(nb);
 }
 
@@ -2019,6 +2022,8 @@ Blockchain.prototype.returnUnixtime = function returnUnixtime(blockhash) {
 }
 Blockchain.prototype.returnLongestChain = function returnLongestChain(chainlength=10) {
 
+  if (chainlength == 0) { return []; }
+
   chainarray  = this.returnLongestChainIndex(chainlength);
   reversearray = [];
 
@@ -2036,8 +2041,9 @@ Blockchain.prototype.returnLongestChain = function returnLongestChain(chainlengt
 
 }
 Blockchain.prototype.returnLongestChainIndex = function returnLongestChainIndex(chainlength=10) {
-  if (this.index.hash.length == 0) { return ""; }
+  if (this.index.hash.length == 0) { return []; }
   if (this.index.hash.length < chainlength) { chainlength = this.index.hash.length; }
+  if (chainlength == 0) { return []; }
 
   var bchainIndex = [];
   var chain_pos = this.longestChain;
@@ -2957,7 +2963,13 @@ Miner.prototype.attemptSolution = function attemptSolution(prevblock) {
     nt = this.app.wallet.createGoldenTransaction(winners, solution);
 
     // add it to mempool and broadcast out into the network
+
+console.log("IS GT STILL set to 1");
+console.log(nt.transaction.from[0]);
+
     this.app.blockchain.mempool.addTransaction(nt);
+
+
     this.app.network.propagateGoldenTicket(nt);
 
 
@@ -3079,6 +3091,9 @@ Network.prototype.propagateTransaction = function propagateTransaction(tx, outbo
       // create a temporary transaction
       var tmptx = new saito.transaction();
           tmptx.transaction = JSON.parse(JSON.stringify(tx.transaction));
+
+console.log("This is what we are sending:");
+console.log(tmptx.transaction);
 
       // copy our path
       var tmppath = new saito.path();
@@ -3259,7 +3274,17 @@ Peer.prototype.addSocketEvents = function addSocketEvents() {
       response = peer_self.returnConnectResponse();
       peer_self.socket.emit('request',JSON.stringify(response));
 
+
+      // try to send a payment just to see
+//      if (peer_self.peer.publickey != "") {
+//	if (peer_self.app.wallet.returnBalance() > 20) {
+// 	  nt = peer_self.app.wallet.createUnsignedTransactionWithFee(peer_self.peer.publickey, 20, 0.005);
+//	  nt = peer_self.app.wallet.signTransaction(nt);
+//	}
+//      }
+
       return;
+
     }
     if (message.request == "connect-reply") {
 
@@ -3442,7 +3467,7 @@ Peer.prototype.returnConnectResponse = function createConnectResponse() {
 Peer.prototype.sendBlocks = function sendBlocks(blocks_to_send) {
 
   if (blocks_to_send < 0) { blocks_to_send = 0; }
-
+  if (blocks_to_send == 0) { return; }
 
 console.log("\n\nBLOCKS TO SEND: "+blocks_to_send);
 
@@ -4268,10 +4293,10 @@ function Transaction(txjson="") {
   if (txjson != "") {
     this.transaction = JSON.parse(txjson);
     for (i = 0; i < this.transaction.from.length; i++) {
-      this.transaction.from[i] = new saito.slip(this.transaction.from[i].add, this.transaction.from[i].amt);
+      this.transaction.from[i] = new saito.slip(this.transaction.from[i].add, this.transaction.from[i].amt, this.transaction.from[i].gt);
     }
     for (i = 0; i < this.transaction.to.length; i++) {
-      this.transaction.to[i] = new saito.slip(this.transaction.to[i].add, this.transaction.to[i].amt);
+      this.transaction.to[i] = new saito.slip(this.transaction.to[i].add, this.transaction.to[i].amt, this.transaction.from[i].gt);
     }
   }
 
@@ -4291,6 +4316,11 @@ Transaction.prototype.validate = function validate() {
 
   if (!saito.crypt().verifyMessage(this.paymentSignatureSource(),this.transaction.sig,this.transaction.from[0].returnAddress())) {
     console.log("transaction signature does not verify");
+    return 0;
+  }
+
+  if (!saito.crypt().verifyMessage(JSON.stringify(this.transaction.msg),this.transaction.msig,this.transaction.from[0].returnAddress())) {
+    console.log("transaction message signature does not verify");
     return 0;
   }
 
@@ -4350,14 +4380,13 @@ Transaction.prototype.paymentSignatureSource = function paymentSignatureSource()
   // (user-included data) and any relevant votes/id numbers. The path
   // is excluded from validation as there can be many of them associated
   // with the same transaction, and we need a single hash.
-
   return        JSON.stringify(this.transaction.from) +
                 JSON.stringify(this.transaction.to) +
                 this.transaction.ts +
                 this.transaction.paysplit +
-                JSON.stringify(this.transaction.msig) +
                 JSON.stringify(this.transaction.ver) +
                 JSON.stringify(this.transaction.gt);
+
 }
 
 
@@ -4947,9 +4976,15 @@ Wallet.prototype.getAdequateInputs = function getAdequateInputs(amount_needed) {
   var utxiset = [];
   value   = 0;
 
+console.log("GETTING ADEQUATE INPUTS: "+amount_needed);
+console.log("WALLET LENGTH: "+this.wallet.utxi.length);
+
   for (i = 0; i < this.wallet.utxi.length; i++) {
     utxiset.push(this.wallet.utxi[i]);
-    value += this.wallet.utxi[i].amount;
+    value += this.wallet.utxi[i].returnAmount();
+
+console.log("value is....: "+value);
+
     if (value >= amount_needed) { return utxiset; }
   }
 
@@ -4965,6 +5000,23 @@ Wallet.prototype.getAdequateInputs = function getAdequateInputs(amount_needed) {
 ///////////////////////////
 // return an empty transaction from me to me for 0.0 -- is used when padding an empty
 // block, to ensure there is always one transaction available for block reward distribution
+Wallet.prototype.createUnsignedTransactionWithFee = function createUnsignedTransactionWithFee(to, amt, fee) {
+
+  tx = new saito.transaction();
+
+  // we could get inadequate inputs -1 if not enough money, need to deal with
+  //
+  // note -- inputs provided automatically as an array
+  //
+  // outputs are created and added manually into array
+  //
+  tx.transaction.from = this.getAdequateInputs(amt+fee);
+  tx.transaction.ts   = new Date().getTime();
+  tx.transaction.to.push(new saito.slip(to, amt));
+
+  return tx;
+
+}
 Wallet.prototype.createUnsignedTransaction = function createUnsignedTransaction(to, amt) {
 
   tx = new saito.transaction();
@@ -4991,8 +5043,12 @@ Wallet.prototype.createGoldenTransaction = function createGoldenTransaction(winn
   tx.transaction.ts           = new Date().getTime();
   tx.transaction.gt           = mysolution;
   tx.transaction.msg          = "golden ticket";
-  tx.transaction.msig         = this.signMessage(tx.transaction.msg);
+  tx.transaction.msig         = this.signMessage(JSON.stringify(tx.transaction.msg));
+console.log("AAAAAAA");
+console.log(tx.paymentSignatureSource());
   tx.transaction.sig          = this.signMessage(tx.paymentSignatureSource());
+console.log("BBBBBBB");
+
 
   return tx;
 
@@ -5100,6 +5156,9 @@ Wallet.prototype.returnPublicKey = function returnPublicKey() {
 }
 Wallet.prototype.returnPrivateKey = function returnPublicKey() {
   return this.wallet.privateKey;
+}
+Wallet.prototype.returnBalance = function returnBalance() {
+  return parseFloat(this.wallet.balance).toFixed(8);
 }
 Wallet.prototype.returnWallet = function returnWallet() {
   return this.wallet;
