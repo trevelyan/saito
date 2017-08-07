@@ -105,6 +105,17 @@
  font-weight:bold;
 }
 
+.balance {
+ font-weight: bold;
+ font-size: 1.2em;
+ color: #48A808;
+ width:190px;
+ margin-left: auto;
+ margin-right:auto;
+ margin-top:20px;
+}
+
+
 
 .connections {
  margin-top: 30px;
