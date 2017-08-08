@@ -751,17 +751,15 @@ Block.prototype.validate = function validate() {
   }
 
 
-
   if (this.block.transactions.length != this.transactions.length) {
 console.log("BLOCK TRANSACTIONS DO NOT MATCH. First our JSON: ");
 console.log(this.block.transactions);
 console.log("NOW OUR RAW OBJECTS");
 console.log(this.transactions);
-
-
 //    console.log("Block transactions do not match. Discarding.");
     return 0;
   }
+
 
   // calculate if fees are adequate
   var transaction_fees_needed = this.calculateTransactionFeesNeeded(this.block.prevhash);
@@ -1004,15 +1002,12 @@ Block.prototype.handleGoldenTicket = function handleGoldenTicket() {
 }
 Block.prototype.validateGoldenTicket = function validateGoldenTicket() {
 
-
   prevblk = this.app.blockchain.returnBlockByHash(this.block.prevhash);
   
   if (prevblk == null) {
     //console.log("Previous Block is NULL -- skipping light clients need to be able to validate blocks without checking GT information");
     return 1;
   }
-
-
 
   // calculate our payment, and the two paysplit amounts given our timestamp
   // our payment is the total amount of fees paid, minus the paysplit amount
@@ -1030,6 +1025,7 @@ Block.prototype.validateGoldenTicket = function validateGoldenTicket() {
   current_difficulty = this.returnDifficulty();
   last_paysplit      = prevblk.returnPaysplit();
   last_difficulty    = prevblk.returnDifficulty();
+
 
 
   // check to see if we have a golden ticket in this block
@@ -1128,7 +1124,9 @@ console.log("paysplit is wrong...4" );
       // increases the treasury, but does not immediately affect the coinbase
       //
       if (prev_treasury != this.block.treasury) { 
-        console.log("Treasury invalid: "+this.block.treasury+ " -- " + prev_treasury);
+        console.log("Treasury invalid: "+this.block.treasury+ " -- " + prev_treasury + " -- " + prevblk.block.treasury);
+console.log("MINER STUFF: " + x.miner_share + " --- " + x.node_share);
+console.log(txfees_total + " -- " + txfees_needed + " -- " + total_revenue + " -- " + miner_share + " -- " + node_share + " -- " + last_paysplit + " -- " + last_difficulty);
         return 0;
       }
       if (prev_coinbase != this.block.coinbase) { 
@@ -1343,7 +1341,7 @@ Blockchain.prototype.debug = function debug() {
 //
 Blockchain.prototype.indexAndStore = function indexAndStore(newblock, forceAdd="no") {
 
-  console.log("Adding "+newblock.hash());
+  console.log("Adding "+newblock.hash()+ " -- " + newblock.block.unixtime + " / " + newblock.block.miner);
 
   var hash           = newblock.hash('hex');
   var ts             = newblock.block.unixtime;
@@ -1659,9 +1657,6 @@ Blockchain.prototype.indexAndStore = function indexAndStore(newblock, forceAdd="
 		}
 	      }
 
-
-
-
             }
           }
         }
@@ -1707,9 +1702,6 @@ Blockchain.prototype.indexAndStore = function indexAndStore(newblock, forceAdd="
       thisblk = this.returnBlockByHash(this.index.hash[our_longest_chain[i]]);
       thisblk.runCallbacks(i);
       this.app.storage.setBlockConfirmation(thisblk.hash(), i);
-
-
-
     }
   }
 
@@ -2623,30 +2615,29 @@ function Mempool(app) {
     return new Mempool(app);
   }
 
-  this.app                      = app || {};
+  this.app                        = app || {};
 
   /////////////
   // mempool //
   /////////////
-  this.transactions             = []; // array
-  this.blocks                   = []; // queue
+  this.transactions               = []; // array
+  this.blocks                     = []; // queue
 
 
   ///////////////////////
   // processing blocks //
   ///////////////////////
-  this.processing_blocks        = 0;
-  this.processing_timer         = null;
-  this.processing_speed         = 200; // 0.2 seconds
-
+  this.processing_blocks          = 0;
+  this.processing_timer           = null;
+  this.processing_speed           = 500; // 0.5 seconds
 
   ///////////////////////////
   // bundling transactions //
   ///////////////////////////
-  this.bundling_blocks          = 0;
-  this.bundling_timer           = null;
-  this.bundling_speed           = 350; // 0.5 seconds
-  this.processing_bundle        = 0;
+  this.bundling_blocks            = 0;
+  this.bundling_timer             = null;
+  this.bundling_speed             = 350; // 0.5 seconds
+  this.processing_bundle          = 0;
 
   return this;
 
@@ -2744,6 +2735,8 @@ Mempool.prototype.startBundling = function startBundling() {
 
   mempool_self = this;
 
+console.log("START BUNDLING in MEMPOOL...");
+
   this.bundling_timer = setInterval(function() {
 
     // only run this timer if we are processing a bundle
@@ -2776,7 +2769,7 @@ Mempool.prototype.startBundling = function startBundling() {
       var fees_available = mempool_self.returnTransactionFees();
       if (fees_available < 0) { fees_available = 0; }
 
-      //console.log(fees_available + " ------> "+ fees_needed);
+      console.log(fees_available + " ------> "+ fees_needed);
 
       if (fees_available >= fees_needed) {
         mempool_self.processing_bundle = 1;
@@ -2834,17 +2827,17 @@ Mempool.prototype.processBlocks = function processBlocks() {
 
   this.processing_timer = setInterval(function() {
 
-    // FIFO adding from our queue
-    blk = mempoolself.returnBlock();
-    mempoolself.app.blockchain.indexAndStore(blk);
-    mempoolself.cleanup(blk);
+      // FIFO adding from our queue
+      blk = mempoolself.returnBlock();
+      mempoolself.app.blockchain.indexAndStore(blk);
+      mempoolself.cleanup(blk);
 
 
-    // if we have emptied our queue
-    if (mempoolself.blocks.length == 0) {
-      clearInterval(mempoolself.processing_timer);
-      mempoolself.processing_blocks = 0;
-    }
+      // if we have emptied our queue
+      if (mempoolself.blocks.length == 0) {
+        clearInterval(mempoolself.processing_timer);
+        mempoolself.processing_blocks = 0;
+      }
 
   }, this.processing_speed);
 
@@ -2887,6 +2880,7 @@ Mempool.prototype.returnBlock = function returnBlock() {
 Mempool.prototype.returnTransactionFees = function returnTransactionFees() {
   var v = 0;
   for (i = 0; i < this.transactions.length; i++) {
+console.log("   fee for "+i+" "+this.transactions[i].returnFee());
     v += this.transactions[i].returnFee();
   }
   return v.toFixed(8);
@@ -2951,7 +2945,7 @@ Miner.prototype.attemptSolution = function attemptSolution(prevblock) {
 
   if (h1 == h2) {
 
-    //console.log("\n\n\nGOLDEN TICKET found when mining....\n");
+    console.log("\n\n\nGOLDEN TICKET found when mining....\n");
     // stop mining for now
     this.stopMining();
 
@@ -4431,7 +4425,7 @@ Transaction.prototype.paymentSignatureSource = function paymentSignatureSource()
 // is paid for out-of-pocket.
 Transaction.prototype.returnFee = function returnFee() {
 
-  if (this.fee == -1) {
+  if (this.fee == -1 || this.fee == null) {
 
     // we haven't calculated the fee for this transaction yet
     // so we do it, and save it to a local variable so we don't
@@ -4440,17 +4434,24 @@ Transaction.prototype.returnFee = function returnFee() {
 
     inputs = 0.0;
     for (v = 0; v < this.transaction.from.length; v++) {
-      inputs += this.transaction.from[v].amount;
+      inputs = parseFloat(inputs) + parseFloat(this.transaction.from[v].amt);
     }
     outputs = 0.0;
     for (v = 0; v < this.transaction.to.length; v++) {
-      outputs += this.transaction.to[v].amount;
+      // only count outputs on non-gt transactions
+      if (this.transaction.to[v].gt != 1) {
+        outputs = parseFloat(outputs) + parseFloat(this.transaction.to[v].amt);
+      }
     }
 
-    this.starting_fee = inputs - outputs;
+    this.starting_fee = (inputs - outputs);
     this.fee = this.starting_fee;
 
+console.log("HERE WE ARE: "+inputs+ " -- " + outputs);
+
     pathlength = this.returnPathLength();
+
+console.log("PL: "+pathlength);
 
     for (x = 1; x < pathlength; x++) {
       this.fee = this.fee/2;
@@ -5061,7 +5062,7 @@ Wallet.prototype.createUnsignedTransactionWithFee = function createUnsignedTrans
   // add our change input
   total_inputs = 0.0;
   for (i = 0; i < tx.transaction.from.length; i++) {
-    total_inputs = parseFloat(total_inputs) + parseFloat(tx.transaction.from[i].returnAmount());
+    total_inputs = parseFloat(total_inputs) + parseFloat(tx.transaction.from[i].amt);
   }
   change_amount = (parseFloat(total_inputs)-parseFloat(total_fees));
   tx.transaction.to.push(new saito.slip(this.returnPublicKey(), change_amount));
@@ -5137,8 +5138,8 @@ Wallet.prototype.paymentConfirmation = function paymentConfirmation(blk, tx) {
       this_slip.sid       = ms+1;
 
       // ignore zero-value payments
-      if (this_slip.returnAmount() > 0) { 
-	this.wallet.balance = parseFloat(parseFloat(this.wallet.balance)+ parseFloat(this_slip.returnAmount())).toFixed(8);
+      if (this_slip.amt > 0) { 
+	this.wallet.balance = parseFloat(parseFloat(this.wallet.balance)+ parseFloat(this_slip.amt)).toFixed(8);
 	this.wallet.utxi.push(this_slip);
       }
     }
@@ -5170,7 +5171,7 @@ Wallet.prototype.paymentConfirmation = function paymentConfirmation(blk, tx) {
 	) {
 
 	  // remove input
-	  this.wallet.balance = parseFloat(parseFloat(this.wallet.balance) - parseFloat(this_slip.returnAmount())).toFixed(8);
+	  this.wallet.balance = parseFloat(parseFloat(this.wallet.balance) - parseFloat(this_slip.amt)).toFixed(8);
 	  this.wallet.utxo.push(this.wallet.utxi[sc]);
 	  this.wallet.utxi.splice(sc, 1);
 	  sc = this.wallet.utxi.length+2;
