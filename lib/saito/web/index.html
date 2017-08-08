@@ -2048,11 +2048,11 @@ console.log("4");
   reversearray = [];
 
   finished = 0;
-  for (i = chainarray.length-1; i >= 0 && finished == 0; i--) {
+  for (ii = chainarray.length-1; ii >= 0 && finished == 0; ii--) {
 console.log("5");
 console.log(chainarray[i]);
 
-    tmpblk = this.returnBlockByHash(this.index.hash[chainarray[i]]);
+    tmpblk = this.returnBlockByHash(this.index.hash[chainarray[ii]]);
     if (tmpblk != null) {
       reversearray.push(tmpblk);
     }
@@ -2127,9 +2127,9 @@ Blockchain.prototype.returnLatestBlockId = function returnLatestBlockId() {
 }
 Blockchain.prototype.returnBlockByHash = function returnBlockByHash(hash) {
   if (this.blocks.length == 0) { return null; }
-  for (i = this.blocks.length-1; i >= 0; i-- ) {
-    if (this.blocks[i].hash() == hash) {
-      return this.blocks[i];
+  for (v = this.blocks.length-1; v >= 0; v-- ) {
+    if (this.blocks[v].hash() == hash) {
+      return this.blocks[v];
     }
   }
   return null;
@@ -3505,7 +3505,7 @@ Peer.prototype.sendBlocks = function sendBlocks(blocks_to_send) {
 
 console.log("\n\nBLOCKS TO SEND: "+blocks_to_send);
 
-  var lc = this.app.blockchain.returnLongestChain(blocks_to_send);
+  lc = this.app.blockchain.returnLongestChain(blocks_to_send);
 
 console.log("Len: "+lc.length);
 
@@ -5026,13 +5026,9 @@ Wallet.prototype.getAdequateInputs = function getAdequateInputs(amount_needed) {
 
   for (i = 0; i < this.wallet.utxi.length; i++) {
     utxiset.push(this.wallet.utxi[i]);
-    value = parseFloat(this.wallet.utxi[i].amt) + parseFloat(value);;
-console.log("Adding up inputs: "+this.wallet.utxi[i].returnAmount() + " -- " + value + " --- " + amount_needed);
+    value = parseFloat(this.wallet.utxi[i].amt) + parseFloat(value);
     if (value >= amount_needed) { return utxiset; }
   }
-
-console.log("\n\n\nCOUNT NOT FIND INPUTS\n\n");
-console.log(this.wallet.utxi);
 
   return null;
 }
@@ -5163,13 +5159,8 @@ Wallet.prototype.paymentConfirmation = function paymentConfirmation(blk, tx) {
 
       this_slip           = my_slips[ms];
 
-console.log("REMOVING PAYMENT INPUT 1");
-console.log("WE FOUND THIS SLIP: ");
-console.log(this_slip);
-console.log("THESE ARE THE ONES WE HAVE: " + this.wallet.utxi.length);
       for (sc = 0; sc < this.wallet.utxi.length; sc++) {
         qs = this.wallet.utxi[sc];
-console.log(qs);
         if (
 			this_slip.bid == qs.bid &&
 			this_slip.tid == qs.tid &&
@@ -5177,8 +5168,6 @@ console.log(qs);
 			this_slip.amt == qs.amt &&
 			this_slip.add == qs.add
 	) {
-
-console.log("REMOVING PAYMENT INPUT 2");
 
 	  // remove input
 	  this.wallet.balance = parseFloat(parseFloat(this.wallet.balance) - parseFloat(this_slip.returnAmount())).toFixed(8);
