@@ -1238,7 +1238,7 @@ function Blockchain(app) {
   this.genesis_block_id        = 0;         // earlier block_id we care about
   this.fork_guard              = 5;         // discard forks that fall N blocks behind
   this.fork_id                 = "";        // a string we use to identify our longest-chain
-
+  this.currently_indexing      = 0;         // we processing a block?
 
   ///////////////////
   // Longest Chain //
@@ -1340,6 +1340,12 @@ Blockchain.prototype.debug = function debug() {
 // forms the longest chain.
 //
 Blockchain.prototype.indexAndStore = function indexAndStore(newblock, forceAdd="no") {
+
+  if (this.currently_indexing == 1) {
+
+console.log("CURRENTLY INDEXING SOMETHING!");
+ return 2; }
+  this.currently_indexing = 1;
 
   console.log("Adding "+newblock.hash()+ " -- " + newblock.block.unixtime + " / " + newblock.block.miner);
 
@@ -1720,6 +1726,12 @@ Blockchain.prototype.indexAndStore = function indexAndStore(newblock, forceAdd="
   if (newblock.returnId() >= (this.genesis_block_id+this.genesis_period+this.fork_guard)) {
     this.updateGenesisBlock(newblock);
   }
+
+
+
+
+  this.currently_indexing = 0;
+
 
 }
 function compareTs(a, b) {
@@ -2630,14 +2642,32 @@ function Mempool(app) {
   this.processing_blocks          = 0;
   this.processing_timer           = null;
   this.processing_speed           = 500; // 0.5 seconds
-
+					 // processing speed must be 
+					 // faster than bundling speed
+					 // to avoid bugs
+					 //
+					 // is speed of adding blocks
   ///////////////////////////
   // bundling transactions //
   ///////////////////////////
   this.bundling_blocks            = 0;
   this.bundling_timer             = null;
-  this.bundling_speed             = 350; // 0.5 seconds
+  this.bundling_speed             = 700; // 0.7 seconds
+					 // is speed of creating blocks
+					 // 
+					 // must be slower than processing speed
+					 // to avoid bugs
+
   this.processing_bundle          = 0;
+
+
+  // ensure that our bundling speed is slower than
+  // our processing speed to avoid problems with 
+  // multiple blocks being created during the 
+  // brief windows when fee levels permit them
+  if (this.bundling_speed < this.processing_speed) {
+    this.bundling_speed = this.processing_speed+100;
+  }
 
   return this;
 
@@ -2735,12 +2765,10 @@ Mempool.prototype.startBundling = function startBundling() {
 
   mempool_self = this;
 
-console.log("START BUNDLING in MEMPOOL...");
-
   this.bundling_timer = setInterval(function() {
 
     // only run this timer if we are processing a bundle
-    if (this.processing_bundle == 1) {} else {
+    if (mempool_self.processing_bundle == 1) {} else {
 
       var fees_needed = 0;
 
@@ -2769,13 +2797,13 @@ console.log("START BUNDLING in MEMPOOL...");
       var fees_available = mempool_self.returnTransactionFees();
       if (fees_available < 0) { fees_available = 0; }
 
-      console.log(fees_available + " ------> "+ fees_needed);
 
-      if (fees_available >= fees_needed) {
-        mempool_self.processing_bundle = 1;
-        mempool_self.createBlock(latestBlk);
-        mempool_self.processing_bundle = 0;
+      if (parseFloat(fees_available) >= parseFloat(fees_needed)) {
+          mempool_self.createBlock(latestBlk);
       }
+
+
+      mempool_self.processing_bundle = 0;
     }
 
   }, this.bundling_speed);
@@ -2821,16 +2849,24 @@ Mempool.prototype.processBlocks = function processBlocks() {
     return;
   }
 
-  this.processing_blocks = 1;
 
   mempoolself = this;
 
   this.processing_timer = setInterval(function() {
 
+      if (this.processing_blocks == 1) { return; }
+      this.processing_blocks = 1;
+
+
       // FIFO adding from our queue
       blk = mempoolself.returnBlock();
-      mempoolself.app.blockchain.indexAndStore(blk);
-      mempoolself.cleanup(blk);
+
+
+      // add and delete block unless we get kickback
+      x = mempoolself.app.blockchain.indexAndStore(blk);
+      if (x != 2) {
+        mempoolself.cleanup(blk);
+      }
 
 
       // if we have emptied our queue
@@ -2838,6 +2874,10 @@ Mempool.prototype.processBlocks = function processBlocks() {
         clearInterval(mempoolself.processing_timer);
         mempoolself.processing_blocks = 0;
       }
+
+
+
+      this.processing_blocks = 0;
 
   }, this.processing_speed);
 
@@ -2880,7 +2920,6 @@ Mempool.prototype.returnBlock = function returnBlock() {
 Mempool.prototype.returnTransactionFees = function returnTransactionFees() {
   var v = 0;
   for (i = 0; i < this.transactions.length; i++) {
-console.log("   fee for "+i+" "+this.transactions[i].returnFee());
     v += this.transactions[i].returnFee();
   }
   return v.toFixed(8);
@@ -4447,11 +4486,7 @@ Transaction.prototype.returnFee = function returnFee() {
     this.starting_fee = (inputs - outputs);
     this.fee = this.starting_fee;
 
-console.log("HERE WE ARE: "+inputs+ " -- " + outputs);
-
     pathlength = this.returnPathLength();
-
-console.log("PL: "+pathlength);
 
     for (x = 1; x < pathlength; x++) {
       this.fee = this.fee/2;
@@ -4459,7 +4494,6 @@ console.log("PL: "+pathlength);
     }
 
     return this.fee;
-
   } else {
     return this.fee;
   }
