@@ -672,10 +672,13 @@ function Block(app, blkjson="") {
   //////////////////////
   if (blkjson != "") {
     this.block = JSON.parse(blkjson);
-    for (i = 0; i < this.block.transactions.length; i++) {
-      this.transactions[i] = new saito.transaction(this.block.transactions[i]);
+    for (nv = 0; nv < this.block.transactions.length; nv++) {
+      this.transactions[nv] = new saito.transaction(this.block.transactions[nv]);
     }
   }
+
+
+  console.log("BLOCK CREATED: "+this.transactions.length+ " -- " + this.block.transactions.length);
 
 
   return this;
@@ -755,7 +758,25 @@ Block.prototype.validate = function validate() {
 console.log("BLOCK TRANSACTIONS DO NOT MATCH. First our JSON: ");
 console.log(this.block.transactions);
 console.log("NOW OUR RAW OBJECTS");
-console.log(this.transactions);
+console.log(JSON.stringify(this.transactions));
+console.log("MISSING ITEM: ");
+for (bm = 0; bm < this.block.transactions.length; bm++) {
+
+  ti = this.block.transactions[bm];
+  hm = 0;
+
+  for (bb = 0; bb < this.transactions; bb++) {
+    if (JSON.stringify(this.transactions[bb]) == this.block.transactions[bm]) {
+      hm = 1;
+    }
+  }
+
+  if (hm == 1) {
+console.log(this.block.transactions[bm]);
+  }
+
+}
+
 //    console.log("Block transactions do not match. Discarding.");
     return 0;
   }
@@ -997,6 +1018,10 @@ Block.prototype.handleGoldenTicket = function handleGoldenTicket() {
       // to reduce the difficulty... which takes time and actual hash power
       //
 
+
+      // we only process one golden ticket by default
+      i = this.transactions.length + 10;
+
     }
   }
 }
@@ -1054,9 +1079,10 @@ Block.prototype.validateGoldenTicket = function validateGoldenTicket() {
       // headers of the first blocks as part of the sync process and then 
       // checking against multiple other clients.
       // 
-      if (prevblk.block.prevhash == "") {
+      if (prevblk.block.prevhash == "" || prevblk.block.prevhash == null) {
         if (miner_share != x.miner_share) {
           console.log("Miner Share does not equal what it should: "+miner_share + " -- " + x.miner_share);
+console.log(JSON.stringify(x));
           return 0;
         }
         if (node_share != x.node_share) {
@@ -1197,11 +1223,11 @@ Block.prototype.runCallbacks = function runCallbacks(confnum) {
 Block.prototype.addTransaction = function addTransaction(tx) {
   this.block.transactions.push(JSON.stringify(tx));
   this.transactions.push(tx);
-
+  console.log("Adding TX: " + this.block.transactions.length + " -- " + this.transactions.length);
 }
 Block.prototype.importTransaction = function importTransaction(txjson) {
-  this.block.transactions.push(txjson);
-  this.transactions.push(new saito.transaction(txjson));
+  tx = new saito.transaction(txjson);
+  this.addTransaction(tx);
 }
 
 
@@ -1238,7 +1264,6 @@ function Blockchain(app) {
   this.genesis_block_id        = 0;         // earlier block_id we care about
   this.fork_guard              = 5;         // discard forks that fall N blocks behind
   this.fork_id                 = "";        // a string we use to identify our longest-chain
-  this.currently_indexing      = 0;         // we processing a block?
 
   ///////////////////
   // Longest Chain //
@@ -1341,13 +1366,7 @@ Blockchain.prototype.debug = function debug() {
 //
 Blockchain.prototype.indexAndStore = function indexAndStore(newblock, forceAdd="no") {
 
-  if (this.currently_indexing == 1) {
-
-console.log("CURRENTLY INDEXING SOMETHING!");
- return 2; }
-  this.currently_indexing = 1;
-
-  console.log("Adding "+newblock.hash()+ " -- " + newblock.block.unixtime + " / " + newblock.block.miner);
+  console.log("Adding block "+newblock.hash());
 
   var hash           = newblock.hash('hex');
   var ts             = newblock.block.unixtime;
@@ -1726,11 +1745,6 @@ console.log("CURRENTLY INDEXING SOMETHING!");
   if (newblock.returnId() >= (this.genesis_block_id+this.genesis_period+this.fork_guard)) {
     this.updateGenesisBlock(newblock);
   }
-
-
-
-
-  this.currently_indexing = 0;
 
 
 }
@@ -2682,9 +2696,32 @@ module.exports = Mempool;
 // Adding and Removing Blocka and Transactions //
 /////////////////////////////////////////////////
 Mempool.prototype.addTransaction = function addTransaction(tx) {
-  this.transactions.push(tx);
+
+  transaction_imported = 0;  
+
+  // we only accept one golden ticket, so check here
+  // and if we already have a golden ticket, compare 
+  // the fees and take the higher-paying ticket
+  if (tx.transaction.gt != null) {
+    for (z = 0; z < this.transactions.length; z++) {
+      if (this.transactions[z].gt != null) {
+        new_tx_fee = tx.returnFee();
+        old_tx_fee = this.transactions[z].returnFee();
+        if (new_tx_fee > old_tx_fee) {
+          this.transactions[z] = tx;
+	  transaction_imported = 1;
+          z = this.transactions.length+1;
+        }
+      }
+    }
+  }
+  if (transaction_imported == 0) {
+    this.transactions.push(tx);
+  }
+
 }
 Mempool.prototype.importTransaction = function importTransaction(txjson) {
+
   tx = new saito.transaction(txjson);
   this.addTransaction(tx);
 }
@@ -2863,11 +2900,10 @@ Mempool.prototype.processBlocks = function processBlocks() {
 
 
       // add and delete block unless we get kickback
-      x = mempoolself.app.blockchain.indexAndStore(blk);
-      if (x != 2) {
+      if (blk != null) {
+        mempoolself.app.blockchain.indexAndStore(blk);
         mempoolself.cleanup(blk);
       }
-
 
       // if we have emptied our queue
       if (mempoolself.blocks.length == 0) {
@@ -3347,6 +3383,8 @@ Peer.prototype.addSocketEvents = function addSocketEvents() {
 	  nt = peer_self.app.wallet.signTransaction(nt);
           peer_self.app.blockchain.mempool.addTransaction(nt);
           peer_self.app.network.propagateTransaction(nt);
+console.log("CREATED TRANSACTION FOR PEER");
+console.log(nt);
 	}
       }
 
@@ -3401,6 +3439,7 @@ Peer.prototype.addSocketEvents = function addSocketEvents() {
 
     // blocks
     if (message.request == "block") {
+      // blockchain confirms and adds network propagation
       peer_self.app.blockchain.importBlock(message.data);
       return;
     }
@@ -3417,8 +3456,12 @@ Peer.prototype.addSocketEvents = function addSocketEvents() {
 
     // golden ticket
     if (message.request == "golden ticket") {
-      tx = new saito.transaction(message.data);
-      peer_self.app.blockchain.mempool.addTransaction(tx);
+
+console.log("RECEIVED GOLDEN TICKET!");
+
+      var tx = new saito.transaction(message.data);
+      peer_self.app.blockchain.mempool.importTransaction(message.data);
+      peer_self.app.network.propagateGoldenTicket(tx);
       return;
     }
 
