@@ -751,8 +751,15 @@ Block.prototype.validate = function validate() {
   }
 
 
+
   if (this.block.transactions.length != this.transactions.length) {
-    console.log("Block transactions do not match. Discarding.");
+console.log("BLOCK TRANSACTIONS DO NOT MATCH. First our JSON: ");
+console.log(this.block.transactions);
+console.log("NOW OUR RAW OBJECTS");
+console.log(this.transactions);
+
+
+//    console.log("Block transactions do not match. Discarding.");
     return 0;
   }
 
@@ -1369,7 +1376,7 @@ Blockchain.prototype.indexAndStore = function indexAndStore(newblock, forceAdd="
   //
   //
   if (this.isHashIndexed(hash) == 1) {
-    console.log("Block Hash: "+hash+" matches hash in transaction history...");
+    //console.log("Block Hash: "+hash+" matches hash in transaction history...");
     return;
   }
 
@@ -2028,13 +2035,23 @@ Blockchain.prototype.returnUnixtime = function returnUnixtime(blockhash) {
 }
 Blockchain.prototype.returnLongestChain = function returnLongestChain(chainlength=10) {
 
+console.log("1");
+
   if (chainlength == 0) { return []; }
 
+console.log("2");
   chainarray  = this.returnLongestChainIndex(chainlength);
+console.log("3");
+console.log(chainarray);
+console.log("4");
+
   reversearray = [];
 
   finished = 0;
   for (i = chainarray.length-1; i >= 0 && finished == 0; i--) {
+console.log("5");
+console.log(chainarray[i]);
+
     tmpblk = this.returnBlockByHash(this.index.hash[chainarray[i]]);
     if (tmpblk != null) {
       reversearray.push(tmpblk);
@@ -2261,9 +2278,10 @@ Browser.prototype.attachEvents = function attachEvents() {
 
              to        = $('#lightbox_compose_to_address').val();
              from      = $('#lightbox_compose_from_address').val();
-             amount    = 0.0;
+             amount    = $('#lightbox_compose_payment').val();
+             fee       = $('#lightbox_compose_fee').val();
 
-             newtx = browser_self.app.wallet.createUnsignedTransaction(to, amount);
+             newtx = browser_self.app.wallet.createUnsignedTransactionWithFee(to, amount, fee);
              modsel = $('#lightbox_compose_module_select').val();
              newtx = browser_self.app.modules.formatTransaction(newtx, modsel);
              newtx = browser_self.app.wallet.signTransaction(newtx);
@@ -2461,6 +2479,8 @@ Browser.prototype.updateBalance = function updateBalance() {
 
     if (this.app.BROWSERIFY == 0) { return; } 
 
+console.log("UPDATING BALANCE ON WEBSITE: "+this.app.wallet.returnBalance());
+
     // update wallet balance
     $('#balance_money').html(this.app.wallet.returnBalance());
 
@@ -2529,13 +2549,9 @@ Crypt.prototype.returnPublicKey = function returnPublicKey(privkey) {
   return this.compressPublicKey(secp256k1.publicKeyCreate(Buffer.from(privkey,'hex'), false).toString('hex'));
 }
 Crypt.prototype.signMessage = function signMessage(msg, privkey) {
-console.log("SIGN MESSAGE:");
-console.log(msg);
   return secp256k1.sign(Buffer.from(this.hash(JSON.stringify(msg)),'hex'), Buffer.from(privkey,'hex')).signature.toString('hex');
 }
 Crypt.prototype.verifyMessage = function verifyMessage(msg, sig, pubkey) {
-console.log("VERIFY MESSAGE:");
-console.log(msg);
   return secp256k1.verify(Buffer.from(this.hash(JSON.stringify(msg)),'hex'), Buffer.from(sig,'hex'), Buffer.from(this.uncompressPublicKey(pubkey),'hex'));
 }
 Crypt.prototype.compressPublicKey = function compressPublicKey(pubkey) {
@@ -2981,8 +2997,8 @@ Miner.prototype.attemptSolution = function attemptSolution(prevblock) {
     var charlie   = children[winnerInt%children.length];
 
     var winners    = [];
-        winners[0] = new saito.slip(this.app.wallet.returnAddress(), miner_share);
-        winners[1] = new saito.slip(charlie, node_share);
+        winners[0] = new saito.slip(this.app.wallet.returnAddress(), miner_share, 1);
+        winners[1] = new saito.slip(charlie, node_share, 1);
 
 
     // create a transaction to claim the reward
@@ -5006,13 +5022,17 @@ Wallet.prototype.addInput = function addInput(x) {
 Wallet.prototype.getAdequateInputs = function getAdequateInputs(amount_needed) {
 
   var utxiset = [];
-  value   = 0;
+  value   = 0.0;
 
   for (i = 0; i < this.wallet.utxi.length; i++) {
     utxiset.push(this.wallet.utxi[i]);
-    value += this.wallet.utxi[i].returnAmount();
+    value = parseFloat(this.wallet.utxi[i].returnAmount()) + parseFloat(value);;
+console.log("Adding up inputs: "+this.wallet.utxi[i].returnAmount() + " -- " + value + " --- " + amount_needed);
     if (value >= amount_needed) { return utxiset; }
   }
+
+console.log("\n\n\nCOUNT NOT FIND INPUTS\n\n");
+console.log(this.wallet.utxi);
 
   return null;
 }
@@ -5036,12 +5056,19 @@ Wallet.prototype.createUnsignedTransactionWithFee = function createUnsignedTrans
   //
   // outputs are created and added manually into array
   //
-  tx.transaction.from = this.getAdequateInputs(amt+fee);
+  total_fees = parseFloat(amt)+parseFloat(fee);
+  tx.transaction.from = this.getAdequateInputs(total_fees);
   tx.transaction.ts   = new Date().getTime();
   tx.transaction.to.push(new saito.slip(to, amt));
 
-console.log("\n\nCREATING TRANSACTION WITH FEE WITH INPUT: ");
-console.log(JSON.stringify(tx.transaction));
+
+  // add our change input
+  total_inputs = 0.0;
+  for (i = 0; i < tx.transaction.from.length; i++) {
+    total_inputs = parseFloat(total_inputs) + parseFloat(tx.transaction.from[i].returnAmount());
+  }
+  change_amount = (parseFloat(total_inputs)-parseFloat(total_fees));
+  tx.transaction.to.push(new saito.slip(this.returnPublicKey(), change_amount));
 
   return tx;
 
@@ -5059,9 +5086,6 @@ Wallet.prototype.createUnsignedTransaction = function createUnsignedTransaction(
   tx.transaction.from = this.getAdequateInputs(amt);
   tx.transaction.ts   = new Date().getTime();
   tx.transaction.to.push(new saito.slip(to, amt));
-
-console.log("\n\nCREATING TRANSACTION WITHOUT FEE WITH INPUT: ");
-console.log(JSON.stringify(tx.transaction));
 
   return tx;
 
@@ -5111,7 +5135,7 @@ Wallet.prototype.paymentConfirmation = function paymentConfirmation(blk, tx) {
     my_slips = tx.returnSlipsTo(this.returnPublicKey());
     for (ms = 0; ms < my_slips.length; ms++) {
 
-      this_slip = my_slips[ms];
+      this_slip           = my_slips[ms];
       this_slip.bid       = blk.block.id;
       this_slip.tid       = tx.transaction.id;
       this_slip.sid       = ms+1;
@@ -5120,12 +5144,6 @@ Wallet.prototype.paymentConfirmation = function paymentConfirmation(blk, tx) {
       if (this_slip.returnAmount() > 0) { 
 	this.wallet.balance = parseFloat(parseFloat(this.wallet.balance)+ parseFloat(this_slip.returnAmount())).toFixed(8);
 	this.wallet.utxi.push(this_slip);
-
-console.log("\n\n\n");
-console.log("RECEIVED A PAYMENT: ");
-console.log(this_slip);
-console.log("\n\n\n");
-
       }
     }
 
@@ -5134,17 +5152,24 @@ console.log("\n\n\n");
 
   }
 
-  if (tx.isFrom(this.returnPublicKey())) {
+
+  // if this is a payment FROM us and it isn't a golden ticket issuance
+  // we want to remove it from our wallet. If it is a golden ticket 
+  // issuance then we don't need to worry about removing any cash
+  if (tx.isFrom(this.returnPublicKey()) && tx.transaction.gt == null) {
     my_slips = tx.returnSlipsFrom(this.returnPublicKey());
+
     for (ms = 0; ms < my_slips.length; ms++) {
 
-      this_slip = my_slips[ms];
-      this_slip.bid       = blk.block.id;
-      this_slip.tid       = tx.transaction.id;
-      this_slip.sid       = ms+1;
+      this_slip           = my_slips[ms];
 
+console.log("REMOVING PAYMENT INPUT 1");
+console.log("WE FOUND THIS SLIP: ");
+console.log(this_slip);
+console.log("THESE ARE THE ONES WE HAVE: " + this.wallet.utxi.length);
       for (sc = 0; sc < this.wallet.utxi.length; sc++) {
         qs = this.wallet.utxi[sc];
+console.log(qs);
         if (
 			this_slip.bid == qs.bid &&
 			this_slip.tid == qs.tid &&
@@ -5152,21 +5177,24 @@ console.log("\n\n\n");
 			this_slip.amt == qs.amt &&
 			this_slip.add == qs.add
 	) {
+
+console.log("REMOVING PAYMENT INPUT 2");
+
 	  // remove input
 	  this.wallet.balance = parseFloat(parseFloat(this.wallet.balance) - parseFloat(this_slip.returnAmount())).toFixed(8);
 	  this.wallet.utxo.push(this.wallet.utxi[sc]);
 	  this.wallet.utxi.splice(sc, 1);
-	  sc = this.wallet.utxi.length+1;
+	  sc = this.wallet.utxi.length+2;
 	}
       }
     }
-
-    // update 
-    this.app.browser.updateBalance();
-
-    // save our options file to preserve records
-    this.app.storage.saveOptions();
   }
+
+  // update 
+  this.app.browser.updateBalance();
+
+  // save our options file to preserve records
+  this.app.storage.saveOptions();
 
 }
 
