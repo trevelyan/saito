@@ -335,9 +335,6 @@ Email.prototype.addMessageToInbox = function addMessageToInbox(tx, app) {
     msg.title = tx.transaction.msg.title;
     msg.json = tx.transaction.msg.body;
 
-console.log("add message to inbox: ");
-console.log(msg);
-
     app.browser.attachMessage(msg);
 
 }
@@ -775,6 +772,7 @@ Block.prototype.validate = function validate() {
   for (zz = 0; zz < this.transactions.length; zz++) {
     if (this.transactions[zz].validate(this.app) != 1) {
       console.log("Block invalid: contains invalid transaction");
+      console.log(this.transactions[zz].transaction);
       return 0;
     }
   }
@@ -1960,7 +1958,6 @@ Blockchain.prototype.addBlock = function addBlock(blk) {
   // check block validates
   if (! blk.validate() ) {
     console.log("Block does not validate!!!");
-    console.log(blk);
     this.app.blockchain.mempool.removeBlock(blk);
     return 0;
   }
@@ -2532,9 +2529,13 @@ Crypt.prototype.returnPublicKey = function returnPublicKey(privkey) {
   return this.compressPublicKey(secp256k1.publicKeyCreate(Buffer.from(privkey,'hex'), false).toString('hex'));
 }
 Crypt.prototype.signMessage = function signMessage(msg, privkey) {
+console.log("SIGN MESSAGE:");
+console.log(msg);
   return secp256k1.sign(Buffer.from(this.hash(JSON.stringify(msg)),'hex'), Buffer.from(privkey,'hex')).signature.toString('hex');
 }
 Crypt.prototype.verifyMessage = function verifyMessage(msg, sig, pubkey) {
+console.log("VERIFY MESSAGE:");
+console.log(msg);
   return secp256k1.verify(Buffer.from(this.hash(JSON.stringify(msg)),'hex'), Buffer.from(sig,'hex'), Buffer.from(this.uncompressPublicKey(pubkey),'hex'));
 }
 Crypt.prototype.compressPublicKey = function compressPublicKey(pubkey) {
@@ -4311,10 +4312,10 @@ function Transaction(txjson="") {
   if (txjson != "") {
     this.transaction = JSON.parse(txjson);
     for (i = 0; i < this.transaction.from.length; i++) {
-      this.transaction.from[i] = new saito.slip(this.transaction.from[i].add, this.transaction.from[i].amt, this.transaction.from[i].gt);
+      this.transaction.from[i] = new saito.slip(this.transaction.from[i].add, this.transaction.from[i].amt, this.transaction.from[i].gt, this.transaction.from[i].bid, this.transaction.from[i].tid, this.transaction.from[i].sid);
     }
     for (i = 0; i < this.transaction.to.length; i++) {
-      this.transaction.to[i] = new saito.slip(this.transaction.to[i].add, this.transaction.to[i].amt, this.transaction.to[i].gt);
+      this.transaction.to[i] = new saito.slip(this.transaction.to[i].add, this.transaction.to[i].amt, this.transaction.to[i].gt, this.transaction.to[i].bid, this.transaction.to[i].tid, this.transaction.to[i].sid);
     }
   }
 
@@ -5039,6 +5040,9 @@ Wallet.prototype.createUnsignedTransactionWithFee = function createUnsignedTrans
   tx.transaction.ts   = new Date().getTime();
   tx.transaction.to.push(new saito.slip(to, amt));
 
+console.log("\n\nCREATING TRANSACTION WITH FEE WITH INPUT: ");
+console.log(JSON.stringify(tx.transaction));
+
   return tx;
 
 }
@@ -5055,6 +5059,9 @@ Wallet.prototype.createUnsignedTransaction = function createUnsignedTransaction(
   tx.transaction.from = this.getAdequateInputs(amt);
   tx.transaction.ts   = new Date().getTime();
   tx.transaction.to.push(new saito.slip(to, amt));
+
+console.log("\n\nCREATING TRANSACTION WITHOUT FEE WITH INPUT: ");
+console.log(JSON.stringify(tx.transaction));
 
   return tx;
 
@@ -5113,6 +5120,12 @@ Wallet.prototype.paymentConfirmation = function paymentConfirmation(blk, tx) {
       if (this_slip.returnAmount() > 0) { 
 	this.wallet.balance = parseFloat(parseFloat(this.wallet.balance)+ parseFloat(this_slip.returnAmount())).toFixed(8);
 	this.wallet.utxi.push(this_slip);
+
+console.log("\n\n\n");
+console.log("RECEIVED A PAYMENT: ");
+console.log(this_slip);
+console.log("\n\n\n");
+
       }
     }
 
