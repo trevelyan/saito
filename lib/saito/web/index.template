@@ -37,7 +37,8 @@
 
         <div class="compose" id="compose">COMPOSE</div>
         <div class="viewkeys" id="viewkeys">SETTINGS</div>
-        <div class="balance" id="balance"></div>
+        <div class="balance" id="balance">my balance:</div>
+	<div class="balance_money" id="balance_money">0</div>
         <div class="connections" id="connections">
           <div class="connections_sync" id="connections_sync"></div>
         </div>

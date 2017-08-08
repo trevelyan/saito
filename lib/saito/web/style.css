@@ -109,10 +109,19 @@
  font-weight: bold;
  font-size: 1.2em;
  color: #48A808;
- width:190px;
+ width:140px;
  margin-left: auto;
  margin-right:auto;
  margin-top:20px;
+}
+.balance_money {
+ font-weight: bold;
+ font-size: 1.2em;
+ color: #48A808;
+ width:140px;
+ margin-left: auto;
+ margin-right:auto;
+ margin-top:4px;
 }
 
 
