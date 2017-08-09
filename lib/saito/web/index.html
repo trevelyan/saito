@@ -982,10 +982,6 @@ function Block(app, blkjson="") {
     }
   }
 
-
-  console.log("BLOCK CREATED: "+this.transactions.length+ " -- " + this.block.transactions.length);
-
-
   return this;
 
 }
@@ -2826,9 +2822,6 @@ Browser.prototype.monitorBlockchainSyncing = function monitorBlockchainSyncing(r
 Browser.prototype.updateBalance = function updateBalance() {
 
     if (this.app.BROWSERIFY == 0) { return; } 
-
-console.log("UPDATING BALANCE ON WEBSITE: "+this.app.wallet.returnBalance());
-
     // update wallet balance
     $('#balance_money').html(this.app.wallet.returnBalance());
 
@@ -3351,7 +3344,7 @@ Miner.prototype.attemptSolution = function attemptSolution(prevblock) {
 
   if (h1 == h2) {
 
-    console.log("\n\n\nGOLDEN TICKET found when mining....\n");
+    console.log("\nGOLDEN TICKET found when mining....\n");
     // stop mining for now
     this.stopMining();
 
@@ -3787,9 +3780,6 @@ console.log(nt);
 
     // golden ticket
     if (message.request == "golden ticket") {
-
-console.log("RECEIVED GOLDEN TICKET!");
-
       var tx = new saito.transaction(message.data);
       peer_self.app.network.propagateGoldenTicket(tx);
       peer_self.app.blockchain.mempool.importTransaction(message.data);
