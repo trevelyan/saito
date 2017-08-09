@@ -231,7 +231,7 @@ Auth.prototype.installModule = function installModule() {
 //////////////////
 Auth.prototype.onConfirmation = function onConfirmation(tx, conf, app) {
 
-  if (conf == 1) {
+  if (conf == 0) {
    
     var sender           = tx.transaction.from[0].add;
     var receiver         = tx.transaction.to[0].add;
@@ -380,6 +380,9 @@ Auth.prototype.attachMessageEvents = function attachMessageEvents(message_id, ap
           utx = app.wallet.signTransaction(utx);
 	  app.blockchain.mempool.addTransaction(utx);
           app.network.propagateTransaction(utx);
+
+	  $.fancybox.close();
+
         }
 
       }
@@ -1555,7 +1558,7 @@ function Blockchain(app) {
   /////////////////////////
   this.heartbeat               =  20;       // expect new block every 20 seconds
   this.money_supply            = 21000000;  // zero-inflation target
-  this.genesis_period          = 100;       // adjust the genesis hash each N blocks
+  this.genesis_period          = 10000;     // adjust the genesis hash each N blocks
   this.genesis_ts              = 0;         // unixtime of earliest block
   this.genesis_block_id        = 0;         // earlier block_id we care about
   this.fork_guard              = 5;         // discard forks that fall N blocks behind
