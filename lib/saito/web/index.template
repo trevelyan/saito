@@ -29,14 +29,19 @@
 
 
     <div class="header">
-      Saito Header
+      <img src="/img/saito_logo_black.png" style="width:35px;margin-top:5px;margin-left:25px;margin-right:10px;float:left;" />
+      <div style="font-family:Georgia;padding-top:0px;font-size:1.2em;color:#444;">saito</div>
     </div>
 
     <div class="loader">
-Saito is currently loading... please be patient.
+Saito is currently loading....
+
+<p></p>
+
+We are downloading the application itself into your browser from our server in Los Angeles. The download is reasonably fast in the United States, but can take up to a minute in China due to its size (~1.6 MB). Please be patient.
     </div>
 
-    <div class="main" class="display:none">
+    <div class="main" style="display:none">
 
       <div class="sidebar">
 
@@ -54,7 +59,7 @@ Saito is currently loading... please be patient.
       <div class="mail">
 
         <div class="mail_controls_delete" id="mail_controls_delete">delete selected</div>
-
+        <div style="display:none" class="mail_controls_message" id="mail_controls_message"></div>
 
 	<table class="message_table">
 	  <tr class="outer_message" id="message_0">
@@ -160,11 +165,15 @@ Your browser is running the full Saito client. In order to allow you to send and
   </div>
 
 
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/browser.js.gz"></script>
+  <script type="text/javascript">
+    $('.loader').hide();
+    $('.main').show();
+  </script>
 
-
-
-<script src="/socket.io/socket.io.js"></script>
-<script type="text/javascript">
+</body>
+</html>
 
 
 

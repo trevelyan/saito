@@ -8,8 +8,8 @@
 
 .header {
  width: 1200px;
- height: 80px;
- background-color: #e5e5e5;
+ height: 50px;
+ #background-color: #e5e5e5;
  border-bottom: 1px solid #a5a5a5;
  font-size:2em;
 }
@@ -60,6 +60,7 @@
  width:630px;
  max-width:630px;
  padding-left:10px;
+ overflow:hidden;
  border-top:0px;
 }
 .inner_message .time {
@@ -89,6 +90,7 @@
  width: 90px;
  font-size:0.9em;
  font-weight:bold;
+ float:left;
 }
 .mail_controls_delete:hover {
  cursor:pointer;
@@ -104,6 +106,27 @@
  font-size:0.9em;
  font-weight:bold;
 }
+
+
+
+.mail_controls_message {
+ cursor:pointer;
+ margin-left: 20px;
+ margin-bottom: 15px;
+ padding-left:10px;
+ padding-right:10px;
+ padding-top: 5px;
+ padding-bottom: 5px;
+ #background-color: #e5e5e5;
+ background-color: #ffffe0;
+ border: 1px solid #a5a5a5;
+ max-width: 500px;
+ font-size:0.9em;
+ font-weight:bold;
+ float:left;
+}
+
+
 
 .balance {
  font-weight: bold;
@@ -172,6 +195,11 @@
 
 
 
+
+
+.message_table {
+ clear:both;
+}
 
 
 
