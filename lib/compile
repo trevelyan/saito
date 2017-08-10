@@ -1,6 +1,6 @@
 rm data/database.sq3
 rm options
-browserify start.js -o saito/web/browser.js
+browserify start.js -o saito/web/browser.js -i express -i sqlite3 -i zlib
 cd saito/web
 ./compile
 cd ../../

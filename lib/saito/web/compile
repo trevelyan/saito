@@ -4,4 +4,7 @@ cat browser.js >> index.html
 echo "" >> index.html
 echo "</script></body></html>" >> index.html
 sed -i '' 's/app.BROWSERIFY = 0/app.BROWSERIFY = 1/' index.html
+cp index.html index.bk
+gzip -f index.bk
+
 
