@@ -165,12 +165,18 @@ Your browser is running the full Saito client. In order to allow you to send and
   </div>
 
 
+
   <script src="/socket.io/socket.io.js"></script>
-  <script src="/browser.js.gz"></script>
   <script type="text/javascript">
-    $('.loader').hide();
-    $('.main').show();
+
+    $.getScript( "browser.js.gz", function( data, textStatus, jqxhr ) {
+      console.log( "Load was performed." );
+      $('.loader').hide();
+      $('.main').show();
+    });
+
   </script>
+
 
 </body>
 </html>
