@@ -8,10 +8,9 @@
 
   <title>Saito Network: Online Demo</title>
 
-  <script type="text/javascript" src="jquery-3.2.1.min.js"></script>
-  <link rel="stylesheet" href="jquery-ui.min.css" type="text/css" media="screen" />
-  <script type="text/javascript" src="jquery-ui.min.js"></script>
-
+  <script type="text/javascript" src="/jquery-3.2.1.min.js"></script>
+  <link rel="stylesheet" href="/jquery-ui.min.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/jquery-ui.min.js"></script>
 
   <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css" media="screen" />
   <script type="text/javascript" src="/fancybox/jquery.fancybox.pack.js"></script>
@@ -22,7 +21,7 @@
   <script type="text/javascript" src="/fancybox/jquery.fancybox-thumbs.js"></script>
 
 
-  <link rel="stylesheet" type="text/css" href="style.css" />
+  <link rel="stylesheet" type="text/css" href="/email/style.css" />
 
 </head>
 <body>
@@ -165,12 +164,17 @@ Your browser is running the full Saito client. In order to allow you to send and
   </div>
 
 
+
   <script src="/socket.io/socket.io.js"></script>
-  <script src="/browser.js.gz"></script>
   <script type="text/javascript">
-    $('.loader').hide();
-    $('.main').show();
+
+    $.getScript( "/browser.js", function( data, textStatus, jqxhr ) {
+      $('.loader').hide();
+      $('.main').show();
+    });
+
   </script>
+
 
 </body>
 </html>
