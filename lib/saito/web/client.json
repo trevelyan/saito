@@ -1,1 +1,1 @@
-{"network":[{"host":"localhost","port":12100,"publickey":"02f5a551a9d6f58db55a1cdfa016b8471b34f711b9d288b24a15c69372ba233253"}],"messages":[],"wallet":{"balance":0,"privateKey":"","publicKey":"","utxi":[],"utxo":[]},"modules":["Email","Auth"],"lastblock":3}
+{"network":[{"host":"localhost","port":12100,"publickey":"020f5f7dc4ae2e7b7610fbdb841d93cc9886027b3c03d8b47cd71aa3e5cd7b3f76"}],"messages":[],"wallet":{"balance":0,"privateKey":"","publicKey":"","utxi":[],"utxo":[]},"modules":["Email","Auth"],"lastblock":2}
