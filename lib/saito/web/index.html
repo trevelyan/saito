@@ -35,9 +35,7 @@
 
     <div class="loader">
 
-Saito is a big-data blockchain that can support any number of large-data web applications:
-
-<p></p>
+Saito is a big-data, free-speech blockchain. Try our demos:
 
 <ul>
  <li><a href="email/">Email</a></li>
@@ -48,148 +46,12 @@ Saito is a big-data blockchain that can support any number of large-data web app
 
 <p></p>
 
-The following demos will run directly in your browser using javascript code that will be streamed to you from our server in Los Angeles. The download should be almost instantaneous in the United States, but can take up to a minute in China due to its size (~1.6 MB). Please be patient if you are trying Saito from a location with slower Internet access.
+The above demos will run directly in your browser using javascript code that will be streamed to you from our server in Los Angeles. The download should be almost instantaneous in the United States, but can take up to a minute in China due to its size (~1.6 MB). Please be patient if you are trying Saito from a location with slower Internet access.
 
     </div>
-
-    <div class="main" style="display:none">
-
-      <div class="sidebar">
-
-        <div class="compose" id="compose">COMPOSE</div>
-        <div class="viewkeys" id="viewkeys">SETTINGS</div>
-        <div class="balance" id="balance">my balance:</div>
-	<div class="balance_money" id="balance_money">0</div>
-        <div class="connections" style="display:none" id="connections">
-          <div class="connections_sync" id="connections_sync"></div>
-        </div>
-      </div>
-
-
-
-      <div class="mail">
-
-        <div class="mail_controls_delete" id="mail_controls_delete">delete selected</div>
-        <div style="display:none" class="mail_controls_message" id="mail_controls_message"></div>
-
-	<table class="message_table">
-	  <tr class="outer_message" id="message_0">
-	    <td class="checkbox"><input type="checkbox" class="check" name="" id="message_1_checkbox" /></td>
-	    <td>
-              <table>
-		<tr class="inner_message" id="message_0">
-		  <td class="from">Saito</td>
-	          <td class="title">Welcome to the Saito Network</td>
-	          <td class="time">4:50 pm</td>
-	          <td class="module" style="display:none">Email</td>
-	          <td class="json" style="display:none">
-Do you want to take a leap of faith?
-
-<p></p>
-
-To start interacting with Saito find an application and send it a message. If you aren't sure of what you can do, why not try sending a message to one of the following addresses and see what happens?
-</td>
-                </tr>
-              </table>
-            </td>
-	  </tr>
-	</table>
-      </div>
-
-  </div>
-
-
-
-  <div id="lightbox_message" style="display:none">
-    <div class="lightbox_message_from" id="lightbox_message_from">
-      <span class="lightbox_message_from_label">FROM: </span>
-      <span class="lightbox_message_from_address" id="lightbox_message_from_address">FROM878e01d3869713eb3bacb205d4a94b5fe551536a9e0b909537722f9cd376</span>
-    </div>
-    <div class="lightbox_message_to" id="lightbox_message_to">
-      <span class="lightbox_message_to_label">TO: </span>
-      <span class="lightbox_message_to_address" id="lightbox_message_to_address">TO8e878e01d3869713eb3bacb205d4a94b5fe551536a9e0b909537722f9cd376</span>
-    </div>
-    <div class="lightbox_message_text" id="lightbox_message_text">
-      Sample Text
-    </div>
-    <div class="compose" id="reply">REPLY</div>
-  </div>
-
-
-
-  <div id="lightbox_compose" style="display:none">
-    <div class="lightbox_compose_from" id="lightbox_compose_from">
-      <span class="lightbox_compose_from_label">FROM: </span>
-      <input type="text" id="lightbox_compose_from_address" class="lightbox_compose_from_address" value="048e878e01d3869713eb3bacb205d4a94b5fe551536a9e0b909537722f9cd376" />
-    </div>
-    <div class="lightbox_compose_to" id="lightbox_compose_to">
-      <span class="lightbox_compose_to_label">TO: </span>
-      <input type="text" id="lightbox_compose_to_address" class="lightbox_compose_to_address" value="048e878e01d3869713eb3bacb205d4a94b5fe551536a9e0b909537722f9cd376" />
-    </div>
-    <div class="lightbox_compose_module" id="lightbox_compose_module">
-      <div style="float:left">
-        <span class="lightbox_compose_module_select_label">module: </span>
-        <select type="text" class="lightbox_compose_module_select" id="lightbox_compose_module_select">
-          <option value="email">email</option>
-          <option value="authorize">authorize</option>
-          <option value="proxy">proxy</option>
-        </select>
-      </div>
-      <div style="float:left">
-        <span class="lightbox_compose_payment_label">payment: </span>
-        <input type="text" class="lightbox_compose_payment" id="lightbox_compose_payment" value="0.0" />
-      </div>
-      <div style="float:left">
-        <span class="lightbox_compose_fee_label">fee: </span>
-        <input type="text" class="lightbox_compose_fee" id="lightbox_compose_fee" value="0.0001" />
-      </div>
-    </div>
-    <div class="module_editable_space" id="module_editable_space">
-      Payment Transaction
-    </div>
-    <div class="compose" id="send">SEND</div>
-  </div>
-
-
-
-
-
-
-  <div id="lightbox_viewkeys" style="display:none">
-
-    <div id="lightbox_viewkeys_text">
-Your browser is running the full Saito client. In order to allow you to send and receive transactions we have autogenerated the following keypair for you. If your browser supports local storage it may remember this keypair for the next time you login. If you wish to use this account long-term, you should backup this information:
-
-  </div>
-
-    <table style="margin-left: 25px">
-      <tr>
-        <td style="margin-right: 10px;font-weight:bold;">Public Key</td>
-	<td id="lightbox_viewkeys_publickey"></td>
-      </tr>
-      <tr>
-        <td style="margin-right: 10px;font-weight:bold;">Private Key</td>
-	<td id="lightbox_viewkeys_privatekey"></td>
-      </tr>
-    </table>
-
-  </div>
-
-
-
-  <script src="/socket.io/socket.io.js"></script>
-  <script type="text/javascript">
-
-    $.getScript( "browser.js.gz", function( data, textStatus, jqxhr ) {
-      $('.loader').hide();
-      $('.main').show();
-    });
-
-  </script>
 
 
 </body>
 </html>
-
 
 
