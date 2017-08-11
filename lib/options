@@ -1,1 +1,0 @@
-{"wallet":{"balance":0,"privateKey":"2bd97a4f953498dd6287c42e36e48f33aaf04ddabdbfb9afcdaca005f06d887a","publicKey":"02a289d706696aeb004ae89b6d65d4c2cb018077f3a69abd079508a390f365f373","utxi":[],"utxo":[]},"network":[],"server":{"host":"localhost","port":12100,"publickey":""},"modules":["Email","Auth"]}
