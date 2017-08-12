@@ -6,12 +6,11 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>Saito Network: Online Demo</title>
+  <title>Saito Network: Search Engine</title>
 
-  <script type="text/javascript" src="jquery-3.2.1.min.js"></script>
-  <link rel="stylesheet" href="jquery-ui.min.css" type="text/css" media="screen" />
-  <script type="text/javascript" src="jquery-ui.min.js"></script>
-
+  <script type="text/javascript" src="/jquery-3.2.1.min.js"></script>
+  <link rel="stylesheet" href="/jquery-ui.min.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/jquery-ui.min.js"></script>
 
   <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css" media="screen" />
   <script type="text/javascript" src="/fancybox/jquery.fancybox.pack.js"></script>
@@ -21,8 +20,7 @@
   <link rel="stylesheet" href="/fancybox/jquery.fancybox-thumbs.css" type="text/css" media="screen" />
   <script type="text/javascript" src="/fancybox/jquery.fancybox-thumbs.js"></script>
 
-
-  <link rel="stylesheet" type="text/css" href="style.css" />
+  <link rel="stylesheet" type="text/css" href="/search/style.css" />
 
 </head>
 <body>
@@ -34,25 +32,38 @@
     </div>
 
     <div class="loader">
+Saito's search demo is currently loading....
+    </div>
 
-Saito is a big-data, free-speech blockchain. Try our demos:
+    <div class="main" style="">
 
-<ul>
- <li><a href="search/">Search Engine</a></li>
- <li><a href="email/">Email</a></li>
- <li><a href="private/">Private Server</a></li>
- <li>Social Network</li>
- <li>Twitter</li>
-</ul>
-
-<p></p>
-
-The above demos will run directly in your browser using javascript code that will be streamed to you from our server in Los Angeles. The download should be almost instantaneous in the United States, but can take up to a minute in China due to its size (~1.6 MB). Please be patient if you are trying Saito from a location with slower Internet access.
+      <div class="search">
+	<center>
+          <div class="search_logo" id="search_logo">Decentralized Search</div>
+          <input class="search_input" id="search_input" type="text" name="search_input" value="search" />
+          <input type="button" class="search_button" id="search_button" value="Search" />
+	  <div class="search_results" id="search_results"></div>
+	</center>
+      </div>
 
     </div>
 
 
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript">
+
+$( document ).ready(function() {
+    $.getScript( "/browser.js", function( data, textStatus, jqxhr ) {
+      $('.loader').hide();
+      $('.main').show();
+    });
+});
+
+  </script>
+
 </body>
 </html>
+
 
 
