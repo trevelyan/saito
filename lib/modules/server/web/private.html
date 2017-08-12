@@ -5,34 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="">
   <meta name="author" content="">
-
   <title>Saito Network: Private Server</title>
-
-  <script type="text/javascript" src="/jquery-3.2.1.min.js"></script>
-  <link rel="stylesheet" href="/jquery-ui.min.css" type="text/css" media="screen" />
-  <script type="text/javascript" src="/jquery-ui.min.js"></script>
-
-  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css" media="screen" />
-  <script type="text/javascript" src="/fancybox/jquery.fancybox.pack.js"></script>
-  <link rel="stylesheet" href="/fancybox/jquery.fancybox-buttons.css" type="text/css" media="screen" />
-  <script type="text/javascript" src="/fancybox/jquery.fancybox-buttons.js"></script>
-  <script type="text/javascript" src="/fancybox/jquery.fancybox-media.js"></script>
-  <link rel="stylesheet" href="/fancybox/jquery.fancybox-thumbs.css" type="text/css" media="screen" />
-  <script type="text/javascript" src="/fancybox/jquery.fancybox-thumbs.js"></script>
-
   <link rel="stylesheet" type="text/css" href="/style.css" />
 
 </head>
 <body>
 
     <div class="header">
-      <img src="/img/saito_logo_black.png" style="width:35px;margin-top:5px;margin-left:25px;margin-right:10px;float:left;" />
-      <div style="font-family:Georgia;padding-top:0px;font-size:1.2em;color:#444;">saito</div>
+      <a href="/" style="text-decoration:none;color:inherits">
+        <img src="/img/saito_logo_black.png" style="width:35px;margin-top:5px;margin-left:25px;margin-right:10px;float:left;" />
+        <div style="font-family:Georgia;padding-top:0px;font-size:1.2em;color:#444;">saito</div>
+      </a>
     </div>
 
     <div class="main">
 
-      <div class="poem">
+
+
+      <div class="poem" id="poem" style="display:none">
 <b>Degrees of Gray in Phillipsburg - Richard Hugo</b>
 <p></p>
 You might come here Sunday on a whim.   
@@ -127,19 +117,33 @@ is slender and her red hair lights the wall.
 
       </div>
 
+
+      <div class="story" id="story" style="width:700px;display:none">
+<b>Poseidon - Franz Kafka</b>
+
+<p></p>
+
+Poseidon sat at his desk, doing figures. The administration of all the waters gave him endless work. He could have had assistants, as many as he wanted — and he did have very many — but since he took his job very seriously, he would in the end go over all the figures and calculations himself, and thus his assistants were of little help to him. It cannot be said that he enjoyed his work; he did it only because it had been assigned to him; in fact, he had already filed many petitions for — as he put it — more cheerful work, but every time the offer of something different was made to him it would turn out that nothing suited him quite as well as his present position. And anyhow it was quite difficult to find something different for him. After all, it was impossible to assign him to a particular sea; aside from the fact that even then the work with figures would not become less but only pettier, the great Poseidon could in any case occupy only an executive position. And when a job away from the water was offered to him he would get sick at the very prospect, his divine breathing would become troubled and his brazen chest began to tremble. Besides, his complaints were not really taken seriously; when one of the mighty is vexatious the appearance of an effort must be made to placate him, even when the case is most hopeless. In actuality a shift of posts was unthinkable for Poseidon — he had been appointed God of the Sea in the beginning, and that he had to remain.
+
+<p></p>
+
+What irritated him most — and it was this that was chiefly responsible for his dissatisfaction with his job — was to hear of the conceptions formed about him: how he was always riding about through the tides with his trident. When all the while he sat here in the depths of the world-ocean, doing figures uninterruptedly, with now and then a trip to Jupiter as the only break in the monotony — a trip, moreover, from which he usually returned in a rage. Thus he had hardly seen the sea — had seen it but fleetingly in the course of hurried ascents to Olympus, and he had never actually traveled around it. He was in the habit of saying that what he was waiting for was the fall of the world; then, probably, a quiet moment would be granted in which, just before the end and having checked the last row of figures, he would be able to make a quick little tour.
+
+<p></p>
+
+Poseidon became bored with the sea. He let fall his trident. Silently he sat on the rocky coast and a gull, dazed by his presence, described wavering circles around his head.
+      </div>
+
     </div>
 
 
-    <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
-
-$( document ).ready(function() {
-      $.getScript( "/browser.js?id=8234243", function( data, textStatus, jqxhr ) {
-        $('.loader').hide();
-        $('.main').show();
-      });
-});
-
+      x = Math.random();
+      if (x < 0.5) {
+        document.getElementById('poem').style.display = 'block';
+      } else {
+        document.getElementById('story').style.display = 'block';
+      }
     </script>
 
 </body>
