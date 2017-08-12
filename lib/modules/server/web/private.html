@@ -1,0 +1,152 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Saito Network: Private Server</title>
+
+  <script type="text/javascript" src="/jquery-3.2.1.min.js"></script>
+  <link rel="stylesheet" href="/jquery-ui.min.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/jquery-ui.min.js"></script>
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/fancybox/jquery.fancybox.pack.js"></script>
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox-buttons.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/fancybox/jquery.fancybox-buttons.js"></script>
+  <script type="text/javascript" src="/fancybox/jquery.fancybox-media.js"></script>
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox-thumbs.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/fancybox/jquery.fancybox-thumbs.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="/server/style.css" />
+
+</head>
+<body>
+
+    <div class="header">
+      <img src="/img/saito_logo_black.png" style="width:35px;margin-top:5px;margin-left:25px;margin-right:10px;float:left;" />
+      <div style="font-family:Georgia;padding-top:0px;font-size:1.2em;color:#444;">saito</div>
+    </div>
+
+    <div class="main" style="display:none">
+
+      Congratulations on getting access to our private server. Have a poem!
+
+      <p></p>
+
+      <div class="poem">
+
+You might come here Sunday on a whim.   
+<br/> 
+Say your life broke down. The last good kiss   
+<br/> 
+you had was years ago. You walk these streets   
+<br/> 
+laid out by the insane, past hotels   
+<br/> 
+that didn’t last, bars that did, the tortured try   
+<br/> 
+of local drivers to accelerate their lives.   
+<br/> 
+Only churches are kept up. The jail   
+<br/> 
+turned 70 this year. The only prisoner   
+<br/> 
+is always in, not knowing what he’s done. 
+
+<p></p>
+
+The principal supporting business now   
+<br/> 
+is rage. Hatred of the various grays   
+<br/> 
+the mountain sends, hatred of the mill,   
+<br/> 
+The Silver Bill repeal, the best liked girls   
+<br/> 
+who leave each year for Butte. One good   
+<br/> 
+restaurant and bars can’t wipe the boredom out.   
+<br/> 
+The 1907 boom, eight going silver mines,   
+<br/> 
+a dance floor built on springs— 
+<br/> 
+all memory resolves itself in gaze, 
+<br/> 
+in panoramic green you know the cattle eat   
+<br/> 
+or two stacks high above the town,   
+<br/> 
+two dead kilns, the huge mill in collapse   
+<br/> 
+for fifty years that won’t fall finally down. 
+
+<p></p>
+
+Isn’t this your life? That ancient kiss 
+<br/> 
+still burning out your eyes? Isn’t this defeat 
+<br/> 
+so accurate, the church bell simply seems 
+<br/> 
+a pure announcement: ring and no one comes?   
+<br/> 
+Don’t empty houses ring? Are magnesium   
+<br/> 
+and scorn sufficient to support a town,   
+<br/> 
+not just Philipsburg, but towns 
+<br/> 
+of towering blondes, good jazz and booze   
+<br/> 
+the world will never let you have 
+<br/> 
+until the town you came from dies inside? 
+
+<p></p>
+
+Say no to yourself. The old man, twenty   
+<br/> 
+when the jail was built, still laughs   
+<br/> 
+although his lips collapse. Someday soon,   
+<br/> 
+he says, I’ll go to sleep and not wake up.   
+<br/> 
+You tell him no. You’re talking to yourself.   
+<br/> 
+The car that brought you here still runs.   
+<br/> 
+The money you buy lunch with, 
+<br/> 
+no matter where it’s mined, is silver   
+<br/> 
+and the girl who serves your food 
+<br/> 
+is slender and her red hair lights the wall.
+
+      </div>
+
+    </div>
+
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+
+$( document ).ready(function() {
+      $.getScript( "/browser.js?id=8234243", function( data, textStatus, jqxhr ) {
+        $('.loader').hide();
+        $('.main').show();
+      });
+});
+
+    </script>
+
+</body>
+</html>
+
+
+
