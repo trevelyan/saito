@@ -1,1 +1,5 @@
-{"wallet":{"balance":"1087.89722380","privateKey":"a44a3864f15c9c513fa1375bff22a643ad353e7d0d5dad40700de4d62d547f29","publicKey":"027ca1018f27aeb09abf422b80159f0009a5851cbee3e95fadfe8850a8ab1cfc3f","utxi":[{"add":"027ca1018f27aeb09abf422b80159f0009a5851cbee3e95fadfe8850a8ab1cfc3f","amt":20,"gt":0,"bid":25,"tid":513,"sid":1,"bhash":"3e2ad121f15035a5d805d7f0e3582a65e4852c52ac8377a18011ed203cd97c96","lc":1},{"add":"027ca1018f27aeb09abf422b80159f0009a5851cbee3e95fadfe8850a8ab1cfc3f","amt":"1047.89722380","gt":1,"bid":26,"tid":514,"sid":1,"bhash":"3efcc2a8ec264465444ef2a128911bedea91d87217d99e9283726a8beb7fb3d1","lc":1},{"add":"027ca1018f27aeb09abf422b80159f0009a5851cbee3e95fadfe8850a8ab1cfc3f","amt":20,"gt":0,"bid":26,"tid":515,"sid":1,"bhash":"3efcc2a8ec264465444ef2a128911bedea91d87217d99e9283726a8beb7fb3d1","lc":1}],"utxo":[]},"network":[{"host":"saito.tech","port":12100,"publickey":""}],"server":{"host":"localhost","port":12100,"publickey":""},"friends":[{"publickey":"112381230982313098123098019231244444","identifier":"popup@saito.tech"}],"modules":["Email","Auth","Search","Server","Saito","Exchange","Twitter"]}
+{
+"wallet":{"balance":0,"privateKey":"","publicKey":"","utxi":[],"utxo":[]},
+"network":[{"host":"saito.tech","port":12100,"publickey":""}],
+"server":{"host":"localhost","port":12100,"publickey":""}
+}
