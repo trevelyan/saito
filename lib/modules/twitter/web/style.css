@@ -26,12 +26,21 @@
 .sidebar {
  float: left;
  width: 200px;
+ height: 100%;
 }
 
-.tweetlist {
+.tweets {
+ float:left;
+ margin-top: 20px;
  width: 1000px;
  cell-padding: 0px;
  cell-spacing: 0px;
 }
+.tweet {
+ border: 1px solid #888;
+ min-height: 80px;
+}
+
+
 
 

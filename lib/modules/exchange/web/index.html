@@ -6,7 +6,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>Saito Network: Online Demo</title>
+  <title>Saito Network: Buy & Sell</title>
 
   <script type="text/javascript" src="/jquery-3.2.1.min.js"></script>
   <link rel="stylesheet" href="/jquery-ui.min.css" type="text/css" media="screen" />
@@ -20,8 +20,7 @@
   <link rel="stylesheet" href="/fancybox/jquery.fancybox-thumbs.css" type="text/css" media="screen" />
   <script type="text/javascript" src="/fancybox/jquery.fancybox-thumbs.js"></script>
 
-
-  <link rel="stylesheet" type="text/css" href="/twitter/style.css" />
+  <link rel="stylesheet" type="text/css" href="/exchange/style.css" />
 
 </head>
 <body>
@@ -35,29 +34,37 @@
     </div>
 
     <div class="loader">
-Saito is currently loading....
+Saito Exchange is currently loading....
 
 <p></p>
 
-We are downloading the application itself into your browser from our server in Los Angeles. The download is reasonably fast in the United States, but can take up to a minute in China due to its size (~1.6 MB). Please be patient.
+This is a simplified way to buy and sell Saito. Please wait while we initialize the software.
+
     </div>
 
     <div class="main" style="display:none">
 
-      <div class="sidebar">
-	User Settings
-      </div>
+Saito Available: 2403423
 
-      <div class="main">
-	<div class="tweets" id="tweets">
-	  <div class="tweet" id="tweet_0">
-This is the first tweet we are sending in our decentralized peer-to-peer network.
-          </div>
-        </div>
-	<div class="debug" id="debug"> ... debug ... </div>
-      </div>
+<br />
+
+Saito Price:  1 ETH = 1000 SAITO
+
+<br />
+
+
+    </div>
+
+
+
+  <div id="lightbox_buy_saito" style="display:none">
+
+    <div id="lightbox_viewkeys_text">
+To purchase Saito, provide us with the amount you wish to buy. We will provide you with an Ethereum address and amount. Once the funds have been received at this address with 1 confirmation, we will send your SAITO to your wallet address.
+    </div>
 
   </div>
+
 
 
   <script src="/socket.io/socket.io.js"></script>
@@ -73,6 +80,5 @@ This is the first tweet we are sending in our decentralized peer-to-peer network
 
 </body>
 </html>
-
 
 
