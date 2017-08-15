@@ -45,7 +45,6 @@ We are downloading the application itself into your browser from our server in L
     <div class="main" style="display:none">
 
       <div class="sidebar">
-	User Settings
       </div>
 
       <div class="main">
@@ -56,6 +55,34 @@ This is the first tweet we are sending in our decentralized peer-to-peer network
         </div>
 	<div class="debug" id="debug"> ... debug ... </div>
       </div>
+
+  </div>
+
+  <div class="lightbox_tweet_reply" id="lightbox_tweet_reply" style="display:none">
+
+    Reply:
+
+    <p></p>
+
+    <textarea id="tweet_reply_input" class="tweet_reply_input"></textarea>
+
+    <p></p>
+
+    <div style="">
+      <div style="float:left;margin-top:5px;">
+        <span class="lightbox_tweet_tip_label">include tip: </span>
+        <input type="text" class="lightbox_tweet_tip" id="lightbox_tweet_tip" value="0.0" />
+      </div>
+      <div style="float:left;margin-top:5px;">
+        <span class="lightbox_tweet_fee_label">fee: </span>
+        <input type="text" class="lightbox_tweet_fee" id="lightbox_tweet_fee" value="0.0001" />
+      </div>
+      <div style="display:none">
+        <input type="hidden" class="lightbox_tweet_publickey" id="lightbox_tweet_publickey" value="" />
+      </div>
+      <div class="reply" id="reply">SEND REPLY</div>
+    </div>
+
 
   </div>
 
