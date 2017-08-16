@@ -114,6 +114,7 @@ Sending and receiving emails requires SAITO tokens. While we are in test-mode, o
 
 
   <div id="lightbox_compose" style="display:none">
+    <div class="lightbox_compose_address_area">
     <div class="lightbox_compose_from" id="lightbox_compose_from">
       <span class="lightbox_compose_from_label">FROM: </span>
       <input type="text" id="lightbox_compose_from_address" class="lightbox_compose_from_address" value="048e878e01d3869713eb3bacb205d4a94b5fe551536a9e0b909537722f9cd376" />
@@ -121,6 +122,7 @@ Sending and receiving emails requires SAITO tokens. While we are in test-mode, o
     <div class="lightbox_compose_to" id="lightbox_compose_to">
       <span class="lightbox_compose_to_label">TO: </span>
       <input type="text" id="lightbox_compose_to_address" class="lightbox_compose_to_address" value="048e878e01d3869713eb3bacb205d4a94b5fe551536a9e0b909537722f9cd376" />
+    </div>
     </div>
     <div class="lightbox_compose_module" id="lightbox_compose_module">
       <div style="float:left">
@@ -172,7 +174,7 @@ Your browser is running the full Saito client. In order to allow you to send and
       </tr>
       <tr>
         <td style="margin-right: 10px;font-weight:bold;">Identifier</td>
-	<td id="lightbox_viewkeys_identifier">??? <span style="font-size:0.9em" onclick="$('#add_identifier').toggle();">(click to add)</span></td>
+	<td id="lightbox_viewkeys_identifier" style="cursor:pointer"><span style="font-size:0.9em" onclick="$('#add_identifier').toggle();">(click to add)</span></td>
       </tr>
     </table>
 
