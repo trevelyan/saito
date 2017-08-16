@@ -1,5 +1,5 @@
 
-body {
+.body {
  font-family: arial, helvetica, sans-serif;
  font-size: 13px;
  padding:0px;
@@ -404,9 +404,11 @@ body {
 }
 .dns_servers {
  padding-top:25px;
+ padding-bottom:25px;
 }
 .social_network {
  padding-top:25px;
+ padding-bottom:25px;
 }
 .viewkeys {
  max-width: 140px;

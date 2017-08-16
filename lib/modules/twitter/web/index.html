@@ -45,6 +45,13 @@ We are downloading the application itself into your browser from our server in L
     <div class="main" style="display:none">
 
       <div class="sidebar">
+	<div class="user_info" id="user_info"></div>
+	<div class="friends" id="friends">
+	  <div class="friends_following">Following:</div>
+	  <ul class="friendlist" id="friendlist">
+	  </ul>
+	  <div class="add_friend">add a friend</div>
+	</div>
       </div>
 
       <div class="main">
@@ -53,10 +60,34 @@ We are downloading the application itself into your browser from our server in L
 This is the first tweet we are sending in our decentralized peer-to-peer network.
           </div>
         </div>
-	<div class="debug" id="debug"> ... debug ... </div>
       </div>
 
   </div>
+
+
+
+
+
+
+
+  <div class="lightbox_follow" id="lightbox_follow" style="display:none">
+
+    <center>Who do you want to follow:</center>
+
+    <p></p>
+
+    <input id="lightbox_follow_input" class="lightbox_follow_input" />
+
+    <p></p>
+
+    <div class="lightbox_follow_submit" id="lightbox_follow_submit">START FOLLOWING</div>
+
+  </div>
+
+
+
+
+
 
   <div class="lightbox_tweet_reply" id="lightbox_tweet_reply" style="display:none">
 
