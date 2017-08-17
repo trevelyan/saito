@@ -1,1 +1,5 @@
-{"wallet":{"balance":0,"privateKey":"2649b6bf789199fdd6a02fcf2ce8046dcf63302a766f6b69a54afe8a3cd9ec61","publicKey":"0247d71a22769704f68670e3ecb18f1d1409f109d25dc88c1b16329186f03aeff3","utxi":[],"utxo":[]},"network":[{"host":"localhost","port":12100,"publickey":""}],"server":{"host":"localhost","port":12100,"publickey":""},"friends":[],"dns":{"keys":[],"domains":[]},"modules":["Email","Auth","Search","Saito","Exchange","Twitter","Debug"]}
+{
+"wallet":{"balance":0,"privateKey":"","publicKey":"","utxi":[],"utxo":[]},
+"network":[{"host":"localhost","port":12100,"publickey":""}],
+"server":{"host":"localhost","port":12100,"publickey":""}
+}
