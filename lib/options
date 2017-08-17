@@ -1,1 +1,5 @@
-{"wallet":{"balance":"1099.99500000","privateKey":"178420784244f7a1884be1c9ab58735275d64e875e0d16fe82306628fb84bec7","publicKey":"036e9d44c25c97697f0825b5f15963b688c4caa1d8d0da231266e7fe57f55d6a79","utxi":[{"add":"036e9d44c25c97697f0825b5f15963b688c4caa1d8d0da231266e7fe57f55d6a79","amt":"50.00000000","gt":1,"bid":3,"tid":2,"sid":1,"bhash":"f940b8cf03de26a015e5944a8cc2752e207ad0f83fc0b83cd37b63d43d50e4ea","lc":1},{"add":"036e9d44c25c97697f0825b5f15963b688c4caa1d8d0da231266e7fe57f55d6a79","amt":"1049.99500000","gt":1,"bid":4,"tid":4,"sid":1,"bhash":"8db814433b24334f33078d3bf1f9073d10b718fa9a8a36e0d366dd0081c4d055","lc":1}],"utxo":[]},"network":[{"host":"localhost","port":12100,"publickey":""}],"server":{"host":"localhost","port":12100,"publickey":""},"friends":[],"dns":{"keys":[],"domains":[]},"modules":["Email","Auth","Search","Saito","Exchange","Twitter","Debug"]}
+{
+"wallet":{"balance":0,"privateKey":"","publicKey":"","utxi":[],"utxo":[]},
+"network":[{"host":"localhost","port":12100,"publickey":""}],
+"server":{"host":"localhost","port":12100,"publickey":""}
+}
