@@ -11,6 +11,7 @@
   "dependencies": {
     "bluebird": "^3.5.0",
     "browserify": "^14.4.0",
+    "bufferutil": "^3.0.2",
     "express": "^4.15.4",
     "merkle-tree-gen": "^1.1.0",
     "secp256k1": "^3.3.0",
@@ -18,6 +19,7 @@
     "sha256": "^0.2.0",
     "socket.io": "^2.0.3",
     "socket.io-client": "^2.0.3",
-    "sqlite3": "^3.1.9"
+    "sqlite3": "^3.1.9",
+    "utf-8-validate": "^3.0.3"
   }
 }
