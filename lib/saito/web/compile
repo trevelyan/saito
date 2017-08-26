@@ -1,3 +1,3 @@
 #sed -i 's/app.BROWSERIFY = 0/app.BROWSERIFY = 1/' browser.js
-sed -i '' 's/app.BROWSERIFY = 0/app.BROWSERIFY = 1/' browser.js
+#sed -i '' 's/app.BROWSERIFY = 0/app.BROWSERIFY = 1/' browser.js
 

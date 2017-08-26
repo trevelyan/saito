@@ -1,0 +1,187 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Saito Facebook</title>
+
+  <script type="text/javascript" src="/jquery/jquery-3.2.1.min.js"></script>
+  <link rel="stylesheet" href="/jquery/jquery-ui.min.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/jquery/jquery-ui.min.js"></script>
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/fancybox/jquery.fancybox.pack.js"></script>
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox-buttons.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/fancybox/jquery.fancybox-buttons.js"></script>
+  <script type="text/javascript" src="/fancybox/jquery.fancybox-media.js"></script>
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox-thumbs.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/fancybox/jquery.fancybox-thumbs.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="/facebook/style.css" />
+
+</head>
+<body>
+
+  <div id="Facebook_browser_active"></div>
+
+
+  <div class="header">
+    <div style="text-decoration:none;color:inherits">
+      <a href="/facebook"><img src="/img/saito_logo_white.png" style="width:35px;margin-top:5px;margin-left:25px;margin-right:10px;float:left;" /></a>
+      <div id="saitoname" style="font-family:Georgia;padding-top:7px;font-size:1.2em;color:#fff;">saito</div>
+    </div>
+  </div>
+
+  <div class="loader">
+    Why are you still using Facebook?
+    <p></p>
+    Loading something better....
+  </div>
+
+  <div class="main">
+
+    <div class="menu">
+
+      <div class="balance" id="balance">
+        <div class="following_label">Account Balance:</div>
+        <div class="balance_money" id="balance_money">0</div>
+        <div class="balance_label" id="balance_label">SAITO</div>
+      </div>
+
+      <div class="facebook_button_big left" id="new_post"><i class="fa fa-file-text-o"></i></div>
+      <div class="facebook_button_big left" id="add_friend"><i class="fa fa-user-o"></i></div>
+      <div class="facebook_button_big left" id="settings"><i class="fa fa-gear"></i></div>
+
+      <div class="following" id="following">
+        <div class="following_label">Currently Following:</div>
+        <div id="following_friends_box"></div>
+      </div>
+
+    </div>
+
+    <div class="posts" id="posts">
+    </div>
+
+  </div>
+
+
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript">
+
+    $.getScript( "/browser.js?id=8234243", function( data, textStatus, jqxhr ) {
+      $('.loader').hide();
+      $('.main').show();
+    });
+
+  </script>
+
+
+
+  <div class="lightbox_follow" id="lightbox_follow" style="display:none">
+    <center>Who do you want to follow:</center>
+    <p></p>
+    <input id="lightbox_follow_input" class="lightbox_follow_input" />
+    <p></p>
+    <div class="lightbox_follow_submit" id="lightbox_follow_submit">START FOLLOWING</div>
+  </div>
+
+
+  <div class="lightbox_settings" id="lightbox_settings" style="display:none">
+
+    <h2>Account Settings</h2>
+
+    <p></p>
+
+    Right now, all accounts receive every message and comment posted over the network.
+    Once we hit a certain critical mass we will ratched down these default settings.
+    In the meantime, you can adjust the size of your firehose below:
+
+    <p></p>
+
+    <div class="post_options" id="post_options">
+      <div class="post_options_label">Posts To Show:</div>
+      <select name="post_options_select_firehose" id="post_options_select_firehose" class="post_options_select">
+        <option name="firehose" value="1" selected>the entire Internet</option>
+        <option name="firehose" value="0">only accounts I follow</option>
+      </select>
+
+      <p></p>
+
+      <div class="post_options_label">Comments To Show:</div>
+      <select name="post_options_select_filter" id="post_options_select_filter" class="post_options_select">
+        <option name="filter" value="0" selected>the entire Internet</option>
+        <option name="filter" value="1">only accounts I follow</option>
+      </select>
+    </div>
+
+    <p></p>
+
+    In the future, we expect our default settings to show posts from accounts that
+    you follow along with the posts that THOSE accounts comment upon. We also plan
+    to add a blacklisting feature so trolls can be proactively ignored.
+ 
+  </div>
+
+
+  <div class="lightbox_information" id="lightbox_information" style="display:none">
+    <h2>Welcome to a Decentralized Twitter/Facebook</h2>
+
+    <p></p>
+
+    This social network operates <b>entirely over the Saito blockchain</b>. As unlike 
+    Twitter and Facebook, you can create as many accounts as you wish and have full 
+    control over who you follow: no-one can censor free speech.
+
+    <p></p>
+
+    We have many features yet to add: private accounts (with permission-based
+    access), avatar images, user profile pages, peer-to-peer encryption, etc. If you 
+    are interested in helping please get in touch. You can contact the development team
+    at:
+
+    <p></p>
+
+    &lt;<i>david@saito</i>&gt;
+
+    <p></p>
+
+    or through old-fashiond email:
+
+    <p></p>
+
+    &lt;<i>david@popupchinese.com</i>&gt;
+  </div>
+
+
+
+  <div class="lightbox_identifier_missing" id="lightbox_identifier_missing" style="display:none">
+
+    <h2>Have you registered a Saito address yet?</h2>
+
+    <p></p>
+
+    It looks as if you have not signed up for a human-readable address yet. This
+    will make it harder for other people to follow your account.
+
+    <p></p>
+
+    To solve this problem just <a href="/email/">click here</a>. There is a message 
+    you will find in your inbox that will help you register an address. Once that is
+    done come back here and this message will disappear.
+
+    <p></p>
+
+    Know what you are doing and still don't want a human-readable address? There is 
+    no reason you can't participate with only a public/private keypair. But please
+    consider creating one if you plan on sending messages and/or leaving comments....
+
+  </div>
+
+</body>
+</html>
+

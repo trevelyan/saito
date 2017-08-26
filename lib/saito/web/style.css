@@ -4,7 +4,6 @@
  padding:0px;
  margin:0px;
 }
-
 .header {
  width: 1200px;
  height: 50px;
@@ -12,8 +11,7 @@
  border-bottom: 1px solid #a5a5a5;
  font-size:2em;
 }
-
-.loader {
+.main {
  padding: 40px;
  font-size:1.2em;
 }

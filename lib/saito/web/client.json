@@ -1,1 +1,0 @@
-{"network":[{"host":"saito.com","port":12100,"publickey":"03873e32e3cf3b42b4dd4da15381c19a134db53cfa303a5922317b78487bceadbc"}],"messages":[],"friends":[],"wallet":{"balance":0,"privateKey":"","publicKey":"","utxi":[],"utxo":[]},"modules":["Email","Auth","Search","Saito","Exchange","Twitter","Debug"],"lastblock":1}

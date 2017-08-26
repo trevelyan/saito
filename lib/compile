@@ -1,7 +1,7 @@
 rm data/database.sq3
 rm options
 cp options.conf options
-browserify start.js -o saito/web/browser.js -i express -i sqlite3 -i express-basic-auth
+browserify browser.js -o saito/web/browser.js -i express -i sqlite3 -i express-basic-auth
 cd saito/web
 ./compile
 cd ../../

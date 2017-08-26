@@ -1,0 +1,238 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Saito Email</title>
+
+  <script type="text/javascript" src="/jquery/jquery-3.2.1.min.js"></script>
+  <link rel="stylesheet" href="/jquery/jquery-ui.min.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/jquery/jquery-ui.min.js"></script>
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/fancybox/jquery.fancybox.pack.js"></script>
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox-buttons.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/fancybox/jquery.fancybox-buttons.js"></script>
+  <script type="text/javascript" src="/fancybox/jquery.fancybox-media.js"></script>
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox-thumbs.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/fancybox/jquery.fancybox-thumbs.js"></script>
+
+
+  <link rel="stylesheet" type="text/css" href="/email/style.css" />
+
+</head>
+<body>
+
+  <div id="Email_browser_active"></div>
+
+  <div class="header">
+    <a href="/" style="text-decoration:none;color:inherits">
+      <img src="/img/saito_logo_black.png" style="width:35px;margin-top:5px;margin-left:25px;margin-right:10px;float:left;" />
+      <div style="font-family:Georgia;padding-top:5px;font-size:1.2em;color:#444;">saito</div>
+    </a>
+  </div>
+
+  <div class="loader">
+Saito is currently loading....
+<p></p>
+We are downloading the application itself into your browser from our server in Los Angeles. The download is reasonably fast in the United States, but can take up to a minute in China due to its size (~1.6 MB). Please be patient.
+  </div>
+
+  <div class="main" style="display:none">
+
+    <div class="sidebar">
+
+      <div class="compose" id="compose">COMPOSE</div>
+    </div>
+
+
+    <div class="mail">
+
+      <div class="mail_controls_delete" id="mail_controls_delete">delete selected</div>
+      <div class="mail_controls_settings" id="mail_controls_settings">edit settings</div>
+      <div class="balance" id="balance">SAITO</div>
+      <div class="balance_money" id="balance_money">0</div>
+      <div style="display:none" class="mail_controls_message" id="mail_controls_message"></div>
+
+      <table class="message_table">
+	<tr class="outer_message" id="message_0">
+	  <td class="checkbox"><input type="checkbox" class="check" name="" id="message_1_checkbox" /></td>
+	  <td>
+            <table>
+	      <tr class="inner_message" id="message_0">
+	        <td class="from">david@saito</td>
+	        <td class="title">Welcome to the Saito Network</td>
+	        <td class="time">4:50 pm</td>
+	        <td class="module" style="display:none">Email</td>
+	        <td class="data" style="display:none">
+
+Our server should have sent you the tokens you need to start using the network.
+
+<p></p>
+
+If you don't have a Saito address yet, please <span class="register_email_address" id="register_email_address" style="text-decoration:underline;cursor:pointer">click here to register one</span>.
+
+<p></p>
+
+Questions? Thoughts? Please reach out at &lt;<i>david@saito</i>&gt; or via traditional email at &lt;<i>david@popupchinese.com</i>&gt;!
+
+                </td>
+              </tr>
+            </table>
+          </td>
+	</tr>
+      </table>
+    </div>
+  </div>
+
+
+  <div id="lightbox_message" style="display:none">
+    <div class="lightbox_message_from" id="lightbox_message_from">
+      <span class="lightbox_message_from_label">FROM: </span>
+      <span class="lightbox_message_from_address" id="lightbox_message_from_address"></span>
+    </div>
+    <div class="lightbox_message_to" id="lightbox_message_to">
+      <span class="lightbox_message_to_label">TO: </span>
+      <span class="lightbox_message_to_address" id="lightbox_message_to_address"></span>
+    </div>
+    <div class="lightbox_message_text" id="lightbox_message_text">
+    </div>
+    <div class="compose" id="reply">REPLY</div>
+  </div>
+
+
+
+  <div id="lightbox_compose" style="display:none">
+    <div class="lightbox_compose_address_area">
+    <div class="lightbox_compose_from" id="lightbox_compose_from">
+      <span class="lightbox_compose_from_label">FROM: </span>
+      <input type="text" id="lightbox_compose_from_address" class="lightbox_compose_from_address" value="048e878e01d3869713eb3bacb205d4a94b5fe551536a9e0b909537722f9cd376" />
+    </div>
+    <div class="lightbox_compose_to" id="lightbox_compose_to">
+      <span class="lightbox_compose_to_label">TO: </span>
+      <input type="text" id="lightbox_compose_to_address" class="lightbox_compose_to_address" value="048e878e01d3869713eb3bacb205d4a94b5fe551536a9e0b909537722f9cd376" />
+    </div>
+    </div>
+    <div class="lightbox_compose_module" id="lightbox_compose_module">
+      <div style="float:left">
+        <select type="text" class="lightbox_compose_module_select" id="lightbox_compose_module_select">
+          <option value="email">email</option>
+          <option value="authorize">authorize</option>
+          <option value="proxy">proxy</option>
+        </select>
+      </div>
+      <div style="float:left">
+        <span class="lightbox_compose_payment_label">payment: </span>
+        <input type="text" class="lightbox_compose_payment" id="lightbox_compose_payment" value="0.0" />
+      </div>
+      <div style="float:left">
+        <span class="lightbox_compose_fee_label">fee: </span>
+        <input type="text" class="lightbox_compose_fee" id="lightbox_compose_fee" value="0.0001" />
+      </div>
+    </div>
+    <div class="module_editable_space" id="module_editable_space">
+      Payment Transaction
+    </div>
+    <div class="compose" id="send">SEND</div>
+  </div>
+
+
+
+
+
+
+  <div id="lightbox_viewkeys" style="display:none" class="lightbox_viewkeys">
+
+<b>Basic Information</b>
+
+<p></p>
+
+This is your wallet. You should backup this information:
+
+    <p></p>
+
+    <table style="margin-left: 25px;">
+      <tr>
+        <td style="margin-right: 10px;font-weight:bold;">Public Key</td>
+	<td id="lightbox_viewkeys_publickey"></td>
+      </tr>
+      <tr>
+        <td style="margin-right: 10px;font-weight:bold;">Private Key</td>
+	<td id="lightbox_viewkeys_privatekey"></td>
+      </tr>
+      <tr>
+        <td style="margin-right: 10px;font-weight:bold;">Address</td>
+	<td id="lightbox_viewkeys_identifier" style="cursor:pointer">unregistered</td>
+      </tr>
+    </table>
+
+    <p style="clear:both"></p>
+
+    <input type="button" id="save_wallet" class="settings_button save_wallet" value="Backup Wallet" />
+    <input type="button" id="save_messages" class="settings_button save_messages" value="Backup Inbox" />
+    <input type="button" id="import_wallet" class="settings_button import_wallet" value="Import Wallet" />
+    <input type="button" id="import_messages" class="settings_button import_messages" value="Import Inbox" />
+    <input type="button" id="reset_button" class="settings_button reset_button" value="Reset Account" />
+    <input id="file-input" type="file" name="name" style="display:none;" />
+
+    <p style="clear:both;margin-top:30px;"></p>   
+
+    <b>DNS Information</b>
+
+    <p></p>
+
+    You are connected to the following DNS servers. You can also sync your own directly off the blockchain:
+
+    <div class="dns_servers" id="dns_servers">
+      <table id="dns_servers_table" class="dns_servers_table" style="margin-left: 25px">
+        <tr>
+          <th style="padding-right:25px;" align="left">Domain</th>
+          <th style="padding-right:25px;" align="left">Server</th>
+          <th style="padding-right:25px;" align="left">Public Key</th>
+        </tr>
+      </table>
+    </div>
+
+    <p style="clear:both;margin-top:30px"></p>
+
+    <b>Social Network</b>
+
+    <p></p>
+
+    You are tracking these accounts in addition to your own:
+
+    <p style="clear:both"></p>
+
+    <div class="social_network" id="social_network">
+      <table id="social_table" class="social_table" style="margin-left: 25px">
+        <tr>
+          <th style="padding-right:25px;" align="left">Identifier</th>
+          <th style="padding-right:25px;" align="left">Public Key</th>
+          <th style="padding-right:25px;" align="left">Keyword</th>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+
+
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript">
+
+    $.getScript( "/browser.js?id=8234243", function( data, textStatus, jqxhr ) {
+      $('.loader').hide();
+      $('.main').show();
+    });
+
+  </script>
+
+
+</body>
+</html>
+
+
+
