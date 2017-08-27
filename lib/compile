@@ -1,6 +1,6 @@
-rm saito/web/browser.js.gz
-rm data/database.sq3
-rm options
+rm -f saito/web/browser.js.gz
+rm -f data/database.sq3
+rm -f options
 cp options.conf options
 browserify browser.js -o saito/web/browser.js -i express -i sqlite3 -i express-basic-auth
 cd saito/web
@@ -9,9 +9,9 @@ gzip browser.js
 cd ../../
 echo ""
 echo ""
-echo "Please update the size of the browser.js.gz file to: "
+echo "You should be ready to run Saito: "
 echo ""
-ls -l saito/web/browser.js.gz
+echo "$> node start.js "
 echo ""
 echo ""
 
