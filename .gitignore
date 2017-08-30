@@ -3,4 +3,6 @@ package-lock.json
 lib/data/database.sq3
 website/
 lib/revertToLocalhost
+lib/revertToSaitoTech
+lib/compile_refreshonly
 

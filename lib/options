@@ -1,4 +1,3 @@
 {
-"server":{"host":"localhost","port":12100,"publickey":""},
-"peers" :[{"host":"localhost","port":12100,"publickey":""}]
+"server":{"host":"saito.tech","port":12100,"publickey":""},
 }
