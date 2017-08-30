@@ -195,14 +195,12 @@ console.log(tx);
     // time. in these cases we save a zero-fee transactions
     // and have a special field tagging the original
     // sender
-    if (tx.transaction.msg.poster_address != null) {
-console.log("ADDING THIS RECKLESS NON-REAL INFO: ");
+    if (tx.transaction.msg.poster_address != "") {
       msg.from = tx.transaction.msg.poster_address;
       msg.id   = tx.transaction.msg.post_id;
     }
 
-console.log("MSG: ");
-console.log(msg);
+
 
     if (msg.from == app.wallet.returnPublicKey()) {
       if (msg.time == this.mylastposttime) {
@@ -839,8 +837,6 @@ Facebook.prototype.formatDate = function formateDate(unixtime) {
 }
 
 Facebook.prototype.formatAuthor = function formatAuthor(author, app, msg=null) {
-
-console.log("submitted post: "+author);
 
   x = this.app.keys.findByPublicKey(author);
   if (x != null) { return x.identifier; }
