@@ -105,21 +105,21 @@ Facebook.prototype.initializeHTML = function initializeHTML(app) {
   }
 **************/
 
-  if ($('#post_box_0').length == 0) {
-    msg = {};
-    msg.id     = "0";
-    msg.time   = "Aug 17, 2017";
-    msg.from   = "david@saito";
-    msg.module = "Facebook";
-    msg.title  = "Hello World";
-    msg.data   = "It would be hard to identify the exact source of that inner intuition, not founded on rational argument, which prompted our refusal to enter the NKVD schools. It certainly didn't derive from the lectures on historical materialism we listened to: it was clear from them that the struggle against the internal enemy was a crucial battlefront, and to share in it was an honorable task. Our decision even ran counter to our material interests: at that time the provincial university we attended could not promise us anything more than the chance to teach in a rural school in a remote area for miserly wages. The NKVD school dangled before us special rations and double or triple pay. Our feelings could not be put into words—and even if we had found the words, fear would have prevented our speaking them aloud to one another. It was not our minds that resisted but something inside our breasts. People can shout at you from all sides: \"You must!\" And your own “head can be saying also: \"You must!\" But inside your breast there is a sense of revulsion, repudiation. I don't want to. It makes me feel sick. Do what you want without me; I want no part of it.<p></p> -- Alexander Solzhenitsyn";
-    this.attachMessage(msg, app, 1);
-  }
+
+  msg = {};
+  msg.id     = "0";
+  msg.time   = "Aug 17, 2017";
+  msg.from   = "david@saito";
+  msg.module = "Facebook";
+  msg.title  = "Hello World";
+  msg.data   = "It would be hard to identify the exact source of that inner intuition, not founded on rational argument, which prompted our refusal to enter the NKVD schools. It certainly didn't derive from the lectures on historical materialism we listened to: it was clear from them that the struggle against the internal enemy was a crucial battlefront, and to share in it was an honorable task. Our decision even ran counter to our material interests: at that time the provincial university we attended could not promise us anything more than the chance to teach in a rural school in a remote area for miserly wages. The NKVD school dangled before us special rations and double or triple pay. Our feelings could not be put into words—and even if we had found the words, fear would have prevented our speaking them aloud to one another. It was not our minds that resisted but something inside our breasts. People can shout at you from all sides: \"You must!\" And your own “head can be saying also: \"You must!\" But inside your breast there is a sense of revulsion, repudiation. I don't want to. It makes me feel sick. Do what you want without me; I want no part of it.<p></p> -- Alexander Solzhenitsyn";
+  this.attachMessage(msg, app, 1);
 
 
   facebook_self = this;
   app.archives.processMessages(20, function (err, txarray) {
     for (bv = 0; bv < txarray.length; bv++) {
+console.log("LOADING from ARCHIVES: "+txarray[bv].transaction.msg);
       if (txarray[bv].transaction.msg.type == "post") {
         facebook_self.addPostToWall(txarray[bv], app, 1);
       }
@@ -143,13 +143,11 @@ Facebook.prototype.initializeHTML = function initializeHTML(app) {
   this.updateBalance(this.app);
 
 
-  // update keys to names with DNS check
-  //
+
+
   // check DNS on timeout so our network
   // has time to bootstrap and fetch 
   // public keys, etc.
-  // 
-  // run 2 seconds after page launch
   setTimeout(function() {
 
     keystocheck = [];
@@ -168,25 +166,29 @@ Facebook.prototype.initializeHTML = function initializeHTML(app) {
 
       keystocheck.push(publickey);
 
-      // fetch the ID for this KEY and update if FOUND
-      app.dns.fetchIdFromAppropriateServer(publickey, function(answer, publickey="") {
+      app.dns.fetchIdFromAppropriateServer(publickey, function(answer) {
+console.log("WE HAVE FOUND: "+answer);
         if (answer == "publickey not found") { return; }
 
         $('.comment_name').each(function() {
+
           commentname2 = $(this).text();
           publickey2  = $(this).prev().text();
           id2 = $(this).attr('id');
           commentid2 = id.substring(13);
 
-          if (publickey2 === publickey) {
- 	    $(this).text(answer);
-	  }
+alert("Comparing: "+publickey2+" -- " + publickey + " -- " + answer);
 
+          if (publickey2 == publickey) {
+            tmpselect = "#comment_name_" + commentid2;
+ 	    $(tmpselect).html(answer);
+	  }
         });
       });
     });
 
-  }, 2000);
+    alert("Timeout On Init");
+  }, 8000);
 
 
 
@@ -401,26 +403,15 @@ Facebook.prototype.attachEvents = function attachEvents(app) {
 
   facebook_self = this;
 
-  $('.following_friend').off();
-  $('.following_friend').on('click', function() {
-    var purgeuser = confirm("Do you want to unfollow this user?");
-    if (purgeuser) {
-      identifier = $(this).text(); 
-      // purge user with key
-      app.keys.removeKeyByIdentifierAndKeyword(identifier, "Facebook");
-      app.keys.saveKeys();
-      facebook_self.showBrowserAlert("Account Unfollowed");
-      facebook_self.initializeHTML(app);
-      facebook_self.attachEvents(app);
-    }
-  });
-
   $('.post_header_name').off();
   $('.post_header_name').on('click', function() {
     var addthisuser = confirm("Do you want to follow this user?");
     if (addthisuser) {
       identifier = $(this).text(); 
       publickey  = $(this).next().next().text(); 
+
+alert(identifier + " -- " + publickey);
+
       // follow user with key
       app.keys.addKey(publickey, identifier, 1, "Facebook");
       app.keys.saveKeys();
@@ -436,6 +427,7 @@ Facebook.prototype.attachEvents = function attachEvents(app) {
     if (addthisuser) {
       identifier = $(this).text();
       publickey  = $(this).prev().text();
+alert(identifier + " -- " + publickey);
       app.keys.addKey(publickey, identifier, 1, "Facebook");
       app.keys.saveKeys();
       facebook_self.showBrowserAlert("Account Followed");
@@ -977,7 +969,7 @@ console.log(msg);
 
   if (this.isPublicKey(author) == 1) { 
     if (msg != null) {
-      app.dns.fetchIdFromAppropriateServer(author, function(answer, publickey="") {
+      app.dns.fetchIdFromAppropriateServer(author, function(answer) {
 console.log("WE HAVE FOUND: "+answer);
         if (answer == "publickey not found") { return; }
         tmpselect = "";

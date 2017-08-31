@@ -1,3 +1,12 @@
+die
+exit
+return
+
+die
+exit(0)
+;
+
+
 rm -f saito/web/browser.js.gz
 rm -f data/database.sq3
 rm -f options
