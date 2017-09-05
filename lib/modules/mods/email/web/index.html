@@ -86,9 +86,12 @@ Feedback is also very welcome at &lt;<i>david@satoshi</i>&gt;.
 
 
   <div id="lightbox_message" style="display:none">
+    <div class="lightbox_message_reply" id="lightbox_message_reply">
+      <div id="reply" class="reply">REPLY</div>
+    </div>
     <div class="lightbox_message_from" id="lightbox_message_from">
       <span class="lightbox_message_from_label">FROM: </span>
-      <span class="lightbox_message_from_address" id="lightbox_message_from_address"></span>
+      <span class="lightbox_message_from_address" id="lightbox_message_from_address" readonly></span>
     </div>
     <div class="lightbox_message_to" id="lightbox_message_to">
       <span class="lightbox_message_to_label">TO: </span>
@@ -96,16 +99,18 @@ Feedback is also very welcome at &lt;<i>david@satoshi</i>&gt;.
     </div>
     <div class="lightbox_message_text" id="lightbox_message_text">
     </div>
-    <div class="compose" id="reply">REPLY</div>
   </div>
 
 
 
   <div id="lightbox_compose" style="display:none">
     <div class="lightbox_compose_address_area">
+    <div class="lightbox_compose_compose">
+      <div class="send" id="send">SEND</div>
+    </div>
     <div class="lightbox_compose_from" id="lightbox_compose_from">
       <span class="lightbox_compose_from_label">FROM: </span>
-      <input type="text" id="lightbox_compose_from_address" class="lightbox_compose_from_address" value="048e878e01d3869713eb3bacb205d4a94b5fe551536a9e0b909537722f9cd376" />
+      <input type="text" id="lightbox_compose_from_address" class="lightbox_compose_from_address" value="048e878e01d3869713eb3bacb205d4a94b5fe551536a9e0b909537722f9cd376" readonly />
     </div>
     <div class="lightbox_compose_to" id="lightbox_compose_to">
       <span class="lightbox_compose_to_label">TO: </span>
@@ -114,25 +119,23 @@ Feedback is also very welcome at &lt;<i>david@satoshi</i>&gt;.
     </div>
     <div class="lightbox_compose_module" id="lightbox_compose_module">
       <div style="float:left">
-        <select type="text" class="lightbox_compose_module_select" id="lightbox_compose_module_select">
-          <option value="email">email</option>
-          <option value="authorize">authorize</option>
-          <option value="proxy">proxy</option>
-        </select>
+        <select type="text" class="lightbox_compose_module_select" id="lightbox_compose_module_select"></select>
       </div>
       <div style="float:left">
-        <span class="lightbox_compose_payment_label">payment: </span>
-        <input type="text" class="lightbox_compose_payment" id="lightbox_compose_payment" value="0.0" />
+        <div class="lightbox_compose_module_alert" id="lightbox_compose_module_alert"></div>
       </div>
       <div style="float:left">
         <span class="lightbox_compose_fee_label">fee: </span>
         <input type="text" class="lightbox_compose_fee" id="lightbox_compose_fee" value="0.0001" />
       </div>
+      <div style="float:left">
+        <span class="lightbox_compose_payment_label">payment: </span>
+        <input type="text" class="lightbox_compose_payment" id="lightbox_compose_payment" value="0.0" />
+      </div>
     </div>
     <div class="module_editable_space" id="module_editable_space">
       Payment Transaction
     </div>
-    <div class="compose" id="send">SEND</div>
   </div>
 
 
