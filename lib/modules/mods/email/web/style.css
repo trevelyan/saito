@@ -1,14 +1,17 @@
 
 .fancybox-close {
-    position: absolute;
-    top: -18px;
-    right: 1013px;
-    width: 36px;
-    height: 36px;
-    cursor: pointer;
-    z-index: 8040;
+ position: absolute;
+ top: -18px;
+ right: 1013px;
+ width: 36px;
+ height: 36px;
+ cursor: pointer;
+ z-index: 8040;
 }
 
+.yellow-bg {
+ background-color: #f4fa58;
+}
 
 #encryptthismsg {
  cursor: pointer;
