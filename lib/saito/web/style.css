@@ -4,6 +4,11 @@
  padding:0px;
  margin:0px;
 }
+.loader {
+ width: 600px;
+ font-size: 2em;
+ line-height: 1.8em;
+}
 .header {
  width: 1200px;
  height: 50px;
