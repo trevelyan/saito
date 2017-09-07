@@ -25,8 +25,8 @@ function Block(app, blkjson="", conf=-1) {
   // consensus variables //
   /////////////////////////
   this.block.burn_fee         = 2.0;  		
-  this.block.fee_step         = 0.000165;
-  this.block.difficulty       = 0.0;
+  this.block.fee_step         = 0.00165;
+  this.block.difficulty       = 1.0;
   this.block.paysplit         = 0.5;
   this.block.treasury         = 21000000.0;
   this.block.coinbase         = 100;
@@ -236,21 +236,16 @@ Block.prototype.validate = function validate() {
 
 Block.prototype.areTransactionFeesAdequate = function areTransactionFeesAdequate() {
 
-
   var transaction_fees_needed = this.calculateTransactionFeesNeeded(this.block.prevhash);
   var usable_transaction_fees   = 0;
-
-console.log("HERE1: " + transaction_fees_needed + " -- " + usable_transaction_fees);
 
   for (i = 0; i < this.block.transactions.length; i++) {
     usable_transaction_fees += this.transactions[i].returnUsableFee();
   }
   if (transaction_fees_needed > usable_transaction_fees) {
-console.log("HERE2: " + transaction_fees_needed + " -- " + usable_transaction_fees);
     return 0;
   }
 
-console.log("HERE3: " + transaction_fees_needed + " -- " + usable_transaction_fees);
   return 1;
 
 }
@@ -322,7 +317,7 @@ Block.prototype.createBlock = function createBlock(prevblock=null) {
   } else {
     this.block.prevhash   = "";
     this.block.paysplit   = 0.5;
-    this.block.difficulty = 0.1875;
+    this.block.difficulty = 1.005;
   }
 
 
