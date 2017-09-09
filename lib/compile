@@ -1,4 +1,5 @@
 rm -f saito/web/browser.js.gz
+cp -f data/database.sq3 data/database.bk
 rm -f data/database.sq3
 rm -f options
 cp options.conf options
