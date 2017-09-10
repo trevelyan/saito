@@ -233,7 +233,7 @@ Block.prototype.validate = function validate() {
   // lite nodes skip as lack transactions
   //
   if (this.block.transactions.length > 0) {
-    if (this.validateTransactionFeesAdequate() == 0) {
+    if (this.areTransactionFeesAdequate() == 0) {
       console.log("Block invalid: transaction fees inadequate");
       return 0;
     }
@@ -287,46 +287,8 @@ Block.prototype.validate = function validate() {
 
 Block.prototype.areTransactionFeesAdequate = function areTransactionFeesAdequate() {
 
-  unixtime_start = this.app.blockchain.returnUnixtime(this.block.prevhash);
-  unixtime_current = this.block.unixtime;
-  ts_bf = this.returnBurnFee();
-  ts_fs = this.returnFeeStep();
 
-  var transaction_fees_needed = this.calculateTransactionFeesNeeded(unixtime_start, unixtime_current, ts_bf, ts_fs);
-  var usable_transaction_fees   = 0;
-
-console.log("CALCULATING: "+this.block.prevhash);
-console.log(transaction_fees_needed);
-
-  for (i = 0; i < this.block.transactions.length; i++) {
-    usable_transaction_fees += this.transactions[i].returnUsableFee();
-  }
-  if (transaction_fees_needed > usable_transaction_fees) {
-    return 0;
-  }
-
-  return 1;
-
-}
-// differs from areTransactionFeesAdequate as it uses the burn_fee and fee_step of the 
-// previous block. this function is used when validating our own blocks. Are transactionFeesAdequate
-// can be used when looking forward
-Block.prototype.validateTransactionFeesAdequate = function validateTransactionFeesAdequate() {
-
-  // if this is our first block, we validate
-  if (this.block.prevhash == "") { return 1; }
-
-  // otherwise
-  tmpprevblock = this.app.blockchain.returnBlockByHash(this.block.prevhash);
-
-  if (tmpprevblock == null) { return 0; }
-
-  unixtime_start = this.app.blockchain.returnUnixtime(this.block.prevhash);
-  unixtime_current = this.block.unixtime;
-  ts_bf = tmpprevblock.returnBurnFee();
-  ts_fs = tmpprevblock.returnFeeStep();
-
-  var transaction_fees_needed = this.calculateTransactionFeesNeeded(unixtime_start, unixtime_current, ts_bf, ts_fs);
+  var transaction_fees_needed = this.calculateTransactionFeesNeeded(this.block.prevhash);
   var usable_transaction_fees   = 0;
 
 console.log("CALCULATING: "+this.block.prevhash);
@@ -446,20 +408,12 @@ Block.prototype.createBlock = function createBlock(prevblock=null) {
 ////////////////////////////////
 // Transaction Fee Management //
 ////////////////////////////////
-Block.prototype.calculateTransactionFeesNeeded = function calculateTransactionFeesNeeded(ts_start, ts_issue, ts_burn_fee, ts_fee_step) {
+Block.prototype.calculateTransactionFeesNeeded = function calculateTransactionFeesNeeded(prevblockhash) {
 
-  var unixtime_original        = ts_start;
-  var unixtime_current         = ts_issue;
-  var milliseconds_since_block = unixtime_current - unixtime_original;
-  var feesneeded = ( ts_burn_fee - (ts_fee_step * milliseconds_since_block) );
-
-/***
   var unixtime_original        = this.app.blockchain.returnUnixtime(prevblockhash);
   var unixtime_current         = this.block.unixtime;
   var milliseconds_since_block = unixtime_current - unixtime_original;
   var feesneeded = ( this.returnBurnFee() - (this.returnFeeStep() * milliseconds_since_block) );
-***/
-
   if (feesneeded < 0) { feesneeded = 0; }
 
   return feesneeded.toFixed(8);
