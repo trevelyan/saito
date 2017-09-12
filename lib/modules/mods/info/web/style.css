@@ -27,3 +27,75 @@
 }
 
 
+
+
+
+.blockchain_table {
+  font-size: 0.9em;
+}
+.blockchain_table > tbody > tr > td {
+ text-align: left;
+ padding-right:5px;
+}
+.blockchain_table > tbody > tr > th {
+ text-align: left;
+ padding-right:5px;
+}
+
+
+.block_table {
+  font-size: 0.9em;
+}
+.block_table > tbody > tr > td {
+ text-align: left;
+ padding-right:5px;
+}
+.block_table > tbody > tr > th {
+ text-align: left;
+ padding-right:5px;
+}
+
+.block_transactions_table {
+  font-size: 0.9em;
+}
+.block_transactions_table > tbody > tr > td {
+ text-align: left;
+ padding-right:5px;
+}
+.block_transactions_table > tbody > tr > th {
+ text-align: left;
+ padding-right:5px;
+}
+
+
+.transactions_table {
+  font-size: 0.9em;
+}
+.transactions_table > tbody > tr > td {
+ vertical-align: top;
+ text-align: left;
+ padding-right:5px;
+}
+.transactions_table > tbody > tr > th {
+ text-align: left;
+ padding-right:5px;
+}
+
+
+
+.address_table {
+  font-size:0.9em;
+}
+.address_table > tbody > tr > td {
+ vertical-align: top;
+ text-align: left;
+ padding-right:5px;
+}
+.address_table > tbody > tr > th {
+ text-align: left;
+ padding-right:5px;
+}
+
+
+
+
