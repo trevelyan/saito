@@ -1,0 +1,9 @@
+cp -f data/database.bk data/database.sq3
+echo ""
+echo "You should be ready to run Saito in DEBUG MODE: "
+echo ""
+echo "$> node start.js "
+echo ""
+echo ""
+
+
