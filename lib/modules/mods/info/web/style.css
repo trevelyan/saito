@@ -35,11 +35,11 @@
 }
 .blockchain_table > tbody > tr > td {
  text-align: left;
- padding-right:5px;
+ padding-right:15px;
 }
 .blockchain_table > tbody > tr > th {
  text-align: left;
- padding-right:5px;
+ padding-right:15px;
 }
 
 
@@ -48,11 +48,11 @@
 }
 .block_table > tbody > tr > td {
  text-align: left;
- padding-right:5px;
+ padding-right:15px;
 }
 .block_table > tbody > tr > th {
  text-align: left;
- padding-right:5px;
+ padding-right:15px;
 }
 
 .block_transactions_table {
@@ -60,11 +60,11 @@
 }
 .block_transactions_table > tbody > tr > td {
  text-align: left;
- padding-right:5px;
+ padding-right:15px;
 }
 .block_transactions_table > tbody > tr > th {
  text-align: left;
- padding-right:5px;
+ padding-right:15px;
 }
 
 
@@ -74,11 +74,11 @@
 .transactions_table > tbody > tr > td {
  vertical-align: top;
  text-align: left;
- padding-right:5px;
+ padding-right:15px;
 }
 .transactions_table > tbody > tr > th {
  text-align: left;
- padding-right:5px;
+ padding-right:15px;
 }
 
 
@@ -89,13 +89,23 @@
 .address_table > tbody > tr > td {
  vertical-align: top;
  text-align: left;
- padding-right:5px;
+ padding-right:15px;
 }
 .address_table > tbody > tr > th {
  text-align: left;
- padding-right:5px;
+ padding-right:15px;
 }
 
 
+
+.hash_search_input {
+ min-width: 300px;
+ font-size: 1.1em;
+ padding: 2px;
+}
+.hash_search_submit {
+ font-size: 1.1em;
+ padding: 15px;
+}
 
 
