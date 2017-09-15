@@ -1,7 +1,11 @@
 package-lock.json
 lib/data/database.sq3
+lib/data/database.bk
+lib/data/database.bk2
 website/
 lib/revertToLocalhost
 lib/revertToSaitoTech
-lib/compile_refreshonly
+lib/debug
+lib/debug.js
+lib/options.debug
 
