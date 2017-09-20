@@ -1,19 +1,26 @@
-rm -f saito/web/browser.js.gz
-cp -f data/database.sq3 data/database.bk
-rm -f data/database.sq3
-rm -f options
-cp options.conf options
-browserify browser.js -o saito/web/browser.js -i express -i sqlite3 -i express-basic-auth
-cd saito/web
-gzip browser.js
-./compile
-cd ../../
-echo ""
-echo ""
-echo "You should be ready to run Saito: "
-echo ""
-echo "$> node start.js "
-echo ""
-echo ""
+echo "\n"
+echo "To recompile, please manually create a new compilation script"
+echo "\n"
+
+exit
+die
+
+#rm -f saito/web/browser.js.gz
+#cp -f data/database.sq3 data/database.bk
+#rm -f data/database.sq3
+#rm -f options
+#cp options.conf options
+#browserify browser.js -o saito/web/browser.js -i express -i sqlite3 -i express-basic-auth
+#cd saito/web
+#gzip browser.js
+#./compile
+#cd ../../
+#echo ""
+#echo ""
+#echo "You should be ready to run Saito: "
+#echo ""
+#echo "$> node start.js "
+#echo ""
+#echo ""
 
 
