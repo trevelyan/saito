@@ -289,10 +289,13 @@ Peer.prototype.connect = function connect(remote=0) {
   // a connection to a remote server
   if (remote == 0) {
 
-    // prevent myself connecting to myself to refuse to cause problems out of principle
-    if (this.peer.host == "localhost" && this.app.BROWSER == 0)                  { return; }
-    if (this.peer.host == this.app.options.server.host && this.app.BROWSER == 0) { return; }
-    if (this.peer.host == "localhost" && this.app.BROWSER == 1) { }              // ok
+    // refuse to cause problems out of principle
+    if (this.options.server.
+
+
+"localhost" && this.app.BROWSER == 0) { return; }
+    if (this.peer.host == "localhost" && this.app.BROWSER == 0) { return; }
+    if (this.peer.host == "localhost" && this.app.BROWSER == 1) { }
 
 
     var serverAddress = "http://"+this.peer.host+":"+this.peer.port;
