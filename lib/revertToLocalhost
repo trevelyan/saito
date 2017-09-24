@@ -1,0 +1,6 @@
+sed -i '' 's/saito.tech/localhost/' ./options.conf
+sed -i '' 's/saito.tech/localhost/' ./options
+sed -i '' 's/saito.tech/localhost/' ./saito/*.js
+sed -i '' 's/saito.tech/localhost/' ./modules/mods/registry/*.js
+sed -i '' 's/saito.tech/localhost/' ./modules/mods/archive/*js
+
