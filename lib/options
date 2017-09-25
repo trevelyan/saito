@@ -1,1 +1,7 @@
-{"archives":[],"wallet":{"balance":"100.00000000","privateKey":"60d2dc4c655f70ee3ab8e4f2fe39eeaadc8a71f100eaa8c886d949511e64b069","publicKey":"0393c31068fa117cc035453468dd2165d6e8c2843219e9be634b1333872057d19c","identifier":"","utxi":[{"add":"0393c31068fa117cc035453468dd2165d6e8c2843219e9be634b1333872057d19c","amt":"50.00000000","gt":1,"bid":2,"tid":1,"sid":0,"bhash":"9b96d747702506196795354b15b72c0a845fca0be36ebada5b2fc3de6f967839","lc":1,"spent":0},{"add":"0393c31068fa117cc035453468dd2165d6e8c2843219e9be634b1333872057d19c","amt":"50.00000000","gt":1,"bid":2,"tid":1,"sid":1,"bhash":"9b96d747702506196795354b15b72c0a845fca0be36ebada5b2fc3de6f967839","lc":1,"spent":0}],"utxo":[],"version":1.05},"server":{"host":"localhost","port":12100,"publickey":"0393c31068fa117cc035453468dd2165d6e8c2843219e9be634b1333872057d19c"},"peers":[],"dns":{"domains":[]},"keys":[],"aes":[],"blockchain":{"latest_block_id":2,"genesis_block_id":0,"fork_id":""},"voter":{"vote_difficulty":0,"target_difficulty":2,"vote_paysplit":0,"target_paysplit":0.5},"modules":[]}
+{
+"server":{"host":"localhost","port":12100,"publickey":""},
+"peers":[{"host":"saito.tech","port":12100,"publickey":"","speed":1000}],
+"dns":[{"domain":"satoshi","host":"saito.tech","port":12100,"publickey":"03b25af00f8afe23657a91ec6c675f5c9c6278fbf24453e26a77d6609e31171ae9"}]
+"archives":[{"domain":"satoshi","host":"saito.tech","port":12100,"publickey":"03b25af00f8afe23657a91ec6c675f5c9c6278fbf24453e26a77d6609e31171ae9"}]
+}
+
