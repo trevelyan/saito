@@ -1,8 +1,0 @@
-sed -i '' 's/localhost/saito.tech/' options.conf
-sed -i '' 's/localhost/saito.tech/' options
-sed -i '' 's/localhost/saito.tech/' saito/server.js
-sed -i '' 's/localhost/saito.tech/' saito/dns.js
-sed -i '' 's/localhost/saito.tech/' saito/archives.js
-sed -i '' 's/localhost/saito.tech/' modules/mods/registry/registry.js
-sed -i '' 's/localhost/saito.tech/' modules/mods/archive/archive.js
-
