@@ -13,7 +13,7 @@ else
   echo "Compiling Saito from scratch requires the nodejs module browserify"
   echo "to be installed globally. Do this with the following command: "
   echo ""
-  echo "npm -i browserify -g "
+  echo "npm install browserify -g "
   echo ""
   exit
 
