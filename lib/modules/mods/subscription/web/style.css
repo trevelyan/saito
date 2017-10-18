@@ -20,8 +20,6 @@ body {
 
 .main {
  padding: 40px;
- padding-top: 20px;
- font-size:1.15em;
 }
 
 
@@ -36,11 +34,6 @@ input[type="text"] {
  width: 800px;
  padding:2px;
  font-size:1.2em;
-}
-input[type="submit"] {
- padding:3px;
- font-size:1.2em;
- min-width:100px;
 }
 
 
