@@ -1,0 +1,111 @@
+
+.body {
+ font-family: arial, helvetica, sans-serif;
+ font-size: 13px;
+ padding:0px;
+ margin:0px;
+}
+
+.header {
+ width: 1200px;
+ min-height:50px;
+ #background-color: #e5e5e5;
+ border-bottom: 1px solid #a5a5a5;
+ font-size:2em;
+}
+
+.loader {
+ padding: 40px;
+}
+
+.main {
+ clear:both;
+ max-width: 1200px;
+ padding: 50px;
+ font-size: 1.2em;
+ width: 1200px;
+}
+
+
+
+
+
+.blockchain_table {
+  font-size: 0.9em;
+}
+.blockchain_table > tbody > tr > td {
+ text-align: left;
+ padding-right:15px;
+}
+.blockchain_table > tbody > tr > th {
+ text-align: left;
+ padding-right:15px;
+}
+
+
+.block_table {
+  font-size: 0.9em;
+}
+.block_table > tbody > tr > td {
+ text-align: left;
+ padding-right:15px;
+}
+.block_table > tbody > tr > th {
+ text-align: left;
+ padding-right:15px;
+}
+
+.block_transactions_table {
+  font-size: 0.9em;
+}
+.block_transactions_table > tbody > tr > td {
+ text-align: left;
+ padding-right:15px;
+}
+.block_transactions_table > tbody > tr > th {
+ text-align: left;
+ padding-right:15px;
+}
+
+
+.transactions_table {
+  font-size: 0.9em;
+}
+.transactions_table > tbody > tr > td {
+ vertical-align: top;
+ text-align: left;
+ padding-right:15px;
+}
+.transactions_table > tbody > tr > th {
+ text-align: left;
+ padding-right:15px;
+}
+
+
+
+.address_table {
+  font-size:0.9em;
+}
+.address_table > tbody > tr > td {
+ vertical-align: top;
+ text-align: left;
+ padding-right:15px;
+}
+.address_table > tbody > tr > th {
+ text-align: left;
+ padding-right:15px;
+}
+
+
+
+.hash_search_input {
+ min-width: 300px;
+ font-size: 1.1em;
+ padding: 2px;
+}
+.hash_search_submit {
+ font-size: 1.1em;
+ padding: 15px;
+}
+
+
