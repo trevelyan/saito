@@ -16,6 +16,7 @@
     "express-basic-auth": "^1.1.2",
     "merkle-tree-gen": "^1.1.0",
     "node-cryptojs-aes": "^0.4.0",
+    "request": "^2.83.0",
     "secp256k1": "^3.3.0",
     "sendgrid": "^5.2.2",
     "sha256": "^0.2.0",
@@ -24,4 +25,4 @@
     "sqlite3": "^3.1.9",
     "utf-8-validate": "^3.0.3"
   }
-}
+} 
