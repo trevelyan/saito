@@ -1,0 +1,3 @@
+
+this file exists so that git creates the directory on download and we avoid an error trying to create the database
+
