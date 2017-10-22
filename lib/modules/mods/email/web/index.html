@@ -180,9 +180,26 @@ This is your wallet. You should backup this information:
     <input type="button" id="import_wallet" class="settings_button import_wallet" value="Import Wallet" />
     <input type="button" id="import_messages" class="settings_button import_messages" value="Import Inbox" />
     <input type="button" id="reset_button" class="settings_button reset_button" value="Reset Account" />
+    <input type="button" id="restore_privatekey" class="settings_button restore_privatekey" value="Restore Wallet from Private Key" onclick="$('#restore_privatekey_div').toggle();"/>
     <input id="file-input" type="file" name="name" style="display:none;" />
 
     <p style="clear:both;margin-top:30px;"></p>   
+
+    <div style="display:none" id="restore_privatekey_div">
+
+      <label for="restore_privatekey_input">Your Private Key:</label>
+
+      <br />
+
+      <input type="text" name="restore_privatekey_input" id="restore_privatekey_input" class="restore_privatekey_input" />
+
+      <br />
+
+      <input type="submit" id="restore_privatekey_submit" value="Import Private Key" class="restore_privatekey_submit" />
+
+      <p style="clear:both;margin-top:30px;"></p>   
+
+    </div>
 
     <b>DNS Information</b>
 

@@ -527,3 +527,19 @@ body {
 
 
 
+.restore_privatekey_input {
+ width:500px;
+ padding:3px;
+ font-size: 1.2em;
+ clear:both;
+ margin-top:15px;
+}
+.restore_privatekey_submit {
+ padding: 5px;
+ min-width:100px;
+ clear:both;
+ margin-top:15px;
+}
+
+
+
