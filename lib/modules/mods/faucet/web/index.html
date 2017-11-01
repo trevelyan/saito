@@ -1,0 +1,73 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Saito Token Faucet</title>
+
+  <script type="text/javascript" src="/jquery/jquery-3.2.1.min.js"></script>
+  <link rel="stylesheet" href="/jquery/jquery-ui.min.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/jquery/jquery-ui.min.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="/faucet/style.css" />
+
+</head>
+<body>
+
+  <div id="Faucet_browser_active"></div>
+
+  <div class="header">
+    <a href="/" style="text-decoration:none;color:inherits">
+      <img src="/img/saito_logo_black.png" style="width:35px;margin-top:5px;margin-left:25px;margin-right:10px;float:left;" />
+      <div style="font-family:Georgia;padding-top:6px;font-size:1.2em;color:#444;">saito</div>
+    </a>
+  </div>
+
+  <div class="loader">
+
+    Loading our Saito faucet, please wait....
+
+    <p></p>
+
+    Currently loading your account....
+
+  </div>
+
+
+  <div class="main" id="main">
+
+    Click the button below to receive 15 Saito token at your address:
+
+    <p></p>
+
+    <div id="saito_address_show" class="saito_address_show"></div>
+
+    <p></p>
+
+    <form method="get" action="/faucet/success"> 
+      <input type="hidden" name="saito_address" id="saito_address" value="" />
+      <input type="submit" id="faucet_button" class="faucet_button" />
+    </form>
+
+  </div>
+
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript">
+
+    $.getScript( "/browser.js?id=8234243", function( data, textStatus, jqxhr ) {
+      $('.loader').hide();
+      $('.main').show();
+    });
+
+  </script>
+
+
+
+
+</body>
+</html>
+
