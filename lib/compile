@@ -1,5 +1,6 @@
 
 
+
 if hash browserify 2>/dev/null; then
 
   echo ""
@@ -19,6 +20,7 @@ else
 
 fi
 
+rm -f modules/mods/registry/web/addresses.txt
 rm -f saito/web/browser.js.gz
 rm -f data/database.sq3
 rm -f options

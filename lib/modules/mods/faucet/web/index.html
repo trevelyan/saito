@@ -39,16 +39,17 @@
 
   <div class="main" id="main">
 
-    Click the button below to receive 15 Saito token at your address:
+    Click the button below to receive 15 Saito tokens:
 
     <p></p>
 
-    <div id="saito_address_show" class="saito_address_show"></div>
+    (auto-filled with your browser's address)
 
     <p></p>
 
     <form method="get" action="/faucet/success"> 
-      <input type="hidden" name="saito_address" id="saito_address" value="" />
+      <input type="text" style="padding:2px;width:640px" name="saito_address" id="saito_address" value="" />
+      <p></p>
       <input type="submit" id="faucet_button" class="faucet_button" />
     </form>
 
