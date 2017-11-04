@@ -1,7 +1,1 @@
-{
-"server":{"host":"localhost","port":12100,"publickey":""},
-"peers":[{"host":"saito.tech","port":12100,"publickey":"","speed":1000}],
-"dns":[{"domain":"satoshi","host":"saito.tech","port":12100,"publickey":"03b010291b430796d0016e1a2e756b1860a6d0456c659baec7ceb71b9b495a89e3"}],
-"archives":[{"host":"saito.tech","port":12100,"publickey":"03b010291b430796d0016e1a2e756b1860a6d0456c659baec7ceb71b9b495a89e3"}]
-}
-
+{"server":{"host":"localhost","port":12100,"publickey":""},"peers":[{"host":"saito.tech","port":12100,"publickey":"","speed":1000}],"dns":[{"domain":"satoshi","host":"saito.tech","port":12100,"publickey":"03b010291b430796d0016e1a2e756b1860a6d0456c659baec7ceb71b9b495a89e3"}],"archives":[{"host":"saito.tech","port":12100,"publickey":"03b010291b430796d0016e1a2e756b1860a6d0456c659baec7ceb71b9b495a89e3"}],"wallet":{"balance":0,"privateKey":"9d849d48499932855e547ee388bb8f4c5397acb60944b874672163a8a0866cb5","publicKey":"02f6df769fa0a736863770ea7f9794d541d9495f3d9f3b74e017683edca5aedfe6","identifier":"","utxi":[],"utxo":[],"version":1.25},"keys":[],"aes":[],"blockchain":{"latest_block_id":1,"genesis_block_id":0,"fork_id":""},"voter":{"vote_difficulty":0,"target_difficulty":2,"vote_paysplit":0,"target_paysplit":0.5},"modules":[]}
