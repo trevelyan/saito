@@ -17,6 +17,9 @@
  cursor: pointer;
  text-decoration: underline;
 }
+#sendingthismsg {
+ text-decoration: blink;
+}
 
 
 

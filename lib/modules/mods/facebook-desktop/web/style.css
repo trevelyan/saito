@@ -21,24 +21,25 @@ body {
  border-bottom: 1px solid #a5a5a5;
  font-size:2em;
 }
+
 .loader {
  padding: 40px;
 }
 
 .main {
  padding-top: 15px;
- width: 100%;
+ width: 1200px;
  margin-left:auto;
  margin-right:auto;
 }
+
 .menu {
  float: left;
- width: 594px;
- padding-bottom: 6px;
+ width: 200px;
 }
 .posts {
  float: left;
- max-width: 594px;
+ width: 594px;
 }
 .following {
  clear:both;
@@ -238,7 +239,7 @@ body {
  margin-left:12px;
  margin-right:12px;
  margin-top:4px;
- margin-bottom:0px;
+ margin-bottom:24px;
  font-weight:bold;
  color:#333;
  cursor:pointer;
@@ -281,28 +282,10 @@ body {
 
 
 .balance {
- width: 160px;
+ clear:both;
+ width: 300px;
  margin-left: 10px;
- margin-top: 2px;
- margin-bottom: 4px;
- padding-bottom: 10px;
-}
-.balance_address {
- float:left;
- overflow: hidden;
- max-width: 150px;
- color: #555;
- line-height: 1.3em;
- font-size: 14px;
- font-weight:bold;
-}
-.balance_money {
- clear: both;
- float:left;
- color: #555;
- line-height: 1.3em;
- font-size: 14px;
- font-weight:bold;
+ padding-bottom: 30px;
 }
 .balance_label {
  float:left;
@@ -312,7 +295,13 @@ body {
  font-size: 14px;
  font-weight:bold;
 }
-
+.balance_money {
+ float:left;
+ color: #555;
+ line-height: 1.3em;
+ font-size: 14px;
+ font-weight:bold;
+}
 
 
 
