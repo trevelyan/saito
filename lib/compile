@@ -27,7 +27,7 @@ rm -f options
 cp options.conf options
 browserify browser.js -o saito/web/browser.js -i express -i sqlite3 -i express-basic-auth
 cd saito/web
-gzip browser.js
+gzip -k browser.js
 ./compile
 cd ../../
 echo ""
