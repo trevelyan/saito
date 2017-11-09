@@ -33,7 +33,7 @@ body {
 }
 .menu {
  float: left;
- width: 594px;
+ max-width: 594px;
  padding-bottom: 6px;
 }
 .posts {
