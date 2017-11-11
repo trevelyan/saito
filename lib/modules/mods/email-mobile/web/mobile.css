@@ -69,6 +69,9 @@ body {
  padding-bottom:8px;
  font-size:0.9em;
 }
+.message .from_full {
+ display: none;
+}
 .message .title {
  width:100%;
  padding-left:10px;
@@ -407,4 +410,23 @@ tr {
 
 
 
+.email {
+ width:100%;
+ height:258px;
+ padding:4px;
+}
+.email_title {
+ margin-top:10px;
+ width:100%;
+ padding:3px;
+ font-size:1em;
+}
+.email_body {
+ clear:both;
+ width:100%;
+ height:245px;
+ font-size:1em;
+ padding:3px;
+ margin-top:10px;
+}
 
