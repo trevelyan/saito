@@ -1,7 +1,6 @@
 {
 "server":{"host":"localhost","port":12100,"publickey":""},
 "peers":[{"host":"saito.tech","port":12100,"publickey":"","speed":1000}],
-"dns":[{"domain":"satoshi","host":"saito.tech","port":12100,"publickey":"03b010291b430796d0016e1a2e756b1860a6d0456c659baec7ceb71b9b495a89e3"}],
-"archives":[{"host":"saito.tech","port":12100,"publickey":"03b010291b430796d0016e1a2e756b1860a6d0456c659baec7ceb71b9b495a89e3"}]
+"dns":[{"domain":"satoshi","host":"saito.tech","port":12100,"publickey":"03b010291b430796d0016e1a2e756b1860a6d0456c659baec7ceb71b9b495a89e3"}]
 }
 
