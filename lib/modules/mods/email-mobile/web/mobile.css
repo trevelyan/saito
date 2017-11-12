@@ -113,11 +113,11 @@ tr {
  cursor:pointer;
  margin-bottom: 5px;
  margin-top: 5px;
- margin-left: 20px;
+ margin-left: 14px;
  padding-left:25px;
  padding-right:15px;
- padding-top: 5px;
- padding-bottom: 5px;
+ padding-top: 15px;
+ padding-bottom: 15px;
  color: #ffffff;
  background-color: #d14836;
  border: 1px solid #a5a5a5;
@@ -145,8 +145,8 @@ tr {
  margin-left: 20px;
  padding-left:10px;
  padding-right:10px;
- padding-top: 5px;
- padding-bottom: 5px;
+ padding-top: 15px;
+ padding-bottom: 15px;
  background-color: #e5e5e5;
  border: 1px solid #a5a5a5;
  max-width: 85px;
@@ -156,20 +156,7 @@ tr {
  float:left;
 }
 .mail_controls_settings:hover {
- cursor:pointer;
- margin-bottom: 5px;
- margin-top: 5px;
- margin-left: 20px;
- padding-left:10px;
- padding-right:10px;
- padding-top: 5px;
- padding-bottom: 5px;
  background-color: #b5b5b5;
- border: 1px solid #a5a5a5;
- max-width: 85px;
- width: 75px;
- font-size:0.9em;
- font-weight:bold;
 }
 
 
@@ -179,7 +166,7 @@ tr {
  font-weight: bold;
  font-size: 1.15em;
  color: #555;
- padding-top:10px;
+ padding-top:35px;
 }
 .balance_money {
  float:right;
@@ -188,7 +175,7 @@ tr {
  color: #555;
  margin-left:20px;
  margin-right:5px;
- padding-top:10px;
+ padding-top:35px;
 }
 
 
