@@ -89,6 +89,7 @@ body {
  display: none;
 }
 .message .data {
+ cursor: auto;
  display: none;
  margin-top: 5;
  border-top: 1px dashed #e5e5e5;
