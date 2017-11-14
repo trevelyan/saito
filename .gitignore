@@ -3,6 +3,7 @@ lib/1
 lib/data/database.sq3
 lib/data/database.bk
 lib/data/database.bk2
+lib/test.js
 website/
 lib/debug
 lib/debug.js
