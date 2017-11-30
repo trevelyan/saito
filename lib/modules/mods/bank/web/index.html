@@ -1,0 +1,78 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Saito Token Faucet</title>
+
+  <script type="text/javascript" src="/jquery/jquery-3.2.1.min.js"></script>
+  <link rel="stylesheet" href="/jquery/jquery-ui.min.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/jquery/jquery-ui.min.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="/faucet/style.css" />
+
+</head>
+<body>
+
+  <div id="Bank_browser_active"></div>
+
+  <div class="header">
+    <a href="/" class="logo_link">
+      <img src="/img/saito_logo_black.png" class="logo" />
+      <div class="logo_text">saito</div>
+    </a>
+  </div>
+
+  <div class="loader">
+
+    Loading our Bank, please wait....
+
+    <p></p>
+
+    Currently loading your account....
+
+  </div>
+
+
+  <div class="main" id="main" style="display:none">
+
+    The Saito Bank attempts to keep your tokens active by periodically resending
+    them across the blockchain. The fees necessary to transmit payments will be 
+    deducted from your account.
+
+    <p></p>
+
+    Please be aware that this software is under-development, and the developers 
+    make no guarantees of security. If you are paranoid about protecting your 
+    tokens, you should use our regular tools to rebroadcast them manually.
+
+    <p></p>
+
+    Your account contains: <span id="bank_balance" class="bank_balance">0.0</span> SAITO.
+
+    <p></p>
+
+    <input type="button" value="Withdraw to Account" >    
+
+  </div>
+
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript">
+
+    $.getScript( "/browser.js?id=8234243", function( data, textStatus, jqxhr ) {
+      $('.loader').hide();
+      $('.main').show();
+    });
+
+  </script>
+
+
+
+
+</body>
+</html>
+

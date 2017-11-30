@@ -1,6 +1,4 @@
 
-
-
 if hash browserify 2>/dev/null; then
 
   echo ""
@@ -20,16 +18,16 @@ else
 
 fi
 
-rm -f modules/mods/registry/web/addresses.txt
 rm -f saito/web/browser.js.gz
 rm -f data/database.sq3
 rm -f options
 cp options.conf options
+
 browserify browser.js -o saito/web/browser.js -i express -i sqlite3 -i express-basic-auth -i sendgrid -i request -i keythereum -i bluebird -i socket.io
-cd saito/web
-gzip -k browser.js
-./compile
-cd ../../
+#cd saito/web
+#gzip -k browser.js
+#./compile
+#cd ../../
 echo ""
 echo "///////////////"
 echo "// IMPORTANT //"

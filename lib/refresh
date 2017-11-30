@@ -1,15 +1,47 @@
+
+if hash browserify 2>/dev/null; then
+
+  echo ""
+  echo "checking that browserify is installed..."
+  echo "compiling source code into browser bundle...."
+  echo ""
+
+else
+
+  echo ""
+  echo "Compiling Saito from scratch requires the nodejs module browserify"
+  echo "to be installed globally. Do this with the following command: "
+  echo ""
+  echo "npm install browserify -g "
+  echo ""
+  exit
+
+fi
+
 rm -f saito/web/browser.js.gz
 #rm -f data/database.sq3
 #rm -f options
 #cp options.conf options
+
 browserify browser.js -o saito/web/browser.js -i express -i sqlite3 -i express-basic-auth -i sendgrid -i request -i keythereum -i bluebird -i socket.io
-cd saito/web
-gzip -k browser.js
-./compile
-cd ../../
+#cd saito/web
+#gzip -k browser.js
+#./compile
+#cd ../../
+echo ""
+echo "///////////////"
+echo "// IMPORTANT //"
+echo "///////////////"
+echo "please confirm your \"options\" file is properly configured. "
+echo "The simplest version that will work for a local install without"
+echo "support for built-in DNS or message-archiving is: "
+echo ""
+echo "{"
+echo "\"server\":{\"host\":\"localhost\",\"port\":12100,\"publickey\":\"\"}"
+echo "}"
 echo ""
 echo ""
-echo "You should be ready to run Saito: "
+echo "once that is done, you can start Saito by running: "
 echo ""
 echo "$> node start.js "
 echo ""

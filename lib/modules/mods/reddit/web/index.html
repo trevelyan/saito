@@ -1,0 +1,264 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Saito Email</title>
+
+  <script type="text/javascript" src="/jquery/jquery-3.2.1.min.js"></script>
+  <link rel="stylesheet" href="/jquery/jquery-ui.min.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/jquery/jquery-ui.min.js"></script>
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/fancybox/jquery.fancybox.pack.js"></script>
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox-buttons.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/fancybox/jquery.fancybox-buttons.js"></script>
+  <script type="text/javascript" src="/fancybox/jquery.fancybox-media.js"></script>
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox-thumbs.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/fancybox/jquery.fancybox-thumbs.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="/email/style.css" />
+
+</head>
+<body>
+
+  <div id="Email_browser_active"></div>
+
+  <div class="header">
+    <a href="/" style="text-decoration:none;color:inherits">
+      <img src="/img/saito_logo_black.png" style="width:35px;margin-top:5px;margin-left:25px;margin-right:10px;float:left;" />
+      <div style="font-family:Georgia;padding-top:5px;font-size:1.2em;color:#444;">satoshi mail</div>
+    </a>
+  </div>
+
+  <div class="loader">
+Saito is currently loading....
+<p></p>
+We are downloading the application itself into your browser from our server in Los Angeles. The download is reasonably fast in the United States, but can take up to a minute in China due to its size (~1.6 MB). Please be patient.
+  </div>
+
+  <div class="main" style="display:none">
+
+    <div class="sidebar">
+      <div class="compose" id="compose">COMPOSE</div>
+    </div>
+
+
+    <div class="mail">
+
+      <div class="mail_controls_delete" id="mail_controls_delete">delete selected</div>
+      <div class="mail_controls_settings" id="mail_controls_settings">edit settings</div>
+      <div class="balance" id="balance">SAITO</div>
+      <div class="balance_money" id="balance_money">0</div>
+      <div style="display:none" class="mail_controls_message" id="mail_controls_message"></div>
+
+      <table class="message_table">
+      </table>
+    </div>
+  </div>
+
+
+  <div id="lightbox_message" style="display:none">
+    <div class="lightbox_message_reply" id="lightbox_message_reply">
+      <div id="reply" class="reply">REPLY</div>
+    </div>
+    <div class="lightbox_message_from" id="lightbox_message_from">
+      <span class="lightbox_message_from_label">FROM: </span>
+      <span class="lightbox_message_from_address" id="lightbox_message_from_address" readonly></span>
+    </div>
+    <div class="lightbox_message_to" id="lightbox_message_to">
+      <span class="lightbox_message_to_label">TO: </span>
+      <span class="lightbox_message_to_address" id="lightbox_message_to_address"></span>
+    </div>
+    <div class="lightbox_message_text" id="lightbox_message_text">
+    </div>
+  </div>
+
+
+
+  <div id="lightbox_compose" style="display:none">
+    <div class="lightbox_compose_address_area">
+    <div class="lightbox_compose_compose">
+      <div class="send" id="send">SEND</div>
+    </div>
+    <div class="lightbox_compose_from" id="lightbox_compose_from">
+      <span class="lightbox_compose_from_label">FROM: </span>
+      <input type="text" id="lightbox_compose_from_address" class="lightbox_compose_from_address" value="048e878e01d3869713eb3bacb205d4a94b5fe551536a9e0b909537722f9cd376" readonly />
+    </div>
+    <div class="lightbox_compose_to" id="lightbox_compose_to">
+      <span class="lightbox_compose_to_label">TO: </span>
+      <input type="text" id="lightbox_compose_to_address" class="lightbox_compose_to_address" value="048e878e01d3869713eb3bacb205d4a94b5fe551536a9e0b909537722f9cd376" />
+    </div>
+    </div>
+    <div class="lightbox_compose_module" id="lightbox_compose_module">
+      <div style="float:left">
+        <select type="text" class="lightbox_compose_module_select" id="lightbox_compose_module_select"></select>
+      </div>
+      <div style="float:left">
+        <div class="lightbox_compose_module_alert" id="lightbox_compose_module_alert">
+          <div id="email_alert_box" class="email_alert_box"></div>
+	</div>
+      </div>
+      <div style="float:left">
+        <span class="lightbox_compose_fee_label">fee: </span>
+        <input type="text" class="lightbox_compose_fee" id="lightbox_compose_fee" value="0.0001" />
+      </div>
+      <div style="float:left">
+        <span class="lightbox_compose_payment_label">payment: </span>
+        <input type="text" class="lightbox_compose_payment" id="lightbox_compose_payment" value="0.0" />
+      </div>
+    </div>
+    <div class="module_editable_space" id="module_editable_space">
+      Payment Transaction
+    </div>
+  </div>
+
+
+
+
+
+
+  <div id="lightbox_viewkeys" style="display:none" class="lightbox_viewkeys">
+
+<b>Basic Information</b>
+
+<p></p>
+
+This is your wallet. You should backup this information:
+
+    <p></p>
+
+    <table style="margin-left: 25px;">
+      <tr>
+        <td style="margin-right: 10px;font-weight:bold;">Public Key</td>
+	<td id="lightbox_viewkeys_publickey"></td>
+      </tr>
+      <tr>
+        <td style="margin-right: 10px;font-weight:bold;">Private Key</td>
+	<td id="lightbox_viewkeys_privatekey"></td>
+      </tr>
+      <tr>
+        <td style="margin-right: 10px;font-weight:bold;">Address</td>
+	<td id="lightbox_viewkeys_identifier" style="cursor:pointer">unregistered</td>
+      </tr>
+    </table>
+
+    <p style="clear:both"></p>
+
+    <input type="button" id="save_wallet" class="settings_button save_wallet" value="Backup Wallet" />
+    <input type="button" id="save_messages" class="settings_button save_messages" value="Backup Inbox" />
+    <input type="button" id="import_wallet" class="settings_button import_wallet" value="Import Wallet" />
+    <input type="button" id="import_messages" class="settings_button import_messages" value="Import Inbox" />
+    <input type="button" id="reset_button" class="settings_button reset_button" value="Reset Account" />
+    <input type="button" id="restore_privatekey" class="settings_button restore_privatekey" value="Restore Wallet from Private Key" onclick="$('#restore_privatekey_div').toggle();"/>
+    <input id="file-input" type="file" name="name" style="display:none;" />
+
+    <p style="clear:both;margin-top:30px;"></p>   
+
+    <div style="display:none" id="restore_privatekey_div">
+
+      <label for="restore_privatekey_input">Your Private Key:</label>
+
+      <br />
+
+      <input type="text" name="restore_privatekey_input" id="restore_privatekey_input" class="restore_privatekey_input" />
+
+      <br />
+
+      <input type="submit" id="restore_privatekey_submit" value="Import Private Key" class="restore_privatekey_submit" />
+
+      <p style="clear:both;margin-top:30px;"></p>   
+
+    </div>
+
+    <b>DNS Information</b>
+
+    <p></p>
+
+    You are connected to the following DNS servers. You can also sync your own directly off the blockchain:
+
+    <div class="dns_servers" id="dns_servers">
+      <table id="dns_servers_table" class="dns_servers_table" style="margin-left: 25px">
+        <tr>
+          <th style="padding-right:25px;" align="left">Domain</th>
+          <th style="padding-right:25px;" align="left">Server</th>
+          <th style="padding-right:25px;" align="left">Public Key</th>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+
+
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript">
+
+    $.getScript( "/browser.js?id=8234243", function( data, textStatus, jqxhr ) {
+      $('.loader').hide();
+      $('.main').show();
+    });
+
+  </script>
+  <script type="text/javascript">
+
+  function formatDate(unixtime) {
+
+    // not unixtime? return as may be human-readable date
+    if (unixtime.toString().length < 13) { return unixtime; }
+
+    x    = new Date(unixtime);
+    nowx = new Date();
+
+    y = "";
+
+    if (x.getMonth()+1 == 1) { y += "Jan "; }
+    if (x.getMonth()+1 == 2) { y += "Feb "; }
+    if (x.getMonth()+1 == 3) { y += "Mar "; }
+    if (x.getMonth()+1 == 4) { y += "Apr "; }
+    if (x.getMonth()+1 == 5) { y += "May "; }
+    if (x.getMonth()+1 == 6) { y += "Jun "; }
+    if (x.getMonth()+1 == 7) { y += "Jul "; }
+    if (x.getMonth()+1 == 8) { y += "Aug "; }
+    if (x.getMonth()+1 == 9) { y += "Sep "; }
+    if (x.getMonth()+1 == 10) { y += "Oct "; }
+    if (x.getMonth()+1 == 11) { y += "Nov "; }
+    if (x.getMonth()+1 == 12) { y += "Dec "; }
+
+    y += x.getDate();
+
+    if (x.getFullYear() != nowx.getFullYear()) {
+      y += " ";
+      y += x.getFullYear();
+    } else {
+      if (x.getMonth() == nowx.getMonth() && x.getDate() == nowx.getDate()) {
+
+        am_or_pm = "am";
+ 
+        tmphour = x.getHours();
+        tmpmins = x.getMinutes();
+
+        if (tmphour >= 12) { if (tmphour > 12) { tmphour -= 12; }; am_or_pm = "pm"; }
+        if (tmphour == 0) { tmphour = 12; };
+        if (tmpmins < 10) {
+          y = tmphour + ":0" + tmpmins + " "+am_or_pm;
+        } else {
+          y = tmphour + ":" + tmpmins + " "+am_or_pm;
+        }
+      }
+    }
+    return y;
+  }
+
+  var new_time = new Date().getTime();
+  $('#tmp_current_time').html(formatDate(new_time));
+  </script>
+
+</body>
+</html>
+
+
+

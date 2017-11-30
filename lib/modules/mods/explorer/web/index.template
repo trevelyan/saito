@@ -1,0 +1,32 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <title>Saito Network: Blockchain Explorer</title>
+  <link rel="stylesheet" type="text/css" href="/explorer/style.css" />
+</head>
+<body>
+
+  <div class="header">
+    <a href="/" class="logo_link">
+      <img src="/img/saito_logo_black.png" class="logo" />
+      <div class="logo_text">saito</div>
+    </a>
+  </div>
+
+  <div class="main" style="display:none">
+    This is a private server. 
+    <p></p>
+    <div id="donation_address" class="donation_address"></div>
+    <p></p>
+    To request access, use the email client (auth module) and send 5 or more SAITO to this address. Be sure to provide the keyword "access".
+  </div>
+
+</body>
+</html>
+
+
+

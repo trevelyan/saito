@@ -1,7 +1,7 @@
 {
   "name": "saito",
-  "version": "1.1.0",
-  "description": "big-data blockchain for decentralized web applications",
+  "version": "2.0.0",
+  "description": "big-data transient blockchain with proof-of-transactions",
   "main": "start.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,21 +9,16 @@
   "author": "David Lancashire",
   "license": "MIT",
   "dependencies": {
-    "bluebird": "^3.5.0",
-    "browserify": "^14.4.0",
-    "bufferutil": "^3.0.2",
-    "express": "^4.15.4",
-    "express-basic-auth": "^1.1.2",
-    "keythereum": "^1.0.2",
+    "base-58": "0.0.1",
+    "crypto-browserify": "^3.12.0",
+    "express": "^4.16.2",
     "merkle-tree-gen": "^1.1.0",
     "node-cryptojs-aes": "^0.4.0",
     "request": "^2.83.0",
-    "secp256k1": "^3.3.0",
-    "sendgrid": "^5.2.2",
+    "secp256k1": "^3.3.1",
     "sha256": "^0.2.0",
-    "socket.io": "^2.0.3",
-    "socket.io-client": "^2.0.3",
-    "sqlite3": "^3.1.13",
-    "utf-8-validate": "^3.0.3"
+    "socket.io": "^2.0.4",
+    "socket.io-client": "^2.0.4",
+    "sqlite3": "^3.1.13"
   }
 }
