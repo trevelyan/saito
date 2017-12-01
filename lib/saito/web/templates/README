@@ -1,0 +1,7 @@
+
+
+The DESKTOP modules assume you are using Fancybox and interact with that library.
+
+The MOBILE modules do not have external depencies and are designed for small screens.
+
+
