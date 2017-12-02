@@ -62,6 +62,10 @@ To run Saito just enter the lib/ directory and start the software:
 
 node start.js
 
+node --max_old_space_size=6144 start.js
+
+
+
 If you want to run Saito from the command-line and have the program
 continue to operate when you disconnect from the server or close 
 your terminal, you can stick Saito into the background by going to
