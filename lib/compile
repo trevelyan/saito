@@ -21,6 +21,7 @@ fi
 rm -f saito/web/browser.js.gz
 rm -f data/database.sq3
 rm -f options
+rm -f modules/mod/registry/web/addresses.txt
 cp options.conf options
 
 browserify browser.js -o saito/web/browser.js -i express -i sqlite3 -i express-basic-auth -i sendgrid -i request -i keythereum -i bluebird -i socket.io
