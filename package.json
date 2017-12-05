@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "David Lancashire",
-  "license": "MIT",
+  "license": "GPL",
   "dependencies": {
     "base-58": "0.0.1",
     "crypto-browserify": "^3.12.0",
