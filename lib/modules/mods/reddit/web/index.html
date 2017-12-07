@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="/fancybox/jquery.fancybox-thumbs.css" type="text/css" media="screen" />
   <script type="text/javascript" src="/fancybox/jquery.fancybox-thumbs.js"></script>
 
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css" />
   <link rel="stylesheet" type="text/css" href="/r/style.css" />
 
 </head>
@@ -42,6 +43,8 @@
       LINK: <input type="text" class="submit_link" id="submit_link" name="submit_link" />
       <br />
       TEXT: <input type="text" class="submit_text" id="submit_text" name="submit_text" />
+      <br />
+      SUBREDDIT: <input type="text" class="submit_r" id="submit_r" name="submit_r" />
       <br />
       <input type="button" class="submit_button" id="submit_button" value="submit" />
     </div>
@@ -67,7 +70,9 @@
   <script src="/socket.io/socket.io.js"></script>
   <script type="text/javascript">
 
-    var subreddit = "";
+    var subreddit  = "";
+    var post_id    = "";
+    var comment_id = "";
 
     $.getScript( "/browser.js?id=8234243", function( data, textStatus, jqxhr ) {
       $('.loader').hide();

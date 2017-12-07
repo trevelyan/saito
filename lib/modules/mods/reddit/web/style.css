@@ -52,13 +52,21 @@
  float:left;
  width: 400px;
  height: 500px;
- border: 1px solid red;
 }
 
 
 
 
 
+
+.upvote_wrapper {
+ clear:both;
+ padding-top:2px;
+}
+.downvote_wrapper {
+ clear:both;
+ margin-top:12px;
+}
 
 .posts {
  max-width: 1000px;
@@ -74,16 +82,18 @@
 }
 .votes {
  float:left;
- width: 40px;
+ padding-left:2px;
+ padding-top:3px;
+ width: 28px;
  height: 72px;
- border: 1px solid green;
 }
 .thumbnail {
  float:left;
  width: 72px;
  height: 72px;
  margin-left:5px;
- border: 1px solid green;
+ border: 1px solid blue;
+ background-color: #e7e7e7;
 }
 .content {
  float:left;
@@ -115,6 +125,7 @@
  clear:all;
 }
 .content_link {
+ cursor:pointer;
  margin-right: 15px;
 }
 .content_link_comments {
@@ -187,25 +198,37 @@
  min-width: 800px;
  max-width: 1200px;
 }
+.upvote {
+ color:#888;
+ font-size:25px;
+}
+.downvote {
+ color:#888;
+ font-size:25px;
+}
 .d_votes {
+ padding-left:2px;
+ padding-top:3px;
+ padding-right:5px;
  display: table-cell;
- width: 50px;
+ width: 28px;
  height: 30px; 
- border: 1px solid blue;
 }
 .d_thumb {
  display: table-cell;
  padding-left: 5px;
+ padding-right: 2px;
  width: 72px;
  height: 72px;
  border: 1px solid blue;
+ background-color: #e7e7e7;
 }
 .d_content {
  display: table-cell;
  padding-left: 10px;
 }
 .d_content_title {
- 
+ margin-bottom:2px;
 }
 .d_content_r {
  clear:both;
@@ -214,6 +237,21 @@
 .d_content_details {
  font-size:0.8em;
 }
+.d_text {
+ clear:both;
+ font-size:1em;
+ padding-top:25px;
+}
+
+
+
+.add_comment {
+ max-width: 600px;
+ min-height: 140px;
+ margin-top:25px;
+ clear:both;
+}
+
 
 .comments {
  clear:both;
@@ -222,15 +260,15 @@
 .comment {
  display: table;
 }
-.comment_upvote {
- width: 40px;
- border: 1px solid green;
+.comment_upvotes {
+ padding-left:2px;
+ padding-top:3px;
+ width: 28px;
  display: table-cell;
 }
 .comment_body {
  padding-left: 5px;
  padding-right: 5px;
- border: 1px solid red;
  display: table-cell;
 }
 .comment_text {
@@ -244,6 +282,9 @@
  font-size: 0.8em;
  margin-top: 8px;
  color: #373737;
+}
+.comment_link {
+ cursor:pointer;
 }
 .comment_reply {
  padding: 10px;

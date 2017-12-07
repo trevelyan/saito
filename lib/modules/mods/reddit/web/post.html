@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="/fancybox/jquery.fancybox-thumbs.css" type="text/css" media="screen" />
   <script type="text/javascript" src="/fancybox/jquery.fancybox-thumbs.js"></script>
 
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css" />
   <link rel="stylesheet" type="text/css" href="/r/style.css" />
 
 </head>
@@ -32,6 +33,10 @@
       <img src="/img/saito_logo_black.png" style="width:35px;margin-top:5px;margin-left:25px;margin-right:10px;float:left;" />
       <div style="font-family:Georgia;padding-top:5px;font-size:1.2em;color:#444;">satoshi reddit</div>
     </a>
+
+
+
+
   </div>
 
   <div class="main" style="main">
@@ -39,13 +44,22 @@
     <div class="discussion" id="discussion">
 
       <div class="d" id="d">
-        <div class="d_votes" id="d_votes"></div>
+        <div class="d_votes" id="d_votes">
+<div class="upvote_wrapper"><i class="fa fa-arrow-up upvote post_upvote" id="post_upvote" aria-hidden="true"></i></div>
+<div class="downvote_wrapper"><i class="fa fa-arrow-down downvote post_downvote" id="post_downvote" aria-hidden="true"></i></div>
+	</div>
         <div class="d_thumb" id="d_thumb"></div>
         <div class="d_content" id="d_content">
-	  <div class="d_content_title" id="d_content_title">This is where the title of our post goes....</div>
-	  <div class="d_content_r" id="d_content_r">/r/bitcoin</div>
-  	  <div class="d_content_details" id="d_content_details">submitted 2 hours ago by MajorGeneral</div>
+	  <div class="d_content_title" id="d_content_title">Loading Post...</div>
+  	  <div class="d_content_details" id="d_content_details"></div>
+	  <div class="d_content_r" id="d_content_r"></div>
         </div>
+      </div>
+      <div class="d_text" id="d_text"></div>
+
+      <div class="add_comment" id="add_comment">
+<textarea class="comment_reply_textarea" id="comment_reply_textarea_0"></textarea>
+<input type="button" class="comment_reply_submit" id="comment_reply_submit_0" value="reply" />
       </div>
 
       <div class="comments" id="comments">
