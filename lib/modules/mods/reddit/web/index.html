@@ -37,28 +37,35 @@
 
   <div class="main" style="main">
 
-    <div id="submit_post" class="submit_post">
-      TITLE: <input type="text" class="submit_title" id="submit_title" name="submit_title" />
-      <br />
-      LINK: <input type="text" class="submit_link" id="submit_link" name="submit_link" />
-      <br />
-      TEXT: <input type="text" class="submit_text" id="submit_text" name="submit_text" />
-      <br />
-      SUBREDDIT: <input type="text" class="submit_r" id="submit_r" name="submit_r" />
-      <br />
-      <input type="button" class="submit_button" id="submit_button" value="submit" />
-    </div>
-
-
-
-
-
-    <div class="posts" id="posts">
+    <div class="posts_container">
+      <div id="submit_post" class="submit_post">
+        <div for="submit_title" class="submit_title_label" id="submit_title_label">title:</div>
+        <input type="text" class="submit_title" id="submit_title" name="submit_title" />
+        <br />
+        <div for="submit_link" class="submit_link_label" id="submit_link_label">url: <span style="font-size:0.9em"><i>(optional)</i></span></div>
+        <input type="text" class="submit_link" id="submit_link" name="submit_link" />
+        <br />
+        <div for="submit_text" class="submit_text_label" id="submit_text_label">discussion:</div>
+        <textarea class="submit_text" id="submit_text" name="submit_text"></textarea>
+        <br />
+        <div for="submit_r" class="submit_r_label" id="submit_r_label">subreddit:</div>
+        <input type="text" class="submit_r" id="submit_r" name="submit_r" />
+        <br />
+        <input type="button" class="submit_button" id="submit_button" value="publish to network" />
+      </div>
+      <div class="posts" id="posts">&nbsp;</div>
     </div>
 
     <div class="sidebar" id="sidebar">
-      <div class="submit" id="submit">submit post</div>
-      <div class="advert" id="advert"></div>
+      <input type="button"  class="submit" id="submit" value="create" name="submit" />
+
+      <div class="balance" id="balance">
+        <div class="saitoname" id="saitoname">testname</div>
+        <div class="balance_money" id="balance_money">0.0</div>
+        <div class="balance_label" id="balance_label">SAITO</div>
+      </div>
+
+      <div class="advert-402-302" id="advert-402-302"></div>
     </div>
 
   </div>
@@ -70,8 +77,8 @@
   <script src="/socket.io/socket.io.js"></script>
   <script type="text/javascript">
 
-    var subreddit  = "";
-    var post_id    = "";
+    var subreddit = "";
+    var post_id = "";
     var comment_id = "";
 
     $.getScript( "/browser.js?id=8234243", function( data, textStatus, jqxhr ) {

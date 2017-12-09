@@ -58,22 +58,115 @@
 
 
 
-
+.votes_total {
+ clear:both;
+ margin-left: auto;
+ margin-right: auto;
+ padding-right:4px;
+ padding-top: 2px;
+ font-size: 16px;
+ text-align: center;
+ color: #888;
+}
 .upvote_wrapper {
  clear:both;
  padding-top:2px;
 }
 .downvote_wrapper {
  clear:both;
- margin-top:12px;
+ margin-top:2px;
 }
 
-.posts {
- max-width: 1000px;
- min-width: 800px;
- font-size: 1.1em;
+.posts_container {
  float:left;
+ width:800px;
 }
+.posts {
+ font-size: 1.1em;
+}
+.submit_post {
+ display:none;
+ padding:30px;
+ padding-bottom: 20px;
+ margin-left: 10px;
+ margin-right: 20px;
+ margin-bottom: 30px;
+ border: 1px solid #888;
+ background-color: #f7fdfd;
+}
+
+.submit_title {
+ clear:both;
+}
+.submit_title_label {
+ color: #888;
+}
+.submit_link {
+ clear:both;
+}
+.submit_link_label {
+ margin-top: 15px;
+ color: #888;
+}
+.submit_text {
+ clear:both;
+}
+.submit_text_label {
+ margin-top: 15px;
+ color: #888;
+}
+.submit_r {
+ clear:both;
+ width: 650px;
+}
+.submit_r_label {
+ margin-top: 15px;
+ color: #888;
+}
+.submit_button {
+ clear:both;
+ margin-top:16px;
+ max-width: 250px;
+ color: #ffffff;
+ background-color: #d14836;
+ text-align: center;
+ padding-left: 10px;
+ padding-bottom: 5px;
+ padding-top: 5px;
+ padding-right: 10px;
+ font-weight: bold;
+ background-image: linear-gradient(to bottom, #dd4b39, #d14836);
+ border: 1px solid #b0281a;
+ cursor: pointer;
+ font-size:1em;
+}
+.submit_button:hover {
+ background-image: linear-gradient(to bottom, #dd4b39, #c53727);
+ border: 1px solid #b0281a;
+}
+a {
+ text-decoration: none;
+}
+a:visited {
+ text-decoration: none;
+}
+input[type=text] {
+ padding: 5px;
+ font-size:1em;
+ width: 650px;
+ border: 1px solid #ccc;
+}
+textarea {
+ padding: 5px;
+ font-size:1em;
+ width: 650px;
+ height: 150px;
+ border: 1px solid #ccc;
+}
+
+
+
+
 .post {
  min-width: 600px;
  min-height: 75px;
@@ -163,6 +256,7 @@
  padding-top: 5px;
  padding-right: 10px;
  line-height: 27px;
+ font-size: 1em;
  font-weight: bold;
  background-image: linear-gradient(to bottom, #dd4b39, #d14836);
  border: 1px solid #b0281a;
@@ -175,13 +269,6 @@
 
 
 
-
-
-
-
-.submit_post {
- display:none;
-}
 
 
 
@@ -306,4 +393,22 @@
  padding-top: 10px;
 }
 
+
+
+.balance {
+ float:left;
+ margin-left: 15px;
+}
+.saitoname {
+ font-size:0.9em;
+}
+.balance_money {
+ float:left;
+ font-size:0.9em;
+}
+.balance_label {
+ float:left;
+ margin-left: 6px;
+ font-size:0.9em;
+}
 
