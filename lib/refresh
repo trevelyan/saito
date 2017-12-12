@@ -23,7 +23,7 @@ rm -f saito/web/browser.js.gz
 #rm -f options
 #cp options.conf options
 
-browserify browser.js -o saito/web/browser.js -i express -i sqlite3 -i express-basic-auth -i sendgrid -i request -i keythereum -i bluebird -i socket.io
+browserify browser.js -o saito/web/browser.js -i express -i sqlite3 -i express-basic-auth -i sendgrid -i request -i keythereum -i bluebird -i socket.io -i phantomjs
 #cd saito/web
 #gzip -k browser.js
 #./compile

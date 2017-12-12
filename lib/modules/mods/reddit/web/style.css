@@ -84,6 +84,9 @@
 .posts {
  font-size: 1.1em;
 }
+.post_author {
+ display:none;
+}
 .submit_post {
  display:none;
  padding:30px;
@@ -201,8 +204,12 @@ textarea {
  float:left;
  color: #474747;
  font-size:0.8em;
- padding-top:2px;
+ padding-top:5px;
  margin-left:10px;
+}
+.content_site a {
+ color: #474747;
+ font-size:0.8em;
 }
 .content_details {
  color: #474747;
@@ -266,7 +273,10 @@ textarea {
  background-image: linear-gradient(to bottom, #dd4b39, #c53727);
  border: 1px solid #b0281a;
 }
-
+.image_upload {
+ padding-top: 3px;
+ font-size: 0.9em;
+}
 
 
 
