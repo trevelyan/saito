@@ -1,0 +1,12 @@
+
+1. webpage snapshots are handled by wkhtmltopdf:
+
+https://wkhtmltopdf.org/downloads.html
+
+UBUNTU: apt-get install wkhtmltopdg
+
+
+
+
+
+
