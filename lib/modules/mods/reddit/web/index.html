@@ -65,7 +65,7 @@
         <div class="balance_label" id="balance_label">SAITO</div>
       </div>
 
-      <div class="advert-402-302" id="advert-402-302"></div>
+      <div class="advert-300-250" id="advert-300-250"></div>
     </div>
 
   </div>
@@ -77,7 +77,7 @@
 
     <p></p>
 
-    If you believe this post contains illegal or exceptionally problematic material, please report it to our admins for review and possible delisting. You can also blacklist the user, in which case their messages and posts will simply not be visible to you.
+    If this post contains illegal or exceptionally problematic content, please report it to our admins for review and delisting. You can alternately just blacklist the poster:
 
     <p></p>
 
@@ -90,7 +90,7 @@
 
     <p></p>
 
-    In general, we strive to respect freedom of speech and believe that decentralized moderation is superior to centralized censorship. If you feel our moderation policies are not strict enough (or are too strict), we encourage you to download the Saito client and setup your own node.
+    While we strive to respect freedom of speech, our moderation policies are going to be entirely arbitrary: if you don't like them we encourage you to download the Saito client and setup your own mirror.
 
   </div>
 
@@ -101,6 +101,7 @@
     var subreddit = "";
     var post_id = "";
     var comment_id = "";
+    var load_content_on_load = 1;
 
     $.getScript( "/browser.js?id=8234243", function( data, textStatus, jqxhr ) {
       $('.loader').hide();

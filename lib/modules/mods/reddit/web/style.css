@@ -50,8 +50,8 @@
 
 .sidebar {
  float:left;
- width: 400px;
- height: 500px;
+ width: 304px;
+ min-height: 500px;
 }
 
 
@@ -186,9 +186,10 @@
  font-size:1em;
 }
 .lightbox_report {
- padding:20px;
+ padding-left:20px;
+ padding-right:20px;
  font-size:1.15em;
- line-spacing: 1.6em;
+ line-height: 1.6em;
 }
 a {
  text-decoration: none;
@@ -484,4 +485,58 @@ textarea {
  margin-left: 6px;
  font-size:0.9em;
 }
+
+
+
+
+
+
+
+.approve {
+ float:left;
+ margin-bottom:14px;
+ max-width: 140px;
+ color: #ffffff;
+ background-color: #d14836;
+ text-align: center;
+ padding-left: 10px;
+ padding-bottom: 5px;
+ padding-top: 5px;
+ padding-right: 10px;
+ line-height: 27px;
+ font-size: 1em;
+ font-weight: bold;
+ background-image: linear-gradient(to bottom, #dd4b39, #d14836);
+ border: 1px solid #b0281a;
+ cursor: pointer;
+}
+.approve:hover {
+ background-image: linear-gradient(to bottom, #dd4b39, #c53727);
+ border: 1px solid #b0281a;
+}
+
+.disapprove {
+ float:left;
+ margin-bottom:14px;
+ margin-left: 20px;
+ max-width: 140px;
+ color: #ffffff;
+ background-color: #d14836;
+ text-align: center;
+ padding-left: 10px;
+ padding-bottom: 5px;
+ padding-top: 5px;
+ padding-right: 10px;
+ line-height: 27px;
+ font-size: 1em;
+ font-weight: bold;
+ background-image: linear-gradient(to bottom, #dd4b39, #d14836);
+ border: 1px solid #b0281a;
+ cursor: pointer;
+}
+.disapprove:hover {
+ background-image: linear-gradient(to bottom, #dd4b39, #c53727);
+ border: 1px solid #b0281a;
+}
+
 

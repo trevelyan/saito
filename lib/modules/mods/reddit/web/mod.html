@@ -31,70 +31,28 @@
   <div class="header">
     <a href="/" style="text-decoration:none;color:inherits">
       <img src="/img/saito_logo_black.png" style="width:35px;margin-top:5px;margin-left:25px;margin-right:10px;float:left;" />
-      <div style="font-family:Georgia;padding-top:5px;font-size:1.2em;color:#444;">satoshi reddit</div>
+      <div style="font-family:Georgia;padding-top:5px;font-size:1.2em;color:#444;">satoshi reddit - moderation</div>
     </a>
-
-
-
-
   </div>
 
   <div class="main" style="main">
 
-    <div class="discussion" id="discussion">
-
-      <div class="d" id="d">
-        <div class="post_author" id="post_author"></div>
-        <div class="d_votes" id="d_votes">
-	  <div class="votes" id="">
-	    <div class="upvote_wrapper" id="post_upvote"><i class="fa fa-arrow-up upvote post_upvote" aria-hidden="true"></i></div>
-            <div class="votes_total" id="votes_total">1</div>
-            <div class="downvote_wrapper" id="post_downvote"><i class="fa fa-arrow-down downvote post_downvote" aria-hidden="true"></i></div>
-          </div>
-        </div>
-        <div class="d_thumb" id="d_thumb"></div>
-        <div class="d_content" id="d_content">
-          <div style="height: 30px;">
-	  <div class="d_content_title" id="d_content_title">Loading Post...</div>
-  	  <div class="d_content_details" id="d_content_details"></div>
-	  </div>
-        </div>
-      </div>
-      <div class="d_text" id="d_text"></div>
-        <div class="d_votes" id="d_votes">
-	</div>
-
-      <div class="add_comment" id="add_comment">
-        <textarea class="comment_reply_textarea" id="comment_reply_textarea_0"></textarea>
-	<input type="button" class="comment_reply_submit" id="comment_reply_submit_0" value="reply" />
-      </div>
-
-      <div class="comments" id="comments">
-      </div>
-
+    <div class="posts_container">
+      <div class="posts" id="posts"></div>
     </div>
 
     <div class="sidebar" id="sidebar">
-      <div class="submit" id="submit">submit post</div>
-      <div class="balance" id="balance">
-        <div class="saitoname" id="saitoname"></div>
-        <div class="balance_money" id="balance_money">0.0</div>
-        <div class="balance_label" id="balance_label">SAITO</div>
-      </div>
       <div class="advert-402-302" id="advert-402-302"></div>
     </div>
 
   </div>
 
 
-
-
-
   <script src="/socket.io/socket.io.js"></script>
   <script type="text/javascript">
 
     var subreddit = "";
-    var post_id = "";
+    var post_id = "moderate";
     var comment_id = "";
     var load_content_on_load = 1;
 
