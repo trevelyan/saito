@@ -10,16 +10,20 @@
   "license": "GPL",
   "dependencies": {
     "base-58": "0.0.1",
+    "body-parser": "^1.18.2",
     "crypto-browserify": "^3.12.0",
     "express": "^4.16.2",
+    "express-fileupload": "^0.3.0",
     "merkle-tree-gen": "^1.1.0",
     "node-cryptojs-aes": "^0.4.0",
+    "phantom": "^4.0.11",
+    "phantomjs": "^2.1.7",
     "request": "^2.83.0",
     "secp256k1": "^3.3.1",
     "sha256": "^0.2.0",
     "socket.io": "^2.0.4",
     "socket.io-client": "^2.0.4",
     "sqlite3": "^3.1.13",
-    "sync-prompt": "file:node_modules/sync-prompt"
+    "url-parse": "^1.2.0"
   }
 }
