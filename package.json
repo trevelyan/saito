@@ -16,8 +16,6 @@
     "express-fileupload": "^0.3.0",
     "merkle-tree-gen": "^1.1.0",
     "node-cryptojs-aes": "^0.4.0",
-    "phantom": "^4.0.11",
-    "phantomjs": "^2.1.7",
     "request": "^2.83.0",
     "secp256k1": "^3.3.1",
     "sha256": "^0.2.0",
