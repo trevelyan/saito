@@ -9,7 +9,7 @@ by combining a transient blockchain with a security method that
 compensates nodes in the peer-to-peer network for providing bandwidth to 
 the network as a whole.
 
-
+ 
 * STEP 1: INSTALLATION *
 
 Saito is programmed in NodeJS. Please make sure you are running an up-to-
