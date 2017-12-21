@@ -1,9 +1,15 @@
 
-1. webpage snapshots are handled by wkhtmltopdf:
+1. webpage snapshots are handled by wkhtmltopdf in concert with phantomJS
 
 https://wkhtmltopdf.org/downloads.html
 
-UBUNTU: apt-get install wkhtmltopdg
+// xvfb is needed to run wkhtmltoimage (which is included with wkhtmltopdf)
+
+// if XVFB doesn't install just edit reddit.js to remove xvfb-run before the wkhtmltoimage command -- SVFB is used to run the software headless under Debian-based systems
+
+apt-get install wkhtmltopdf
+apt-get install xvfb
+
 
 
 

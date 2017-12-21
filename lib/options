@@ -1,6 +1,1 @@
-{
-"server":{"host":"localhost","port":12101,"publickey":""},
-"peers":[{"host":"saito.tech","port":12101,"publickey":"","speed":1000}],
-"dns":[{"domain":"satoshi","host":"localhost","port":12101,"publickey":"hcRBiPjKjPynu24WNuEKcoJQXDHaRxbq1dXAkJjJCeoN"}]
-}
-
+{"server":{"host":"saito.tech","port":12101,"publickey":"2AKNPPaYNm5B65Cz3TTTF939PTDqWfVh38FbDZ3ACppbK"},"peers":[],"dns":[{"domain":"satoshi","host":"saito.tech","port":12101,"publickey":"2AKNPPaYNm5B65Cz3TTTF939PTDqWfVh38FbDZ3ACppbK"}],"wallet":{"balance":"1041.66666666","privateKey":"13085e6aecde7366661978f87afe46c8814d805f19bcb577577bb141dae1ef58","publicKey":"2AKNPPaYNm5B65Cz3TTTF939PTDqWfVh38FbDZ3ACppbK","identifier":"","utxi":[{"add":"2AKNPPaYNm5B65Cz3TTTF939PTDqWfVh38FbDZ3ACppbK","amt":"520.83333333","gt":1,"bid":2,"tid":1,"sid":0,"bhash":"81b23afb177b45f25d2c92e0fb310dbdbcb51e1040eeb692b6f2cfbab712631f","lc":1,"ft":0},{"add":"2AKNPPaYNm5B65Cz3TTTF939PTDqWfVh38FbDZ3ACppbK","amt":"520.83333333","gt":1,"bid":2,"tid":1,"sid":1,"bhash":"81b23afb177b45f25d2c92e0fb310dbdbcb51e1040eeb692b6f2cfbab712631f","lc":1,"ft":0}],"utxo":[],"version":1.4},"blockchain":{"latest_block_id":2,"genesis_block_id":0,"fork_id":""},"voter":{"vote_difficulty":0,"target_difficulty":2,"vote_paysplit":0,"target_paysplit":0.5},"keys":[],"archives":[],"modules":[]}
