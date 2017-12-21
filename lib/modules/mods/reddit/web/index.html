@@ -54,6 +54,12 @@
         <input type="button" class="submit_button" id="submit_button" value="publish to network" />
       </div>
       <div class="posts" id="posts">&nbsp;</div>
+      <div class="paginate" id="paginate">
+	<div class="last" id="last">last</div>
+	<div class="page" id="page"></div>
+	<div class="next" id="next">next</div>
+      </div>
+
     </div>
 
     <div class="sidebar" id="sidebar">
@@ -66,6 +72,7 @@
       </div>
 
       <div class="advert-300-250" id="advert-300-250"></div>
+
     </div>
 
   </div>
@@ -102,6 +109,7 @@
     var post_id = "";
     var comment_id = "";
     var load_content_on_load = 1;
+    var offset = 0;
 
     $.getScript( "/browser.js?id=8234243", function( data, textStatus, jqxhr ) {
       $('.loader').hide();

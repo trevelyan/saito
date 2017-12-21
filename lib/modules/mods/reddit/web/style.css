@@ -540,3 +540,43 @@ textarea {
 }
 
 
+.paginate {
+ width: 300px;
+ margin-left:auto;
+ margin-right:auto;
+}
+.last {
+ cursor: pointer;
+ float:left;
+ padding-top: 3px;
+ padding-bottom: 3px;
+ padding-left: 10px;
+ padding-right: 10px;
+ border: 1px solid #888;
+ background-color: #F7F7F7;
+ width: 35px;
+ text-align: center;
+}
+.next {
+ cursor: pointer;
+ margin-left: 10px;
+ float:left;
+ padding-top: 3px;
+ padding-bottom: 3px;
+ padding-left: 10px;
+ padding-right: 10px;
+ border: 1px solid #888;
+ background-color: #F7F7F7;
+ width: 35px;
+ text-align: center;
+}
+.page {
+ float: left;
+ margin-left: 10px;
+ padding-left: 10px;
+ padding-rignt: 10px;
+ padding-top: 5px;
+ margin-right: 10px;
+}
+
+
