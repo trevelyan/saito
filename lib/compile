@@ -19,8 +19,8 @@ else
 fi
 
 
-rm -f modules/mods/reddit/web/cache/*
-rm -f modules/mods/advert/web/cache/*
+rm -f modules/mods/reddit/web/cache/*.html
+rm -f modules/mods/advert/web/cache/*.html
 
 rm -f saito/web/browser.js.gz
 rm -f data/database.sq3
