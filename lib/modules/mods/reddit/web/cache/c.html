@@ -54,7 +54,7 @@
         <input type="button" class="submit_button" id="submit_button" value="publish to network" />
       </div>
       <div class="loading_posts" id="loading_posts">Loading....</div>
-      <div class="posts" id="posts">&nbsp;</div>
+      <div class="posts" id="posts">      <div class="post" id="post_U4u8xX2mKm7K3N4ZzzjSiKQ5ufb4LrWh1q5WwondUmMLdC9DTLb8322hMnHhScvZSQ2qQ1eiYEwMTwiuesVXMx9">        <div class="post_author" id="post_author_U4u8xX2mKm7K3N4ZzzjSiKQ5ufb4LrWh1q5WwondUmMLdC9DTLb8322hMnHhScvZSQ2qQ1eiYEwMTwiuesVXMx9">tUB4EYFLPFv45HeAQTSw7Hgr4YtwAyqearjzqigYXavm</div>        <div class="votes">          <div class="upvote_wrapper" id="post_upvote_U4u8xX2mKm7K3N4ZzzjSiKQ5ufb4LrWh1q5WwondUmMLdC9DTLb8322hMnHhScvZSQ2qQ1eiYEwMTwiuesVXMx9"><i class="fa fa-arrow-up upvote post_upvote" aria-hidden="true"></i></div>          <div class="votes_total" id="votes_total_U4u8xX2mKm7K3N4ZzzjSiKQ5ufb4LrWh1q5WwondUmMLdC9DTLb8322hMnHhScvZSQ2qQ1eiYEwMTwiuesVXMx9">1</div>          <div class="downvote_wrapper" id="post_downvote_U4u8xX2mKm7K3N4ZzzjSiKQ5ufb4LrWh1q5WwondUmMLdC9DTLb8322hMnHhScvZSQ2qQ1eiYEwMTwiuesVXMx9"><i class="fa fa-arrow-down downvote post_downvote" aria-hidden="true"></i></div>        </div>        <div class="thumbnail"><img src="/r/screenshots/3.png" class="thumbnail_image" onerror="this.src='/img/saito_logo_grey.png'" /></div>        <div class="content">          <div class="content_title"><a href="http://c.com">c</a><div class="content_site">(<a href="http://c.com">c.com</a>)</div></div>          <div class="content_details">submitted by <span class="post_author_clickable" id="post_author_clickable_U4u8xX2mKm7K3N4ZzzjSiKQ5ufb4LrWh1q5WwondUmMLdC9DTLb8322hMnHhScvZSQ2qQ1eiYEwMTwiuesVXMx9">tUB4EYFLPFv45HeAQT...</span> to <a href="/r/c">/r/c</a></div>          <div class="content_links">            <a href="/r/c/U4u8xX2mKm7K3N4ZzzjSiKQ5ufb4LrWh1q5WwondUmMLdC9DTLb8322hMnHhScvZSQ2qQ1eiYEwMTwiuesVXMx9" class="content_link content_link_comments">read comments</a>            <div class="content_link content_link_report" id="content_link_report_U4u8xX2mKm7K3N4ZzzjSiKQ5ufb4LrWh1q5WwondUmMLdC9DTLb8322hMnHhScvZSQ2qQ1eiYEwMTwiuesVXMx9">report</div>          </div>        </div>      </div>  </div>
       <div class="paginate" id="paginate">
 	<div class="last" id="last">last</div>
 	<div class="page" id="page"></div>
@@ -106,10 +106,10 @@
   <script src="/socket.io/socket.io.js"></script>
   <script type="text/javascript">
 
-    var subreddit = "";
+    var subreddit = "c";
     var post_id = "";
     var comment_id = "";
-    var load_content_on_load = 1;
+    var load_content_on_load = 0;
     var offset = 0;
 
     $.getScript( "/browser.js?id=8234243", function( data, textStatus, jqxhr ) {
