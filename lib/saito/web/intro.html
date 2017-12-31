@@ -30,11 +30,23 @@
 
 <p></p>
 
-Saito is a blockchain designed to process terabytes of data each day.
+Saito is a blockchain designed to process terabytes of data each day. In fact, our long-term goal is to handle over 100 terabytes of data on a daily basis.
 
 <p></p>
 
-Why do we need a blockchain capable of processing this volume of data? With such a large amount of space available, Saito allows users to include arbitrary data in a special message field in their transactions. By letting applications use this field to send data across the network, we can create a new class of distributed applications. Publishing "posts" and "status updates" across the blockchain allows us to replace centralized messaging services like Facebook, Twitter and Reddit with truly decentralized alternatives resistant. At the extreme of current data capabilities, we could even take a stab at decentralizing our global email infrastructure: just attach the email message directly to your transaction.
+Why do we need a blockchain capable of processing this volume of data? While scaling payments may be useful, the real answer is that with such a large amount of blockspace available, Saito can afford to let applications send information across the network along with payments. On the software level, Saito does this by attaching a signed message field to all transactions that applications can use to store whatever data they wish. This turns the blockchain into a message-passing architecture that is both decentralized and censorship-resistent.
+
+<p></p>
+
+While there are many projects that are attempting to use blockchain technology to enable non-payment usages, all of them to date have all focused on hard-coding the additional data they need to transmit right into the blockchain, a design decision made in order to avoid blockchain creep. In this light, the difference between them and Saito is that Saito has a more sophisticated method of scaling that allows it to abstract away the entire application layer and let applications define and create their own protocols on the fly.
+
+<p></p>
+
+The end result is a genuine platform for blockchain applications, which can be distinguished from "smart contracts" by virtue of the fact that they run on the edge of the network, just like the applications on your smart phone or computer. As unlike smart contracts, no other computer in the network is forced to run exactly the same code. And it is possible to write extremely CPU-intensive and memory-intensive applications without bringing the servers in the peer-to-peer network to their knees. Not only does this flexibility allow blockchains to be used for applications that have historically been impossible to decentralize, but it allows new types of innovation in application development as applications can be rolled-out, tested and improved without the need for the entire blockchain ecosystem to upgrade.
+
+<p></p>
+
+What can we do with this new type of blockchain? While we have several powerful <a href="/">online demos</a>. One obvious example is to recreate social media in a truly democratic fashion. Our ability to publish "posts" and "status updates" across the blockchain allows us to replace centralized messaging services like Facebook, Twitter and Reddit with truly decentralized alternatives. At the extreme of current data capabilities, we could even take a stab at decentralizing our global email infrastructure: just attach the email message directly to your transaction.
 
 <p></p>
 
@@ -43,6 +55,70 @@ More interesting possibilities emerge once we realize that we can use our big-da
 <p></p>
 
 Essentially, what Saito offers is an entirely new type of blockchain designed to serve as a public infrastructure for public-key cryptography and message-passing. Additionally, Saito solves two fundamental problems in computer science: how to create secure encrypted connections on a distributed network, and how to avoid sybil attacks on nodes in a blockchain. Understanding how and why these work require a more detailed understanding of how Saito works, available in our technical explanation of <a href="/transactions.html">proof-of-transactions</a>.
+
+<p></p>
+
+<h2>Blockchain Scaling</h2>
+
+<p></p>
+
+The following table shows current scaling capabilities, which reflect the time needed to create and process a single Saito block on a 2017 Macbook Air. These figures can be replicated by enabling our Spammer module, which can be used to stress-test the network.
+
+<p></p>
+
+<table class="scaling_table">
+  <tr>
+    <th>Txs</th>
+    <th>Tx Size</th>
+    <th>Blk Size</th>
+    <th>Callbacks</th>
+    <th>Genesis Period</th>
+    <th>Memory Used</th>
+    <th>Processing Time</th>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>1 MB</td>
+    <td>1 MB</td>
+    <td>100</td>
+    <td>20160</td>
+    <td>~200 MB</td>
+    <td>1 second</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>25 MB</td>
+    <td>25 MB</td>
+    <td>100</td>
+    <td>20160</td>
+    <td>~1500 MB</td>
+    <td>3 seconds</td>
+  </tr>
+  <tr>
+    <td>1000</td>
+    <td>0.001 MB</td>
+    <td>1 MB</td>
+    <td>100</td>
+    <td>20160</td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
+
+<style>
+table {
+ min-width: 700px;
+}
+th {
+ text-align: left;
+}
+td { 
+ text-align: left;
+ padding-right:10px;
+}
+
+</style>
+
 
 <p></p>
 
