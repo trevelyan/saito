@@ -62,7 +62,7 @@ Essentially, what Saito offers is an entirely new type of blockchain designed to
 
 <p></p>
 
-The following table shows current scaling capabilities, which reflect the time needed to create and process a single Saito block on a 2017 Macbook Air. These figures can be replicated by enabling our Spammer module, which can be used to stress-test the network.
+The following table shows current scaling capabilities. Specifically, this reflects the amount of time needed for the function indexAndStore() in the saito/blockchain.js file to add a new block to the Saito blockchain, including the time needed to verify inputs on all bundled transactions.
 
 <p></p>
 
@@ -73,7 +73,6 @@ The following table shows current scaling capabilities, which reflect the time n
     <th>Blk Size</th>
     <th>Callbacks</th>
     <th>Genesis Period</th>
-    <th>Memory Used</th>
     <th>Processing Time</th>
   </tr>
   <tr>
@@ -82,7 +81,6 @@ The following table shows current scaling capabilities, which reflect the time n
     <td>1 MB</td>
     <td>100</td>
     <td>20160</td>
-    <td>~200 MB</td>
     <td>1 second</td>
   </tr>
   <tr>
@@ -91,8 +89,7 @@ The following table shows current scaling capabilities, which reflect the time n
     <td>25 MB</td>
     <td>100</td>
     <td>20160</td>
-    <td>~1500 MB</td>
-    <td>3 seconds</td>
+    <td>2 seconds</td>
   </tr>
   <tr>
     <td>1000</td>
@@ -100,8 +97,31 @@ The following table shows current scaling capabilities, which reflect the time n
     <td>1 MB</td>
     <td>100</td>
     <td>20160</td>
-    <td></td>
-    <td></td>
+    <td>2 seconds</td>
+  </tr>
+  <tr>
+    <td>1000</td>
+    <td>0.025 MB</td>
+    <td>25 MB</td>
+    <td>100</td>
+    <td>20160</td>
+    <td>6 seconds</td>
+  </tr>
+  <tr>
+    <td>2000</td>
+    <td>0.001 MB</td>
+    <td>20 MB</td>
+    <td>100</td>
+    <td>20160</td>
+    <td> seconds</td>
+  </tr>
+  <tr>
+    <td>1000</td>
+    <td>0.05 MB</td>
+    <td>50 MB</td>
+    <td>100</td>
+    <td>20160</td>
+    <td>27 seconds</td>
   </tr>
 </table>
 
@@ -119,6 +139,10 @@ td {
 
 </style>
 
+
+<p></p>
+
+These figures can be replicated by enabling our Spammer module, which can be used to stress-test the network at various levels of stress. In practice, the figures will be elevated as they necessarily include the time needed to save transactions to a local wallet.
 
 <p></p>
 
