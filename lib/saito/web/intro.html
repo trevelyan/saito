@@ -30,23 +30,23 @@
 
 <p></p>
 
-Saito is a blockchain designed to process terabytes of data each day. In fact, our long-term goal is to handle over 100 terabytes of data on a daily basis.
+Saito is a blockchain designed to process terabytes of data on a rolling basis. Our long-term goal is to handle over 100 terabytes of data each day, with the same levels of security and transaction irreversibility as bitcoin.
 
 <p></p>
 
-Why do we need a blockchain capable of processing this volume of data? While scaling payments may be useful, the real answer is that with such a large amount of blockspace available, Saito can afford to let applications send information across the network along with payments. On the software level, Saito does this by attaching a signed message field to all transactions that applications can use to store whatever data they wish. This turns the blockchain into a message-passing architecture that is both decentralized and censorship-resistent.
+Why do we need a blockchain capable of processing this volume of data? While scaling payments is one idea, the real answer is that with such a large amount of blockspace available, Saito can let applications send information across its network along with their payments. On the software level, Saito does this by including a signed message field in every transaction that applications can use to store whatever data they wish. Letting applications read and write this data then turns our blockchain into a message-passing architecture that is both decentralized and censorship-resistent.
 
 <p></p>
 
-While there are many projects that are attempting to use blockchain technology to enable non-payment usages, all of them to date have all focused on hard-coding the additional data they need to transmit right into the blockchain, a design decision made in order to avoid blockchain creep. In this light, the difference between them and Saito is that Saito has a more sophisticated method of scaling that allows it to abstract away the entire application layer and let applications define and create their own protocols on the fly.
+While there are various projects that attempt to use blockchain technology to enable non-payment usages, none has the flexibility or scalability of Saito, as they hard-code the additional data they need right into the blockchain. This decision -- made to minimize the amount of data required for storage on the blockchain -- is a product of the underlyinh design of their underlying blockchains, which require all nodes in the network to store all network data in perpetuity. Because Saito has a more sophisticated method of scaling, our network can afford to abstract away the entire application layer and let applications format their transactions however they would prefer. All applications which run on the network can define and upgrade their protocols on the fly: applications that require more data will simply need to pay a slightly higher fee than those transferring minimal amounts of data.
 
 <p></p>
 
-The end result is a genuine platform for blockchain applications, which can be distinguished from "smart contracts" by virtue of the fact that they run on the edge of the network, just like the applications on your smart phone or computer. As unlike smart contracts, no other computer in the network is forced to run exactly the same code. And it is possible to write extremely CPU-intensive and memory-intensive applications without bringing the servers in the peer-to-peer network to their knees. Not only does this flexibility allow blockchains to be used for applications that have historically been impossible to decentralize, but it allows new types of innovation in application development as applications can be rolled-out, tested and improved without the need for the entire blockchain ecosystem to upgrade.
+The end result is a new platform for blockchain applications, which can be distinguished from "smart contracts" by virtue of the fact that they run on the edge of the network and have no limitations on computational resources other than those imposed by the end-node itself. As unlike with smart contracts, under Saito it is possible to write extremely CPU-intensive and memory-intensive applications without bringing the servers in the peer-to-peer network to their knees. Not only does this flexibility allow the Saito blockchain to be used for applications that have historically been impossible to decentralize, but it allows new types of innovation in application development as applications can be rolled-out, tested and improved without the need for the entire blockchain ecosystem to upgrade.
 
 <p></p>
 
-What can we do with this new type of blockchain? While we have several powerful <a href="/">online demos</a>. One obvious example is to recreate social media in a truly democratic fashion. Our ability to publish "posts" and "status updates" across the blockchain allows us to replace centralized messaging services like Facebook, Twitter and Reddit with truly decentralized alternatives. At the extreme of current data capabilities, we could even take a stab at decentralizing our global email infrastructure: just attach the email message directly to your transaction.
+What can we do with this new type of blockchain? Our <a href="/">online demos</a> showcase several possibilities: decentralized email and social media platforms. In the latter case, our ability to publish "posts" and "status updates" across the blockchain allows us to replace centralized messaging services like Facebook, Twitter and Reddit with truly peer-to-peer alternatives. At the extreme of current data capabilities, we could even take a stab at decentralizing our global email infrastructure: just attach the email message directly to your transaction.
 
 <p></p>
 
@@ -62,7 +62,7 @@ Essentially, what Saito offers is an entirely new type of blockchain designed to
 
 <p></p>
 
-The following table shows current scaling capabilities. Specifically, this reflects the amount of time needed for the function indexAndStore() in the saito/blockchain.js file to add a new block to the Saito blockchain, including the time needed to verify inputs on all bundled transactions.
+The following table shows current scaling capabilities. The time estimates in the table below reflects the amount of time needed for the function indexAndStore() to add a new block to the blockchain. The data is based on current code as of January 2, 2018 and includes the time needed to verify inputs on all bundled transactions along with the indexing and storage of block data.
 
 <p></p>
 
@@ -113,7 +113,7 @@ The following table shows current scaling capabilities. Specifically, this refle
     <td>20 MB</td>
     <td>100</td>
     <td>20160</td>
-    <td> seconds</td>
+    <td>7 seconds</td>
   </tr>
   <tr>
     <td>1000</td>
@@ -142,7 +142,7 @@ td {
 
 <p></p>
 
-These figures can be replicated by enabling our Spammer module, which can be used to stress-test the network at various levels of stress. In practice, the figures will be elevated as they necessarily include the time needed to save transactions to a local wallet.
+These figures can be replicated by enabling our Spammer module, which can be used to stress-test the software. They were produced on a 2017 Macbook Air: professional servers with larger amounts of memory will perform better on-average.
 
 <p></p>
 
