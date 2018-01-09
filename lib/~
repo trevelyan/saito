@@ -101,8 +101,8 @@ function Blockchain(app) {
 
   // 1 week blockchain, 30 second blocks = 20160
   this.max_heartbeat           = 120;       // burn fee hits zero every 120 seconds
-  this.genesis_period          = 100;       // number of blocks before money disappears
-  this.fork_guard              = 5;        // discard forks that fall N blocks behind
+  this.genesis_period          = 10;       // number of blocks before money disappears
+  this.fork_guard              = 40;        // discard forks that fall N blocks behind
   this.callback_limit	       = 100;        // only run callbacks on the last X blocks
 
 
@@ -941,11 +941,10 @@ console.log("\n\n ------------- UPDATE GENESIS BLOCK --------------- ");
     // we use the purge_id variable since our functions inside
     // need to delete from wallet slips, which requires genesis
     // block_id to be set properly. 
-    return this.purgeArchivedData(purge_id, pos);
+    this.purgeArchivedData(purge_id, pos) ;
 
   }
 
-  return pos;
 }
 
 Blockchain.prototype.returnLastSharedBlockId = function returnLastSharedBlockId(fork_id, latest_known_block_id) {
