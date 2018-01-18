@@ -31,6 +31,7 @@ done
 
 rm -f saito/web/browser.js.gz
 rm -f data/database.sq3
+rm -f data/blocks/*.blk
 rm -f options
 rm -f modules/mod/registry/web/addresses.txt
 cp options.conf options
