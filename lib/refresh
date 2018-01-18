@@ -18,6 +18,17 @@ else
 
 fi
 
+
+for d in modules/mods/* ; do
+ if [ -f $d/refresh ] ; then
+   chmod +x $d/refresh
+   $d/refresh
+ fi
+done
+
+
+
+
 rm -f saito/web/browser.js.gz
 #rm -f data/database.sq3
 #rm -f options

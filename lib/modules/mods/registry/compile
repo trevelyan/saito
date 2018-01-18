@@ -1,0 +1,4 @@
+
+rm -f modules/mods/registry/web/addresses.txt
+touch modules/mods/registry/web/addresses.txt
+

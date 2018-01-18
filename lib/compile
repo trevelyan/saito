@@ -19,8 +19,15 @@ else
 fi
 
 
-rm -f modules/mods/reddit/web/cache/*.html
-rm -f modules/mods/advert/web/cache/*.html
+
+for d in modules/mods/* ; do
+ if [ -f $d/compile ] ; then
+   chmod +x $d/compile
+   $d/compile
+ fi
+done
+
+
 
 rm -f saito/web/browser.js.gz
 rm -f data/database.sq3

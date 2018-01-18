@@ -1,1 +1,1 @@
-{"archives":[],"keys":[],"peers":[{"host":"localhost","port":12101,"publickey":"rf3uC6ex4vxP6pijKoYsiQUtNAFCBnFqy34k3Zt8Jxnq"}],"dns":[],"blockchain":{"lastblock":1}}
+{"archives":[],"keys":[],"peers":[{"host":"localhost","port":12101,"publickey":"2AKNPPaYNm5B65Cz3TTTF939PTDqWfVh38FbDZ3ACppbK"}],"dns":[{"domain":"satoshi","host":"localhost","port":12101,"publickey":"2AKNPPaYNm5B65Cz3TTTF939PTDqWfVh38FbDZ3ACppbK"}],"blockchain":{"lastblock":3}}

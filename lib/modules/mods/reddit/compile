@@ -1,0 +1,5 @@
+
+rm -f modules/mods/reddit/web/cache/*.html
+
+
+
