@@ -1,5 +1,4 @@
 
 rm -f modules/mods/reddit/web/cache/*.html
-
-
+rm -f modules/mods/reddit/web/screenshots/*.png
 
