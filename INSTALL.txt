@@ -1,0 +1,55 @@
+
+
+**********
+* STEP 1 *
+**********
+
+Download Google's Dense Hashmap implementation:
+
+    git clone https://github.com/sparsehash/sparsehash
+
+If you cannot download this file, we have included a recent working
+version inside the "extras" directory in this distribution. You can 
+install it by entering the relevant directory and installing it:
+
+    cd extras/sparsehash/sparsehash
+    ./configure
+    make
+    make install
+
+
+
+**********
+* STEP 2 *
+**********
+
+Install required NodeJS dependencies:
+
+    npm install
+
+If you run into any problems at this point please write us and let us
+know and we'll figure out the problem and update this file. Otherwise
+you should be ready to run Saito.
+
+
+
+**********
+* STEP 3 *
+**********
+
+Enter the /lib directory and try:
+
+  node --max_old_space_size=4144 start.js
+
+If you wish to run Saito on a server and close your connection to the 
+server while continuing to run Saito in background mode, enter this
+command instead:
+
+  nohup node --max_old_space_size=6144 start.js > saito.log 2> saito.err &
+
+Wait a few seconds after starting the program and type "Cntl-C". You
+will see the ^C carat printed at the terminal line but get no other
+indications of change. You should then type "exit" to close your 
+terminal. Saito will continue to run in the background.
+
+

@@ -1,0 +1,100 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Saito Module Creator</title>
+
+  <script type="text/javascript" src="/jquery/jquery-3.2.1.min.js"></script>
+  <link rel="stylesheet" href="/jquery/jquery-ui.min.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/jquery/jquery-ui.min.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="/remix/style.css" />
+
+</head>
+<body>
+
+  <div id="Remix_browser_active"></div>
+
+  <div class="header">
+    <a href="/" class="logo_link">
+      <img src="/img/saito_logo_black.png" class="logo" />
+      <div class="logo_text">saito</div>
+    </a>
+  </div>
+
+  <div class="loader">
+
+    Loading our Saito IDE, please wait....
+
+  </div>
+
+
+  <div class="main" id="main" style="display:none">
+    <form target="_remixapp" method="post" action="/remix/submit"> 
+
+    Our Remix module allows you to create and test Saito modules in your browser without the need for installing the full application.
+
+    <br />
+
+    <input type="button" style="clear:both;margin-top:15px" id="new_module_button" class="new_module_button" value="new module" />
+
+    <p></p>
+
+    <div id="editor" class="editor">
+	<div id="menu" class="menu">
+	  <div id="js_menu" class="js_menu">javascript</div>
+	  <div id="html_menu" class="html_menu">html</div>
+	</div>
+        <textarea name="code" class="code" id="code"></textarea>
+        <textarea name="html" class="html" id="html"></textarea>
+        <p></p>
+        <input type="hidden" id="remix_module_name" class="remix_module_name" name="remix_module_name" />
+    </div>
+    <div id="controls" class="controls">
+      <div id="ide_instructions" class="ide_instructions">
+
+	You have created a basic application. Now add email or web-app features:
+
+	<p></p>
+
+	<input type="button" name="new_module_email_callbacks" id="new_module_email_callbacks" class="ide_button new_module_email_callbacks" value="Add Email Callbacks" />
+
+	<p></p>
+
+	<input type="button" name="new_module_webapp_callbacks" id="new_module_webapp_callbacks" class="ide_button new_module_webapp_callbacks" value="Add WebApp Callbacks" />
+
+	<p></p>
+
+	When you are done, click "deploy" to bundle your application into a standalone javascript
+	module and see it online.
+
+	<p></p>
+
+        <input type="submit" id="remix_submit" class="remix_submit ide_button" value="deploy" />
+
+      </div>
+    </div>
+    </form>
+  </div>
+
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript">
+
+    $.getScript( "/browser.js?id=8234243", function( data, textStatus, jqxhr ) {
+      $('.loader').hide();
+      $('.main').show();
+    });
+
+  </script>
+
+
+
+
+</body>
+</html>
+

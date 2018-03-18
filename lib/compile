@@ -34,11 +34,16 @@ rm -f data/database.sq3
 rm -f data/*.sq3
 rm -f data/*.sq3-journal
 rm -f data/blocks/*.blk
+rm -f data/blocks/*.zip
+rm -f data/blocks/*.segadd
+rm -f data/tmp/*.blk
+rm -f data/tmp/*.zip
 rm -f options
 rm -f modules/mod/registry/web/addresses.txt
 cp options.conf options
 
-browserify browser.js -o saito/web/browser.js -i express -i sqlite3 -i express-basic-auth -i sendgrid -i request -i keythereum -i bluebird -i socket.io -i phantomjs -i express-fileupload -i body-parser
+browserify browser.js -o saito/web/browser.js -i express -i sqlite3 -i express-basic-auth -i sendgrid -i request -i bluebird -i socket.io -i phantomjs -i express-fileupload -i body-parser -i shashmap -i http -i http-proxy -i simple-socks -i unzip -i node-zip -i shelljs
+
 #cd saito/web
 #gzip -k browser.js
 #./compile

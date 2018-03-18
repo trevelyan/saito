@@ -1,0 +1,114 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Demo Application</title>
+
+  <script type="text/javascript" src="/jquery/jquery-3.2.1.min.js"></script>
+  <link rel="stylesheet" href="/jquery/jquery-ui.min.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="/jquery/jquery-ui.min.js"></script>
+
+</head>
+<body>
+
+  <div id="RemixApp_browser_active"></div>
+
+  <div class="header">
+    <a href="/" class="logo_link">
+      <img src="/img/saito_logo_black.png" class="logo" />
+      <div class="logo_text">saito</div>
+    </a>
+  </div>
+
+  <div class="loader">
+
+    Loading application, please wait....
+
+  </div>
+
+  <div class="main" id="main" style="display:none">
+
+    This is your Saito address:
+
+    <p></p>
+
+    <div id="saito_address" class="saito_address"></div>
+
+    <p></p>
+
+    <input type="button" name="saito_button" id="saito_button" class="saito_button" value="click me!" />
+
+  </div>
+
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript">
+
+    $.getScript( "../js/browser.js", function( data, textStatus, jqxhr ) {
+      $('.loader').hide();
+      $('.main').show();
+    });
+
+  </script>
+
+
+  <style type="text/css">
+
+    .body {
+      font-family: arial, helvetica, sans-serif;
+      font-size: 13px;
+      padding:0px;
+      margin:0px;
+    }
+
+    .header {
+      width: 100%;
+      height: 50px;
+      border-bottom: 1px solid #a5a5a5;
+      font-size:2em;
+    }
+
+    .logo {
+      width:35px;
+      margin-top:5px;
+      margin-left:25px;
+      margin-right:10px;
+      float:left;
+    }
+
+    .logo_link {
+      text-decoration:none;
+      color:inherits
+    }
+
+    .logo_text {
+      font-family:Georgia;
+      padding-top:0px;
+      font-size:1.2em;
+      color:#444;
+    }
+
+    .loader {
+      padding: 30px;
+      width: 100%;
+      max-width: 600px;
+      font-size: 2em;
+      line-height: 1.8em;
+    }
+
+    .main {
+      width: 80%;
+      max-width: 640px;
+      padding: 40px;
+      font-size:1.2em;
+    }
+
+  </style>
+
+</body>
+</html>
+

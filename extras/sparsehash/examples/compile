@@ -1,0 +1,2 @@
+g++ -I /usr/local/include/sparsehash test.cpp -o test.o
+

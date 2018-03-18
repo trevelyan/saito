@@ -1,37 +1,19 @@
 
 
-Saito is blockchain for big-data applications.
+* COMPILING VERSUS REFRESHING *
 
-Our goal is supporting a decentralized layer of free-speech applications
-like Gmail, Twitter and Facebook on an open-access blockchain that makes
-censorship effectively impossible. We achieve the scalability to do this 
-by combining a transient blockchain with a security method that 
-compensates nodes in the peer-to-peer network for providing bandwidth to 
-the network as a whole.
-
- 
-* STEP 1: INSTALLATION *
-
-Make sure you are running an up-to-date version fo Node (version 8.0 or
-greater). Then install Saito as you would any other application:
-
-npm install
-
-You may need to manually install the following two modules:
-
-npm install keythereum
-npm install sqlite3
-
-
-* STEP 2: ALTERNATE CONFIGURATIONS *
-
-Note: if you make ANY changes to the source code, you should recompile
-the source code to recreate the javascript file that will be given to 
-lite-clients that connect to your server. You can do this by entering 
-the lib/ directory and typing:
+We include two files in the /lib directory that are useful for development. 
+The difference is that "compile" will wipe-out the database and reset your 
+server "options" file (i.e. resetting the wallet). The "refresh" script 
+simply updates the javascript file that is produced for browsers without 
+deleting any information on the server.
 
 ./compile  (to purge all blockchain data)
 ./refresh  (to preserve blockchain data)
+
+
+
+* CONFIGURATION OPTIONS *
 
 The configuration settings for your server will be saved in the options 
 file in the /lib directory. This file will also be used as your wallet
@@ -40,38 +22,22 @@ storing transaction inputs and outputs.
 If you are setting up a new server, the simplest options file is:
 
 {
-"server":{"host":"localhost","port":12100,"publickey":""}
+"server":{"host":"localhost","port":12101,"publickey":""}
 }
 
+This will run a server on your machine on port 12101. For more 
+complex options, you can edit the options.conf file to update
+the defaults.
 
 
-* STEP 3: USING SAITO *
 
-To run Saito just enter the lib/ directory and start the software:
+* RUNNING SAITO *
 
-node --max_old_space_size=6144 start.js
+Please see the INSTALL file for instructions on getting Saito running. 
+Once the program is executing, you can connect to Saito through your 
+browser:
 
-We recommend allocating 6 GB of memory for the application if you are
-planning to run a production server. If you are playing around with 
-the software and running a local version, there is no need for extra
-memory allocation.
-
-If you wish to run the software as a background service, do the following:
-
-nohup node --max_old_space_size=6144 start.js > saito.log 2> saito.err &
-
-This second command is more useful for remote servers, as it will
-keep Saito running once the connection is closed. To ensure that this
-happens, wait a few seconds after starting the program and type "Cntl-C"
-at the command line. You will see the ^C command printed at the terminal 
-but get no other indication of any changes). Then type "exit" to close 
-your terminal. Saito will now continue running in the background -- note 
-that if you do not hit Cntl-C and/or do not type exit the program will 
-close when you close your terminal window or disconnect from the server.
-
-You can now connect to Saito through your browser:
-
-http://localhost:12100
+http://localhost:12101
 
 If you are interested in developing the application, you can find the 
 default start page for the main server in the source code directory at:
