@@ -10,7 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "David Lancashire",
-  "license": "GPL-3.0",
+  "license": "private - to be determined",
   "dependencies": {
     "base-58": "0.0.1",
     "browserify": "^16.1.0",
