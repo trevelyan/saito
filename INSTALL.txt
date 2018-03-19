@@ -37,15 +37,37 @@ you should be ready to run Saito.
 * STEP 3 *
 **********
 
-Enter the /lib directory and try:
+Install our SHASHMAP module which links NodeJS with the Google Dense Hash Maps
 
-  node --max_old_space_size=4144 start.js
+    cp -rf extras/shashmap node_modules/shashmap
+    cd node_modules/shashmap
+    npm build . --unsafe-perm
+
+Google's implementation includes error-throwing, which is why the last
+line requires the --unsafe-perm exemption. We will try to simplify this
+and move it in the future.
+
+
+
+
+**********
+* STEP 4 *
+**********
+
+Go into the lib directory where our start.js script is found
+
+    cd lib/
+
+And run our "compile" script to refresh the software to a clean state
+for the first time it will run. Then:
+
+    node start.js
 
 If you wish to run Saito on a server and close your connection to the 
 server while continuing to run Saito in background mode, enter this
 command instead:
 
-  nohup node --max_old_space_size=6144 start.js > saito.log 2> saito.err &
+    nohup node --max_old_space_size=6144 start.js > saito.log 2> saito.err &
 
 Wait a few seconds after starting the program and type "Cntl-C". You
 will see the ^C carat printed at the terminal line but get no other
