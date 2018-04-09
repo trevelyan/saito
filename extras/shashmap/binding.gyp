@@ -2,9 +2,9 @@
   "targets": [
     {
       "target_name": "shashmap",
-      "sources": [ "shashmap.cpp" ],
-      "cflags": [ "-fexceptions" ],
-      "cflags_cc": [ "-fexceptions" ]
+      "cflags_cc": [ '-fexceptions' ],
+      "cflags": [ '-fexceptions' ],
+      "sources": [ "shashmap.cpp" ]
     }
   ]
 }

@@ -1,6 +1,4 @@
 {
-"server":{"host":"localhost","port":12101,"publickey":""},
-"peers":[{"host":"saito.tech","port":12101,"publickey":"","speed":1000}],
-"dns":[{"domain":"satoshi","host":"localhost","port":12101,"publickey":"hcRBiPjKjPynu24WNuEKcoJQXDHaRxbq1dXAkJjJCeoN"}]
+"server":{"host":"localhost","port":12101,"publickey":""}
 }
 

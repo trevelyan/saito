@@ -1,33 +1,4 @@
 {
-  "_from": "http://saito.tech/shashmap.tar.gz",
-  "_id": "shashmap@1.0.0",
-  "_inBundle": false,
-  "_integrity": "sha1-WMmfuZp6sLI4DVEpyGXh8kKUzPw=",
-  "_location": "/shashmap",
-  "_phantomChildren": {},
-  "_requested": {
-    "type": "remote",
-    "raw": "shashmap@http://saito.tech/shashmap.tar.gz",
-    "name": "shashmap",
-    "escapedName": "shashmap",
-    "rawSpec": "http://saito.tech/shashmap.tar.gz",
-    "saveSpec": "http://saito.tech/shashmap.tar.gz",
-    "fetchSpec": "http://saito.tech/shashmap.tar.gz"
-  },
-  "_requiredBy": [
-    "/"
-  ],
-  "_resolved": "http://saito.tech/shashmap.tar.gz",
-  "_spec": "shashmap@http://saito.tech/shashmap.tar.gz",
-  "_where": "/Users/admin/Programming/saito",
-  "bundleDependencies": false,
-  "deprecated": false,
-  "description": "To compile, run",
-  "gypfile": true,
-  "main": "./build/Release/shashmap",
   "name": "shashmap",
-  "scripts": {
-    "install": "node-gyp rebuild"
-  },
   "version": "1.0.0"
 }
