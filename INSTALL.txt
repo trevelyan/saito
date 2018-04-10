@@ -1,5 +1,22 @@
 
 
+************************
+* Server Configuration * (pre-install)
+************************
+
+You should have a server with at least 2 GB of RAM and a reasonably up-
+to-date version of NodeJS and NPM installed. If you are setting up a 
+new server, we recommend using Ubuntu, which can be configured to work
+out-of-the-box with Node v9 as follows:
+
+  apt-get update
+  apt-get install g++ make
+  curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+  sudo apt-get install -y nodejs
+
+
+
+
 **********
 * STEP 1 *
 **********
