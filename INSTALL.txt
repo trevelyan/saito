@@ -7,6 +7,10 @@
 Download Google's Dense Hashmap implementation:
 
     git clone https://github.com/sparsehash/sparsehash
+    cd sparsehash
+    ./configure
+    make
+    make install
 
 If you cannot download this file, we have included a recent working
 version inside the "extras" directory in this distribution. You can 
@@ -37,23 +41,6 @@ you should be ready to run Saito.
 * STEP 3 *
 **********
 
-Install our SHASHMAP module which links NodeJS with the Google Dense Hash Maps
-
-    cp -rf extras/shashmap node_modules/shashmap
-    cd node_modules/shashmap
-    npm build . --unsafe-perm
-
-Google's implementation includes error-throwing, which is why the last
-line requires the --unsafe-perm exemption. We will try to simplify this
-and move it in the future.
-
-
-
-
-**********
-* STEP 4 *
-**********
-
 Go into the lib directory where our start.js script is found
 
     cd lib/
@@ -63,11 +50,16 @@ for the first time it will run. Then:
 
     node start.js
 
+This will start a version of Saito running on LOCALHOST. When we launch
+our testnet we will change this package to connect to testnet by default.
+Until then, connecting to the testnet needs to be manually enabled, but 
+the local version can still be used for testing and app development.
+
 If you wish to run Saito on a server and close your connection to the 
 server while continuing to run Saito in background mode, enter this
 command instead:
 
-    nohup node --max_old_space_size=6144 start.js > saito.log 2> saito.err &
+    nohup node --max_old_space_size=4144 start.js > saito.log 2> saito.err &
 
 Wait a few seconds after starting the program and type "Cntl-C". You
 will see the ^C carat printed at the terminal line but get no other

@@ -1,53 +1,44 @@
 
+/////////////////////
+// GETTING STARTED //
+/////////////////////
+If you just downloaded Saito and want to get it running, please read our 
+INSTALL.txt file instead of this one. This README contains more general
+information that might be useful for developers getting started.
 
-* COMPILING VERSUS REFRESHING *
 
+
+/////////////////////////////////
+// COMPILING VERSUS REFRESHING //
+/////////////////////////////////
 We include two files in the /lib directory that are useful for development. 
 The difference is that "compile" will wipe-out the database and reset your 
-server "options" file (i.e. resetting the wallet). The "refresh" script 
-simply updates the javascript file that is produced for browsers without 
-deleting any information on the server.
+server "options" file. The "refresh" script simply updates the javascript 
+file that is produced for browsers without deleting any information.
 
 ./compile  (to purge all blockchain data)
 ./refresh  (to preserve blockchain data)
 
 
 
-* CONFIGURATION OPTIONS *
-
-The configuration settings for your server will be saved in the options 
-file in the /lib directory. This file will also be used as your wallet
-storing transaction inputs and outputs. 
-
-If you are setting up a new server, the simplest options file is:
-
-{
-"server":{"host":"localhost","port":12101,"publickey":""}
-}
-
-This will run a server on your machine on port 12101. For more 
-complex options, you can edit the options.conf file to update
-the defaults.
-
-
-
-* RUNNING SAITO *
-
+////////////////////
+// FOR DEVELOPERS // 
+////////////////////
 Please see the INSTALL file for instructions on getting Saito running. 
 Once the program is executing, you can connect to Saito through your 
 browser:
 
 http://localhost:12101
 
-If you are interested in developing the application, you can find the 
-default start page for the main server in the source code directory at:
+You can find the default start page for this webpage in our source code
+directory at the following location:
 
 lib/saito/web/index.html
 
 Most of the user-driven functionality is coded in optional modules that 
 create web applications. Our blockchain explorer, for instance, is just 
-a regular Saito application module (info). The file that controls which 
-modules are loaded is:
+a regular Saito application module. The file that controls which modules 
+are loaded by any server is:
 
 lib/modules/mods.js
 
@@ -58,7 +49,7 @@ act as simple tutorials on how to code your own applications.
 
 If you have any questions or need help please get in touch:
 
-david@satoshi
+david@saito
 david@popupchinese.com
 
 
