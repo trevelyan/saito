@@ -31,6 +31,7 @@ done
 
 rm -f saito/web/browser.js.gz
 rm -f data/database.sq3
+rm -f data/log.txt
 rm -f data/*.sq3
 rm -f data/*.sq3-journal
 rm -f data/blocks/*.blk
