@@ -50,9 +50,12 @@
     <form method="get" action="/faucet/success"> 
       <input type="text" style="padding:2px;width:640px" name="saito_address" id="saito_address" value="" />
       <p></p>
-      <input type="hidden" id="saito_domain" value="saito.tech" />
+      <input type="hidden" name="domain" id="source_domain" value="saito.tech" />
       <input type="submit" id="faucet_button" class="faucet_button" />
     </form>
+
+    <script>$("#source_domain").val(location.host);</script>
+
 
   </div>
 
