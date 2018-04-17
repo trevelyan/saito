@@ -32,6 +32,7 @@ int validate_existing_slip(std::string slipname, int value);
 int validate_slip_spent(std::string slipname); // is spent (not is spendable in this block) -- for monetary check
 int update_existing_slip(std::string slipname, int value);
 int check_slip_exists(std::string slipname);
+int slip_value(std::string slipname);
 int delete_slip(std::string slipname);
 
 
@@ -135,6 +136,21 @@ void jsDeleteSlip(const FunctionCallbackInfo<Value>& args) {
   args.GetReturnValue().Set(rv);
 
 }
+void jsSlipValue(const FunctionCallbackInfo<Value>& args) {
+
+  //Isolate* isolate = args.GetIsolate();
+
+  ///////////////
+  // variables //
+  ///////////////
+  v8::String::Utf8Value param1(args[0]->ToString());
+  std::string slipname = std::string(*param1);
+
+  int rv = slip_value(slipname);
+
+  args.GetReturnValue().Set(rv);
+
+}
 
 
 
@@ -165,6 +181,7 @@ void init(Local<Object> exports) {
   NODE_SET_METHOD(exports, "validate_slip",  jsValidateSlip);
   NODE_SET_METHOD(exports, "validate_slip_spent",  jsValidateSlipSpent);
   NODE_SET_METHOD(exports, "exists_slip",  jsExistsSlip);
+  NODE_SET_METHOD(exports, "slip_value",  jsSlipValue);
   NODE_SET_METHOD(exports, "delete_slip",  jsDeleteSlip);
 
 }

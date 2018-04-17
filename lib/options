@@ -1,4 +1,1 @@
-{
-"server":{"host":"localhost","port":12101,"publickey":""}
-}
-
+{"server":{"host":"localhost","port":12101,"publickey":""},"peers":[{"host":"saito.tech","port":12101,"publickey":"","speed":1000}],"dns":[{"domain":"saito","host":"saito.tech","port":12101,"publickey":"nR2ecdN7cW91nxVaDR4uXqW35GbAdGU5abzPJ9PkE8Mn"}],"wallet":{"balance":0,"privateKey":"6eef312297d3ff35ce4c673a37efcaa569ccbd9ebf380cda45f0c3ca9413e297","publicKey":"y8Tg39azvp2ECJBEuQ8PW1dhz3nRBjPsjfq2DCdRwJvB","identifier":"","utxi":[],"utxo":[],"version":1.54},"blockchain":{"latest_block_ts":1523952340241,"latest_block_hash":"61101849ec125a6be8038f248095f6bb8e33f69e3faa2e2338e742c319147cb0","latest_block_id":8,"genesis_block_id":0,"fork_id":""},"voter":{"vote_on_difficulty":0,"target_difficulty":2,"vote_on_paysplit":0,"target_paysplit":0.5},"keys":[],"archives":[],"modules":[]}

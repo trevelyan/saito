@@ -2,5 +2,5 @@
   "name": "shashmap",
   "main": "./build/Release/shashmap",
   "homepage": "https://github.com/trevelyan/shashmap",
-  "version": "1.0.2"
+  "version": "1.0.3"
 }
