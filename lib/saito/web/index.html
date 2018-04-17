@@ -13,11 +13,14 @@
   <script type="text/javascript" src="/jquery/jquery-ui.min.js"></script>
 
   <link rel="stylesheet" type="text/css" href="style.css" />
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/intro.js"></script>
+  <script type="text/javascript" src="saito-intro.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/introjs.min.css" />
 </head>
 <body>
 
     <div class="header">
+<span id="show-intro" style="cursor:pointer;float: right; margin-right: 25px; font-size: 16px; background-color: #990000; color: #FFF; padding: 10px; text-align: center; margin-top: 5px; border-radius: 3px;" class="btn btn-primary" onclick="startIntro();">Show Introduction</span>
       <a href="/" class="logo_link">
         <img src="/img/saito_logo_black.png" class="logo" />
         <div class="logo_text">saito</div>
@@ -25,26 +28,54 @@
     </div>
 
     <div class="main">
+<p>
 Try some blockchain applications running on the Saito Network:
 
 <ul>
- <li><a href="email/">Saito Email</a> (laptop version) </li>
- <li><a href="email/mobile.html">Saito Email</a> (mobile version) </li>
- <li><a href="facebook/">Facebook</a> (laptop version)</li>
- <li><a href="facebook/mobile.html">Facebook</a> (mobile version)</li>
- <li><a href="ethln/">Ethereum Payment Channels</a></li>
- <li><a href="remix/">Saito Remix</a> (build your own module, online!)</li>
- <li><a href="secret/">Secret Server</a></li>
- <li><a href="auth/">Authorization</a></li>
- <li><a href="faucet/">Token Faucet</a> </li>
- <li><a href="explorer/">Blockchain Explorer</a> </li>
+ <li id="email"><a href="email/">Saito Email</a> (laptop version) </li>
+ <li id="mobile-email"><a href="email/mobile.html">Saito Email</a> (mobile version) </li>
+ <li id="facebook"><a href="facebook/">Facebook</a> (laptop version)</li>
+ <li id="mobile-facebook"><a href="facebook/mobile.html">Facebook</a> (mobile version)</li>
+ <li id="raiden"><a href="ethln/">Ethereum Payment Channels</a></li>
+ <li id="remix"><a href="remix/">Saito Remix</a> (build your own module, online!)</li>
+ <li id="sserver"><a href="secret/">Secret Server</a></li>
+ <li id="auth"><a href="auth/">Authorization</a></li>
+ <li id="faucet"><a href="faucet/">Token Faucet</a> </li>
+ <li id="explorer"><a href="explorer/">Blockchain Explorer</a> </li>
 </ul>
+</p>
 
-<p></p>
-
-Newcomers should read our <a href="/docs/intro.html">general introduction</a> on what Saito is. More advanced users can read our technical explanation of how <a href="/docs/transactions.html">proof-of-transactions</a> enables us to support a terabyte-level blockchain.
-
+<p id="reading">
+  Newcomers should read our <a href="/docs/intro.html">general introduction</a> on what Saito is. More advanced users can read our technical explanation of how <a href="/docs/transactions.html">proof-of-transactions</a> enables us to support a terabyte-level blockchain.
+</p>
     </div>
 
+<script>
+    function startIntro() {
+      var intro = introJs();
+      intro.setOptions({
+        steps: [{
+            intro: "<span style='color:#336699; font-size:18px'>Welcome to Saito!</span><br/></br>This is a demonstration of the power and simplicity of decentralised blockchain applications on Saito.<br/></br>Everything you see here is running ON CHAIN."
+          },
+          {
+            element: '#email',
+            intro: "More than just email - a way to control the entire Internet.<br/></br>Register an address, send some emails, and create encrypted channels. Or pay for access to our secret server -- all from within email."
+          },
+          {
+            element: '#remix',
+            intro: "Can you read javascript? Build your first Saito app in two minutes. This is a great way to understand how simple development is our the Saito network.<br/></br>Soon you can compete with Facebook and Google without the need for a single server."
+          },
+          {
+            element: '#faucet',
+            intro: "Something you will see only in demonstration mode - FREE MONEY to get you started."
+          },
+          {
+            intro: "There is a lot more to experience, even in these early demos: Saito is the future of the Internet.<br/></br>If you have feedback, questions or want to participate, please contact info@saito.tech"
+          }
+        ]
+      }).start();
+
+    }
+    </script>
 </body>
 </html>

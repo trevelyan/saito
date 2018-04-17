@@ -1,5 +1,5 @@
-.body {
- font-family: arial, helvetica, sans-serif;
+.body, body {
+ font-family: arial, helvetica, sans-serif, sans;
  font-size: 13px;
  padding:0px;
  margin:0px;
@@ -51,3 +51,8 @@ li {
  margin-top:6px;
 }
 
+.introjs-tooltip {
+  font-size: 16px;
+  min-width: 400px;
+  max-width: 500px;
+}
