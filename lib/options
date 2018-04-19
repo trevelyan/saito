@@ -1,4 +1,1 @@
-{
-"server":{"host":"localhost","port":12101,"publickey":""}
-}
-
+{"server":{"host":"localhost","port":12101,"publickey":""},"wallet":{"balance":0,"privateKey":"dff7f5c77cdaa44333bbf825cd636ee13d12db9af55e5b0e0195f372546429c2","publicKey":"bVEDneGRPPZ5fuPvVfjgBrVNMnFhcUtC6iL6oKMjuCaR","identifier":"","utxi":[{"add":"bVEDneGRPPZ5fuPvVfjgBrVNMnFhcUtC6iL6oKMjuCaR","amt":"863.48684211","gt":1,"bid":2,"tid":1,"sid":0,"bhash":"b6e8f8daa11cc273b6d722fa016453ee3e32d72ee1066e820d0ed3d053daaead","lc":1,"ft":0,"rn":46},{"add":"bVEDneGRPPZ5fuPvVfjgBrVNMnFhcUtC6iL6oKMjuCaR","amt":"863.48684210","gt":1,"bid":2,"tid":1,"sid":1,"bhash":"b6e8f8daa11cc273b6d722fa016453ee3e32d72ee1066e820d0ed3d053daaead","lc":1,"ft":0,"rn":92}],"utxo":[],"version":1.54},"peers":[],"blockchain":{"latest_block_ts":1524061461329,"latest_block_hash":"b6e8f8daa11cc273b6d722fa016453ee3e32d72ee1066e820d0ed3d053daaead","latest_block_id":2,"genesis_block_id":0,"fork_id":""},"voter":{"vote_on_difficulty":0,"target_difficulty":2,"vote_on_paysplit":0,"target_paysplit":0.5},"keys":[],"archives":[],"dns":[],"modules":[]}
