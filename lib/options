@@ -1,1 +1,4 @@
-{"server":{"host":"localhost","port":12101,"publickey":""},"wallet":{"balance":0,"privateKey":"97a6dcc05a4380cc8f0175c21dbce8c14e768544c8f6f1a94d31d9cc5ea84b31","publicKey":"ckrAZ9N1sjWzZ78E2V21jCLbppDPPhS9PdjxVTpfXnBE","identifier":"","utxi":[],"utxo":[],"version":1.54},"peers":[],"blockchain":{"latest_block_ts":1524120903932,"latest_block_hash":"99909bd20539af15ae3fb578e11a6937935bbd0a51f7f6304bc2529eafac8087","latest_block_id":3,"genesis_block_id":0,"fork_id":""},"voter":{"vote_on_difficulty":0,"target_difficulty":2,"vote_on_paysplit":0,"target_paysplit":0.5},"keys":[],"archives":[],"dns":[],"modules":[]}
+{
+"server":{"host":"localhost","port":12101,"publickey":""}
+}
+
