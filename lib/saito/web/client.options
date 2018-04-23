@@ -1,1 +1,1 @@
-{"archives":[],"keys":[],"peers":[{"host":"localhost","port":12101,"publickey":"w9yhRyndwFc4Tk8YESGgAK2CBbGXumgEF9cu6TbC3ZVz"}],"dns":[],"blockchain":{"lastblock":3}}
+{"archives":[],"keys":[],"peers":[{"host":"localhost","port":12101,"publickey":"28AtM33vddtR3VovCDQgS5fQC1yqCMxnWB9QwtgLcYD3F"}],"dns":[{"domain":"saito","host":"do.saito.tech","port":12101,"publickey":"nR2ecdN7cW91nxVaDR4uXqW35GbAdGU5abzPJ9PkE8Mn"}],"blockchain":{"lastblock":3}}
