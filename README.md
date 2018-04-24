@@ -2,7 +2,7 @@
 
 ## Getting started
 If you just downloaded Saito and want to get it running, please read our 
-INSTALL.txt file instead of this one. This README contains more general
+[INSTALL file](INSTALL.md) instead of this one. This README contains more general
 information that might be useful for developers getting started.
 
 
@@ -47,5 +47,5 @@ act as simple tutorials on how to code your own applications.
 
 If you have any questions or need help please get in touch:  
 
-* david@saito
+* david@saito.tech
 * david@popupchinese.com  
