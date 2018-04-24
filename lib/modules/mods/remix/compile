@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 if [ -d "modules/mods/remix/web/cache/html/" ]; then
     rm -f modules/mods/remix/web/cache/html/*
 else
@@ -8,3 +9,12 @@ if [ -d "modules/mods/remix/web/cache/js/" ]; then
 else
     mkdir modules/mods/remix/web/cache/js
 fi
+=======
+
+rm -f modules/mods/remix/web/cache/html/*
+rm -f modules/mods/remix/web/cache/js/*
+mkdir modules/mods/remix/web/cache/html
+mkdir modules/mods/remix/web/cache/js
+
+
+>>>>>>> dev

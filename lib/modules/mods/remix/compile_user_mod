@@ -1,5 +1,8 @@
 
-cp modules/mods/remix/start.js remixtmp.js
+pwd
+cp -f modules/mods/remix/start.js remixtmp.js
+cp -f modules/mods/remix/start.js remixtmp2.js
+
 
 if hash browserify 2>/dev/null; then
 
@@ -21,17 +24,17 @@ else
 fi
 
 
-for d in modules/mods/* ; do
- if [ -f $d/refresh ] ; then
-   chmod +x $d/refresh
-   $d/refresh
- fi
-done
+#for d in modules/mods/* ; do
+# if [ -f $d/refresh ] ; then
+#   chmod +x $d/refresh
+#   $d/refresh
+# fi
+#done
+
+pwd
 
 rm -f modules/mods/remix/web/cache/browser.js
 browserify remixtmp.js -o modules/mods/remix/web/cache/browser.js -i express -i sqlite3 -i express-basic-auth -i sendgrid -i request -i bluebird -i socket.io -i phantomjs -i express-fileupload -i body-parser -i shashmap -i http -i http-proxy -i simple-socks -i unzip -i node-zip
-
-rm -f remixtmp.js
 
 echo ""
 echo "///////////////"
