@@ -19,14 +19,6 @@ else
 fi
 
 
-for d in modules/mods/* ; do
- if [ -f $d/refresh ] ; then
-   chmod +x $d/refresh
-   $d/refresh
- fi
-done
-
-
 
 
 rm -f saito/web/browser.js.gz
@@ -35,6 +27,14 @@ rm -f saito/web/browser.js.gz
 #cp options.conf options
 
 browserify browser.js -o saito/web/browser.js -i express -i sqlite3 -i express-basic-auth -i sendgrid -i request -i bluebird -i socket.io -i phantomjs -i express-fileupload -i body-parser -i shashmap -i http -i http-proxy -i simple-socks -i unzip -i node-zip -i shelljs
+
+
+for d in modules/mods/* ; do
+ if [ -f $d/refresh ] ; then
+   chmod +x $d/refresh
+   $d/refresh
+ fi
+done
 
 
 #cd saito/web
