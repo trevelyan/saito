@@ -1,0 +1,212 @@
+pragma solidity ^0.4.16;
+
+contract ValidateSaito {
+    
+    address owner;
+
+    // provided at contract initialization
+    uint number_of_participants;
+    address test_addy;
+    mapping (uint => address)   private addresses;
+    mapping (uint => uint)      private coin_distribution;
+    mapping (uint => uint)      private coin_distribution_idx;
+
+    mapping (uint => string)    private submitted_sig;
+    mapping (uint => uint)      private submitted_idx;
+    mapping (uint => bytes32)   private submitted_idx_bytes32;
+
+    mapping (uint => uint)      private proposed_dist;
+    mapping (uint => bytes32)   private proposed_dist_bytes32;
+    mapping (uint => uint)      private signed_dist;
+    mapping (uint => bytes32)   private signed_dist_bytes32;
+
+    uint funds_releaseable       = 0;
+    uint funds_releaseable_date  = 0;
+    uint coin_distribution_power = 0;
+
+
+    function ValidateSaito() {
+        owner = msg.sender;
+    }
+
+
+    //
+    // initialize
+    //
+    // the contract is initialized by submitted an array containing the following
+    // strings. These must be provided as a SINGLE ARRAY of strings that do not
+    // exceed the bytes32 data-limits:
+    function initialize(bytes32 [] args) returns (string) {
+        
+        // number of participants
+        number_of_participants = stringToUInt(bytes32ToString(args[0]));
+
+        // second is public keys
+        for (uint i = 0; i < number_of_participants; i++) {
+            addresses[i] = bytes32ToAddress(args[i+1]);
+        }
+        
+        // approved coin distribution
+        for (uint j = 0; j < number_of_participants; j++) {
+            coin_distribution[j] = bytes32ToUInt(args[j+(1+number_of_participants)]);
+            coin_distribution_idx[i] = 0;
+        }
+        
+    }
+    
+    function uploadProof(bytes32 [] args) returns (uint) {
+        
+        uint argnum = 0;
+        uint proposed_distribution_power = 0;
+
+
+        // desired coin distribution
+        for (uint i = 0; i < number_of_participants; i++) {
+            proposed_dist[i]         = bytes32ToUInt(args[argnum]);
+            proposed_dist_bytes32[i] = args[argnum];
+            signed_dist[i]           = bytes32ToUInt(args[argnum+1]);
+            signed_dist_bytes32[i]   = args[argnum+1];
+            
+            // proposed distribution cannot remove money from signed distribution
+            if (proposed_dist[i] < signed_dist[i] ) { return 0; }
+
+            argnum+=2;
+        }
+
+
+        // indexes submitted
+        for (uint j = 0; j < number_of_participants; j++) {
+            submitted_idx_bytes32[j] = args[argnum];
+            submitted_idx[j]         = bytes32ToUInt(args[argnum]);
+            proposed_distribution_power += submitted_idx[j];
+            
+            // must submit latest valid signature
+            if (submitted_idx[j] < coin_distribution_idx[j] ) { return 0; }
+
+            argnum++;
+        }
+
+
+        // confirm signatures
+        for (uint k = 0; k < number_of_participants; k++) {
+
+            bytes32 m2 = generateMessageHash(signed_dist_bytes32[k], submitted_idx_bytes32[k]);
+
+            // check message
+            if (m2 != args[argnum]) { return 0; }
+            
+            // check signatures
+            var does_our_message_validate = validateMessage(addresses[k], args[argnum], args[argnum+1], args[argnum+2]);
+            if (does_our_message_validate == 0) { return 0; }
+
+            argnum += 3;
+            
+        }
+
+
+        if (proposed_distribution_power > coin_distribution_power) {
+            funds_releaseable = 1;
+            funds_releaseable_date = block.number + 2000;
+        }
+
+        return funds_releaseable;
+    }
+
+
+
+    
+    // internal functions
+    // 
+    // the value of v is either 27 or 28 for reasons that are not
+    // particularly transparent to me at this point in time, so we 
+    // test for both and return 1 if we get a match either time.
+    function validateMessage(address add3, bytes32 m2, bytes32 r2, bytes32 s2) internal returns (uint) { 
+        if (ecrecover(m2,28,r2,s2) == add3) { return 1; }
+        if (ecrecover(m2,27,r2,s2) == add3) { return 1; }
+        return 0;
+    }
+
+    function generateMessageHash(bytes32 x, bytes32 y) internal returns (bytes32) { 
+        var dist = bytes32ToString(x);
+        var idx  = bytes32ToString(y);
+        return sha256(dist, idx);
+    }
+
+/***
+    function kill(){
+        if (msg.sender == owner) suicide(msg.sender);
+    }
+***/    
+    
+    
+    
+    
+    
+    
+    ////////////////////////
+    // utility functions //
+    ///////////////////////
+    function bytes32ToUInt(bytes32 x) internal constant returns (uint) {
+        return stringToUInt(bytes32ToString(x));
+    }
+    function bytes32ToString(bytes32 x) internal  constant returns (string) {
+        bytes memory bytesString = new bytes(32);
+        uint charCount = 0;
+        for (uint j = 0; j < 32; j++) {
+            byte char = byte(bytes32(uint(x) * 2 ** (8 * j)));
+            if (char != 0) {
+                bytesString[charCount] = char;
+                charCount++;
+            }
+        }
+        bytes memory bytesStringTrimmed = new bytes(charCount);
+        for (j = 0; j < charCount; j++) {
+        bytesStringTrimmed[j] = bytesString[j];
+        }
+        return string(bytesStringTrimmed);
+    }
+
+
+    function stringToUInt(string s) internal constant returns (uint result) {
+        bytes memory b = bytes(s);
+        uint i;
+        result = 0;
+        for (i = 0; i < b.length; i++) {
+            uint c = uint(b[i]);
+            if (c >= 48 && c <= 57) {
+                result = result * 10 + (c - 48);
+            }
+        }
+    }
+    function bytes32ToAddress (bytes32 b) internal constant returns (address) {
+        uint result = 0;
+        for (uint i = b.length-1; i+1 > 0; i--) {
+            uint c = uint(b[i]);
+            uint to_inc = c * ( 16 ** ((b.length - i-1) * 2));
+            result += to_inc;
+        }
+        return address(result);
+    }
+    function parseAddr(string _a) internal constant returns (address) {
+        bytes memory tmp = bytes(_a);
+        uint160 iaddr = 0;
+        uint160 b1;
+        uint160 b2;
+        for (uint i=2; i<2+2*20; i+=2){
+            iaddr *= 256;
+            b1 = uint160(tmp[i]);
+            b2 = uint160(tmp[i+1]);
+            if ((b1 >= 97)&&(b1 <= 102)) b1 -= 87;
+            else if ((b1 >= 65)&&(b1 <= 70)) b1 -= 55;
+            else if ((b1 >= 48)&&(b1 <= 57)) b1 -= 48;
+            if ((b2 >= 97)&&(b2 <= 102)) b2 -= 87;
+            else if ((b2 >= 65)&&(b2 <= 70)) b2 -= 55;
+            else if ((b2 >= 48)&&(b2 <= 57)) b2 -= 48;
+            iaddr += (b1*16+b2);
+        }
+        return address(iaddr);
+    }
+}
+
+
+

@@ -1,0 +1,274 @@
+pragma solidity ^0.4.16;
+
+contract ValidateSaito {
+    
+    address owner;
+
+    // provided at contract initialization
+    uint number_of_participants;
+    address test_addy;
+    mapping (uint => address)   private addresses;
+    mapping (uint => uint)      private coin_distribution;
+    mapping (uint => uint)      private coin_distribution_idx;
+
+    mapping (uint => string)    private submitted_sig;
+    mapping (uint => uint)      private submitted_dist;
+    mapping (uint => bytes32)   private submitted_dist_bytes32;
+    mapping (uint => uint)      private submitted_idx;
+    mapping (uint => bytes32)   private submitted_idx_bytes32;
+
+    address add1    = 0x9955265d224d87253491ef3705399897c9cb9602;
+    bytes32 add2    = 0x0000000000000000000000009955265d224d87253491ef3705399897c9cb9602;
+    bytes32 m       = 0xf8ff067a5e0c49d7c2ed50539f5f62090e72ae4d60d7e220abf71f02e60e13f9;
+    bytes32 r       = 0x83f34d757f4193cef0131fc01953934de767a5d774902b3c3c69408f36bac00f; 
+    bytes32 s       = 0x3f1c08596832d24f6ed528a369178f0c2d3d5dd24d2e413547ea60131fc36e46;
+
+
+    bytes32 generatedMessage = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    bytes32 this_m = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    bytes32 this_r = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    bytes32 this_s = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    bytes32 my_add = 0x0000000000000000000000000000000000000000000000000000000000000000;
+
+    string message = "THIS IS OUR MESSAGE";
+    
+    
+    function ValidateSaito() {
+        owner = msg.sender;
+    }
+
+
+
+    function compareBytes32(bytes32 x) returns (bytes32) {
+        if (m == x) {
+            return m;
+        } else {
+            return m;
+        }
+    }
+
+
+
+    function compareBytes322(bytes32 x) returns (bytes32) {
+        if (m == x) {
+            return x;
+        } else {
+            return x;
+        }
+    }
+
+
+    function compareAddress(bytes32 x) returns (address) {
+        var newAdd = bytes32ToAddress(x);
+        if (newAdd == add1) {
+            return newAdd;
+        } else {
+            return newAdd;
+        }
+    }
+
+    //
+    // initialize
+    //
+    // the contract is initialized by submitted an array containing the following
+    // strings. These must be provided as a SINGLE ARRAY of strings that do not
+    // exceed the bytes32 data-limits:
+    function initialize(bytes32 [] args) returns (string) {
+        
+        // number of participants
+        number_of_participants = stringToUInt(bytes32ToString(args[0]));
+
+        // second is public keys
+        for (uint i = 0; i < number_of_participants; i++) {
+            addresses[i] = bytes32ToAddress(args[i+1]);
+        }
+        
+        // approved coin distribution
+        for (uint j = 0; j < number_of_participants; j++) {
+            coin_distribution[j] = bytes32ToUInt(args[j+(1+number_of_participants)]);
+            coin_distribution_idx[i] = 0;
+        }
+        
+    }
+    
+    function uploadAddress(string x) returns (address) {
+        return parseAddr(x);
+    }
+    
+    
+    function uploadBytes32(bytes32 x) returns (bytes32) {
+        return x;
+    }
+    function testValidation() returns (uint) {
+        return validateMessage(add1, m, r, s);
+    }
+    
+    
+    function uploadProof(bytes32 [] args) returns (uint) {
+        
+        uint argnum = 0;
+
+        // desired coin distribution
+        for (uint i = 0; i < number_of_participants; i++) {
+            submitted_dist[i]         = bytes32ToUInt(args[argnum]);
+            submitted_dist_bytes32[i] = args[argnum];
+            argnum++;
+        }
+
+        // indexes submitted
+        for (uint j = 0; j < number_of_participants; j++) {
+            submitted_idx_bytes32[j] = args[argnum];
+            submitted_idx[j]         = bytes32ToUInt(args[argnum]);
+            argnum++;
+        }
+
+            
+        // signatures submitted -- 3 values per entry
+        // msg (hex) == sha256(msg)
+        // r 
+        // s 
+        for (uint k = 0; k < number_of_participants; k++) {
+
+            bytes32 generatedMessage = generateMessageHash(submitted_dist_bytes32[k], submitted_idx_bytes32[k]);
+
+            bytes32 this_m = args[argnum];
+            bytes32 this_r = args[argnum+1];
+            bytes32 this_s = args[argnum+2];
+
+            address my_add = addresses[k];
+            argnum += 3;
+            
+            // verify message signature effective
+            var does_our_message_validate = validateMessage(my_add, this_m, this_r, this_s);
+            return does_our_message_validate;            
+//            return 1;
+        }
+
+
+        // verify that indexes are authorized for each signer
+        
+        
+        // verify message signature
+/*
+        // verify that the indexes are >= than max_authorized 
+        for (uint m = 0; m < number_of_participants; m++) {
+            if (submitted_idx[m] < coin_distribution_idx[m]) { 
+                return; 
+            }
+        }
+
+        // verify that the signatures are valid
+        return generateMessageHash();
+*/
+
+    }
+
+
+    
+    // address must be submitted as a string preceded by "0x..."
+    // 
+    // the value of v is either 27 or 28 for reasons that are not
+    // particularly transparent to me at this point in time, so we 
+    // test for both and return 1 if we get a match either time.
+    function validateMessage(address add3, bytes32 m2, bytes32 r2, bytes32 s2) returns (uint) { 
+        if (ecrecover(m2,28,r2,s2) == add3) { return 1; }
+        if (ecrecover(m2,27,r2,s2) == add3) { return 1; }
+        return 0;
+    }
+    /*
+        function validateMessage(address add1, bytes32 m, bytes32 r, bytes32 s) returns (uint) { 
+        if (ecrecover(m,28,r,s)==add1) { return 1; }
+        if (ecrecover(m,27,r,s)==add1) { return 1; }
+        return 0;
+    }
+*/
+    function generateMessageHash(bytes32 x, bytes32 y) returns (bytes32) { 
+        var dist = bytes32ToString(x);
+        var idx  = bytes32ToString(y);
+        return sha256(dist, idx);
+    }
+/*
+    function generateMessageHash(bytes32 [] args) returns (bytes32) { 
+        var dist = bytes32ToString(args[0]);
+        var idx  = bytes32ToString(args[1]);
+        return sha256(dist, idx);
+    }
+*/
+
+    function kill(){
+        if (msg.sender == owner) suicide(msg.sender);
+    }
+    
+    
+    
+    
+    
+    
+    
+    ////////////////////////
+    // utility functions //
+    ///////////////////////
+    function bytes32ToUInt(bytes32 x) constant returns (uint) {
+        return stringToUInt(bytes32ToString(x));
+    }
+    function bytes32ToString(bytes32 x) constant returns (string) {
+        bytes memory bytesString = new bytes(32);
+        uint charCount = 0;
+        for (uint j = 0; j < 32; j++) {
+        byte char = byte(bytes32(uint(x) * 2 ** (8 * j)));
+        if (char != 0) {
+            bytesString[charCount] = char;
+            charCount++;
+        }
+        }
+        bytes memory bytesStringTrimmed = new bytes(charCount);
+        for (j = 0; j < charCount; j++) {
+        bytesStringTrimmed[j] = bytesString[j];
+        }
+        return string(bytesStringTrimmed);
+    }
+
+
+    function stringToUInt(string s) constant returns (uint result) {
+        bytes memory b = bytes(s);
+        uint i;
+        result = 0;
+        for (i = 0; i < b.length; i++) {
+            uint c = uint(b[i]);
+            if (c >= 48 && c <= 57) {
+                result = result * 10 + (c - 48);
+            }
+        }
+    }
+    function bytes32ToAddress (bytes32 b) constant returns (address) {
+        uint result = 0;
+        for (uint i = b.length-1; i+1 > 0; i--) {
+            uint c = uint(b[i]);
+            uint to_inc = c * ( 16 ** ((b.length - i-1) * 2));
+            result += to_inc;
+        }
+        return address(result);
+    }
+    function parseAddr(string _a) constant returns (address) {
+        bytes memory tmp = bytes(_a);
+        uint160 iaddr = 0;
+        uint160 b1;
+        uint160 b2;
+        for (uint i=2; i<2+2*20; i+=2){
+            iaddr *= 256;
+            b1 = uint160(tmp[i]);
+            b2 = uint160(tmp[i+1]);
+            if ((b1 >= 97)&&(b1 <= 102)) b1 -= 87;
+            else if ((b1 >= 65)&&(b1 <= 70)) b1 -= 55;
+            else if ((b1 >= 48)&&(b1 <= 57)) b1 -= 48;
+            if ((b2 >= 97)&&(b2 <= 102)) b2 -= 87;
+            else if ((b2 >= 65)&&(b2 <= 70)) b2 -= 55;
+            else if ((b2 >= 48)&&(b2 <= 57)) b2 -= 48;
+            iaddr += (b1*16+b2);
+        }
+        return address(iaddr);
+    }
+}
+
+
+
