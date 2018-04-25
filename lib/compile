@@ -1,12 +1,4 @@
-for d in modules/mods/* ; do
- if [ -f $d/compile ] ; then
-   chmod +x $d/compile
-   $d/compile
- fi
-done
-
-
-
+rm -f remixtmp.js
 rm -f saito/web/browser.js.gz
 rm -f data/database.sq3
 rm -f data/log.txt
@@ -22,6 +14,15 @@ rm -f modules/mod/registry/web/addresses.txt
 cp options.conf options
 
 ../node_modules/.bin/browserify browser.js -o saito/web/browser.js -i express -i sqlite3 -i express-basic-auth -i sendgrid -i request -i bluebird -i socket.io -i phantomjs -i express-fileupload -i body-parser -i shashmap -i http -i http-proxy -i simple-socks -i unzip -i node-zip -i shelljs
+
+
+for d in modules/mods/* ; do
+ if [ -f $d/compile ] ; then
+   chmod +x $d/compile
+   $d/compile
+ fi
+done
+
 
 #cd saito/web
 #gzip -k browser.js
