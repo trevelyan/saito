@@ -47,5 +47,5 @@ act as simple tutorials on how to code your own applications.
 
 If you have any questions or need help please get in touch:  
 
-* david@saito.tech
+* david@saito
 * david@popupchinese.com  
