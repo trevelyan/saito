@@ -21,6 +21,7 @@ fi
 
 
 
+rm -f saito/web/client.options
 rm -f saito/web/browser.js.gz
 #rm -f data/database.sq3
 #rm -f options
