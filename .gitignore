@@ -13,3 +13,4 @@ lib/options.good
 lib/options.debug
 lib/options.bk
 lib/options
+.eslintcache
