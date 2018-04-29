@@ -1,15 +1,18 @@
+@import url('https://use.fontawesome.com/releases/v5.0.10/css/all.css');
+
+
 .email {
  width:100%;
  height:408px;
  padding:4px;
 }
-.email_title { 
+.email_title {
  margin-top:15px;
  width:100%;
  padding:5px;
  font-size:1.2em;
 }
-.email_body { 
+.email_body {
  width:100%;
  height:395px;
  font-size:1.2em;
@@ -575,38 +578,38 @@ body {
  line-height:1.8em;
  line-spacing:1.8m;
 }
-.module_textinput { 
+.module_textinput {
  margin-top:15px;
  width:200px;
  padding:5px;
  font-size:1.2em;
  float:left;
 }
-.module_textinput_details { 
+.module_textinput_details {
  margin-left:5px;
  font-size:1.3em;
  font-weight:bold;
  padding-top:20px;
  padding-bottom:20px;
- float:left; 
+ float:left;
 }
 .module_textinput_button {
- clear:both; 
- max-width: 140px; 
+ clear:both;
+ max-width: 140px;
  margin-left:0px;
  margin-right:0px;
- margin-top: 20px; 
- color: #ffffff; 
- background-color: #d14836; 
- text-align: center; 
- padding-left: 10px; 
- padding-bottom: 5px; 
- padding-top: 5px; 
- padding-right: 10px; 
- line-height: 27px; 
- font-weight: bold; 
- background-image: linear-gradient(to bottom, #dd4b39, #d14836); 
- border: 1px solid #b0281a; 
+ margin-top: 20px;
+ color: #ffffff;
+ background-color: #d14836;
+ text-align: center;
+ padding-left: 10px;
+ padding-bottom: 5px;
+ padding-top: 5px;
+ padding-right: 10px;
+ line-height: 27px;
+ font-weight: bold;
+ background-image: linear-gradient(to bottom, #dd4b39, #d14836);
+ border: 1px solid #b0281a;
  cursor: pointer;
 
 }
@@ -614,3 +617,19 @@ body {
  background-image: linear-gradient(to bottom, #dd4b39, #c53727); border: 1px solid #b0281a;
 }
 
+.file-upload, .file-download {
+    padding: 5px;
+    color: #eee;
+    background-color: #369;
+    border-radius: 3px;
+    margin-top: 5px;
+    display: block;
+
+}
+
+.file-upload:before, .file-download:before {
+    font-family: FontAwesome;
+    content: "\f15b";
+    padding-right: 10px;
+    text-decoration: none;
+}

@@ -17,3 +17,4 @@ lib/data/blocks
 lib/data/database.sq3-journal
 options
 coverage
+.eslintcache
