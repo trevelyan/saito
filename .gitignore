@@ -13,4 +13,8 @@ lib/options.good
 lib/options.debug
 lib/options.bk
 lib/options
+lib/data/blocks
+lib/data/database.sq3-journal
+options
+coverage
 .eslintcache
