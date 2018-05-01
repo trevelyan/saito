@@ -9,7 +9,7 @@
   "scripts": {
     "test": "jest",
     "precommit": "npm run lint",
-    "lint": "eslint --ext .js --fix --cache lib/saito/*.js",
+    "lint": "eslint --ext .js --fix --cache lib/saito/*.js"
   },
   "author": "David Lancashire",
   "license": "private - to be determined",
