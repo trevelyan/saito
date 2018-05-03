@@ -65,6 +65,29 @@ npm test -- --watch --no-coverage
 ```
 For further info please check [the Jest docs](https://facebook.github.io/jest/docs/en/getting-started.html)
 
+### API and Documentation
+A quick guide to where the important stuff lives:
+
+#### `/lib/*`
+
+This is the home directory. Your `options` file goes here and contains the most important configuration information (peers, dns servers, wallet, etc). In browsers this file is basically saved in localStorage. The `compile` script in this directory will do a hard reset of all data. The `refresh` script will recompile the javascript version of the code (see [browser.js](https://github.com/trevelyan/saito/blob/master/lib/browser.js)) that gets sent out to users who connect to your server and do not already have a cached version of the javascript.  
+
+If you have any development problems and are running a local node, do a hard reset with that “compile”. You should use the “refresh” script after you update any modules.
+
+#### `/lib/saito/*`
+
+This is where we put the classes which run the core features of the blockchain: monitoring the network, handling interactions with peers, managing the mempool and building blocks. If you want to get your hands dirty, you can access these objects through the “app” object that is passed along with most module callbacks.
+
+#### `/lib/saito/web/*`
+
+This is where the webpage you see in your browser when you visit your Saito node is located. Right now applications themselves are just tiny webpages that load the javascript file from We have a couple of default libraries that are bundled into our distribution like jquery and you can find those here as well.
+
+#### `/lib/modules/*`
+
+This is where you install modules. All modules go into the `mods` subdirectory in this directory. In order to install a module, put it in the mods subdirectory like all of the others then edit the file `mods.js` in this folder to tell Saito that you want to load it. Everything should be pretty clear.  
+
+You’ll notice a template.js file in here as well. That is the parent class from which all modules inherent their functionality. You can look at it and see exactly what functions you can extend when building applications. We try to keep this file well-commented.
+
 
 ## Contact
 If you have any questions or need help please get in touch:  
