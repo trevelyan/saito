@@ -20,6 +20,25 @@ class ViewPost {
       this.tx = this.createMockTransaction();
     }
 
+    // ========================================================================
+    // CANONICAL URL UPDATE: Update browser URL to reflect the post being viewed
+    // ========================================================================
+    if (this.tx && this.tx.signature) {
+      const authorPublicKey = this.tx.from && this.tx.from.length > 0 
+        ? (this.tx.from[0].publicKey || this.tx.from[0].address || '')
+        : '';
+      
+      if (authorPublicKey) {
+        const canonicalUrl = `/${this.mod.slug}/${authorPublicKey}/${this.tx.signature}`;
+        // Use pushState to update URL without reload (allows back button to work)
+        window.history.pushState(
+          { view: 'stack_post', publicKey: authorPublicKey, signature: this.tx.signature },
+          null,
+          canonicalUrl
+        );
+      }
+    }
+
     const html = ViewPostTemplate(this.app, this.mod, this.tx);
     
     // Render into container
@@ -117,6 +136,12 @@ class ViewPost {
     // Open the editor to write a new post referencing this transaction
     // Store reference transaction for potential use in new post
     if (this.mod.create_post_ui) {
+      // ========================================================================
+      // INVARIANT 4: Unmount before navigating to editor (navigation path: viewer → editor)
+      // ========================================================================
+      if (typeof this.mod.create_post_ui.onEditorUnmount === 'function') {
+        this.mod.create_post_ui.onEditorUnmount();
+      }
       // Render the editor
       this.mod.create_post_ui.render();
       

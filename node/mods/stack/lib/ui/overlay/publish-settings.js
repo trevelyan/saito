@@ -8,7 +8,7 @@ class PublishSettingsOverlay {
     this.overlay = new SaitoOverlay(this.app, this.mod);
     this.postState = {
       published: false,
-      accessLevel: 'public', // 'public', 'nft', 'custom'
+      accessLevel: 'public', // 'public', 'private', 'subscription'
       description: '',
       image: null,
       imageUrl: null,
@@ -22,6 +22,11 @@ class PublishSettingsOverlay {
       ...this.postState,
       ...postData
     };
+
+    // If editor has featured image, use it (authoritative source)
+    if (this.mod.create_post_ui && this.mod.create_post_ui.featuredImage) {
+      this.postState.image = this.mod.create_post_ui.featuredImage;
+    }
 
     const html = PublishSettingsTemplate(this.app, this.mod, this.postState);
     this.overlay.show(html);
@@ -64,9 +69,15 @@ class PublishSettingsOverlay {
         checkbox.checked = true;
         card.classList.add('stack-publish-access-card-active');
         
-        // Map 'subscribers' to 'nft' for internal storage
-        const mappedLevel = accessValue === 'subscribers' ? 'nft' : accessValue;
-        this.setAccessLevel(mappedLevel);
+        // Only allow selection of public or private (subscription is disabled)
+        if (accessValue === 'subscription') {
+          // Subscription is disabled - do not change state
+          checkbox.checked = false;
+          card.classList.remove('stack-publish-access-card-active');
+          return;
+        }
+        
+        this.setAccessLevel(accessValue);
       });
     });
 
@@ -77,6 +88,12 @@ class PublishSettingsOverlay {
         const accessValue = card?.getAttribute('data-access');
         
         if (checkbox.checked) {
+          // Prevent selection of disabled subscription option
+          if (accessValue === 'subscription') {
+            checkbox.checked = false;
+            return;
+          }
+          
           // Uncheck all others
           accessCheckboxes.forEach(cb => {
             if (cb !== checkbox) {
@@ -86,9 +103,7 @@ class PublishSettingsOverlay {
           });
           card?.classList.add('stack-publish-access-card-active');
           
-          // Map 'subscribers' to 'nft' for internal storage
-          const mappedLevel = accessValue === 'subscribers' ? 'nft' : accessValue;
-          this.setAccessLevel(mappedLevel);
+          this.setAccessLevel(accessValue);
         } else {
           // Prevent unchecking - at least one must be selected
           checkbox.checked = true;
@@ -186,19 +201,22 @@ class PublishSettingsOverlay {
   }
 
   setAccessLevel(level) {
-    // Map 'subscribers' to 'nft' for internal storage (backward compatibility)
-    const internalLevel = level === 'subscribers' ? 'nft' : level;
-    this.postState.accessLevel = internalLevel;
+    // Only allow 'public' or 'private' (subscription is disabled)
+    if (level === 'subscription') {
+      console.warn('Stack: Subscription access mode is not yet available');
+      return;
+    }
+    
+    this.postState.accessLevel = level; // 'public' or 'private'
     
     // Update checkbox card states
     const accessCards = document.querySelectorAll('.stack-publish-access-card');
-    const displayValue = internalLevel === 'nft' ? 'subscribers' : internalLevel;
     
     accessCards.forEach(card => {
       const cardValue = card.getAttribute('data-access');
       const checkbox = card.querySelector('.stack-publish-access-checkbox');
       
-      if (cardValue === displayValue) {
+      if (cardValue === level) {
         checkbox.checked = true;
         card.classList.add('stack-publish-access-card-active');
       } else {
@@ -256,6 +274,7 @@ class PublishSettingsOverlay {
     }
   }
 
+
   async handlePublish() {
     const title = document.querySelector('#stack-post-title-input')?.value || '';
     // Use DOM-based serialization (DOM is single source of truth)
@@ -274,15 +293,19 @@ class PublishSettingsOverlay {
     try {
       this.app.connection.emit('saito-header-update-message', { msg: 'Publishing post...' });
       
+      // Get featured image from editor state (authoritative source)
+      const featuredImage = this.mod.create_post_ui?.featuredImage || this.postState.image || '';
+      
       await this.mod.createStackPostTransaction({
         title,
         content,
-        image: this.postState.image,
+        image: featuredImage, // Featured/teaser image (singular)
         imageUrl: this.postState.imageUrl,
         tags: [],
         timestamp: Date.now(),
         subscriptionTier: this.postState.accessLevel === 'public' ? 'free' : 'paid',
-        excerpt: this.postState.description || content.substring(0, 200).replace(/\n/g, ' ').trim()
+        excerpt: this.postState.description || content.substring(0, 200).replace(/\n/g, ' ').trim(),
+        accessLevel: this.postState.accessLevel // 'public' or 'private'
       }, () => {
         this.postState.published = true;
         this.app.connection.emit('saito-header-update-message', { msg: '' });

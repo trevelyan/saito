@@ -6,6 +6,9 @@ module.exports = (app, mod, posts = [], isLoading = false) => {
       <div class="stack-explore-sidebar">
         <div class="stack-explore-sidebar-header">
           <h2>Explore</h2>
+          <button class="stack-explore-add-subscription-btn" id="stack-explore-add-subscription-btn" title="Add subscription">
+            <i class="fa-solid fa-plus"></i>
+          </button>
         </div>
         <div class="stack-explore-sidebar-content">
           <div class="stack-explore-subscriptions-list">
@@ -30,6 +33,12 @@ module.exports = (app, mod, posts = [], isLoading = false) => {
         <!-- Author Identity Header - Context-aware based on selected subscription -->
         <div class="stack-explore-author-header" id="stack-explore-author-header">
           <!-- Will be populated by JavaScript using SaitoUser component -->
+          <!-- Subscribe button appears here when viewing via URL routing and not already subscribed -->
+          <div id="stack-explore-subscribe-button-container" style="display: none;">
+            <button class="stack-explore-subscribe-btn" id="stack-explore-subscribe-btn">
+              Subscribe
+            </button>
+          </div>
         </div>
 
         <div class="stack-explore-content">

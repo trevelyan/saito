@@ -101,17 +101,35 @@ class WelcomeBackOverlay {
     }, 25);
   }
 
-  renderPostList(posts) {
+  renderPostList(postRefs) {
+    // ========================================================================
+    // postRefs from app.options.stack.posts are lightweight: { sig, publicKey, timestamp, lastEdited, status }
+    // Try to get titles from cache, otherwise load from archive
+    // ========================================================================
     // Sort posts by timestamp (most recent first)
-    const sortedPosts = [...posts].sort((a, b) => {
+    const sortedPosts = [...postRefs].sort((a, b) => {
       const timeA = a.timestamp || a.lastEdited || 0;
       const timeB = b.timestamp || b.lastEdited || 0;
       return timeB - timeA;
     });
 
-    const postItems = sortedPosts.map((post, index) => {
-      const title = post.title || 'Untitled';
-      const date = post.timestamp || post.lastEdited || Date.now();
+    const postItems = sortedPosts.map((postRef, index) => {
+      // Try to get title from cache first
+      let title = 'Untitled';
+      if (this.mod.transactionCache && this.mod.transactionCache[postRef.sig]) {
+        const tx = this.mod.transactionCache[postRef.sig];
+        const txmsg = tx.returnMessage();
+        if (txmsg && txmsg.data && txmsg.data.title) {
+          title = txmsg.data.title;
+        }
+      }
+      
+      // If not in cache, use placeholder (will be loaded on click)
+      if (title === 'Untitled' && postRef.sig) {
+        title = `Post ${postRef.sig.substring(0, 8)}...`;
+      }
+      
+      const date = postRef.timestamp || postRef.lastEdited || Date.now();
       const dateObj = this.app.browser.formatDate(date);
       const dateStr = dateObj ? `${dateObj.month} ${dateObj.day}, ${dateObj.year}` : '';
       
@@ -140,16 +158,16 @@ class WelcomeBackOverlay {
     `;
   }
 
-  attachPostListEvents(posts) {
-    // Post item clicks
+  attachPostListEvents(postRefs) {
+    // Post item clicks - load full post from archive
     const postItems = document.querySelectorAll('.stack-welcome-post-item');
     postItems.forEach((item, index) => {
-      item.addEventListener('click', (e) => {
+      item.addEventListener('click', async (e) => {
         e.preventDefault();
         const postIndex = parseInt(item.getAttribute('data-post-index'), 10);
-        const post = posts[postIndex];
-        if (post) {
-          this.loadPostIntoEditor(post);
+        const postRef = postRefs[postIndex];
+        if (postRef) {
+          await this.loadPostIntoEditor(postRef);
         }
       });
     });
@@ -173,25 +191,52 @@ class WelcomeBackOverlay {
     }
   }
 
-  loadPostIntoEditor(post) {
+  async loadPostIntoEditor(postRef) {
+    // ========================================================================
+    // Load full post content from archive (app.options only has lightweight reference)
+    // ========================================================================
+    // postRef from app.options.stack.posts only contains: { sig, publicKey, timestamp, lastEdited, status }
+    // Full content must be loaded from archive
+    const postSig = postRef.sig;
+    let tx = null;
+    
+    // Try to load from archive
+    if (this.mod.loadPost && postSig) {
+      try {
+        tx = await this.mod.loadPost(postSig, {}, null);
+      } catch (error) {
+        console.error('Stack: Failed to load post from archive:', error);
+      }
+    }
+    
+    if (!tx) {
+      console.error('Stack: Post not found in archive:', postSig);
+      this.overlay.hide();
+      return;
+    }
+
     // Set session flag
     sessionStorage.setItem('stack-welcome-overlay-shown', 'true');
     
     // Close overlay
     this.overlay.hide();
 
+    // Extract post data from transaction
+    const txmsg = tx.returnMessage();
+    const postData = txmsg?.data || {};
+
     // Load post data into editor
     if (this.mod.create_post_ui) {
       // Set title
       const titleInput = document.querySelector('#stack-post-title-input');
-      if (titleInput && post.title) {
-        titleInput.value = post.title;
+      if (titleInput && postData.title) {
+        titleInput.value = postData.title;
       }
 
       // Load content into document
-      if (post.content) {
+      if (postData.content) {
         const { parseMarkdownToDocument } = require('../../post-document');
-        this.mod.create_post_ui.document = parseMarkdownToDocument(post.content);
+        this.mod.create_post_ui.document = parseMarkdownToDocument(postData.content);
         this.mod.create_post_ui.renderDocument();
         this.mod.create_post_ui.updatePlaceholderVisibility();
         this.mod.create_post_ui.updatePublishTriggerVisibility();
@@ -203,11 +248,9 @@ class WelcomeBackOverlay {
         this.mod.create_post_ui.updatePlaceholderVisibility();
       }
 
-      // Set published state if applicable
-      if (post.published) {
-        this.mod.create_post_ui.isPublished = true;
-        this.mod.create_post_ui.updatePublishTriggerState();
-      }
+      // Set published state (post from archive is published)
+      this.mod.create_post_ui.isPublished = true;
+      this.mod.create_post_ui.updatePublishTriggerState();
 
       // Focus editor at end
       setTimeout(() => {

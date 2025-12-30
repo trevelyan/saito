@@ -8,6 +8,13 @@ class StackMain {
   }
 
   render(container = "") {
+    // ========================================================================
+    // INVARIANT 4: Unmount before navigating to splash (navigation path: editor → splash)
+    // ========================================================================
+    if (this.mod.create_post_ui && typeof this.mod.create_post_ui.onEditorUnmount === 'function') {
+      this.mod.create_post_ui.onEditorUnmount();
+    }
+
     if (container !== "") {
       this.container = container;
     }
@@ -18,11 +25,16 @@ class StackMain {
 
     const html = MainTemplate(this.app, this.mod);
 
-    // Replace content in container
+    // ========================================================================
+    // FIX: Use replaceElementContentBySelector to preserve .saito-container
+    // ========================================================================
+    // Ensure container is preserved when rendering splash to avoid conflicts
+    // with editor ownership of .saito-container
     if (!document.querySelector(".stack-splash")) {
       this.app.browser.addElementToSelector(html, this.container);
     } else {
-      this.app.browser.replaceElementBySelector(html, ".stack-splash");
+      // Replace only the splash content, not the entire container
+      this.app.browser.replaceElementContentBySelector(html, ".stack-splash");
     }
 
     // Update container class
@@ -49,6 +61,12 @@ class StackMain {
       if (getStartedBtn) {
         getStartedBtn.onclick = (e) => {
           e.preventDefault();
+          // ========================================================================
+          // INVARIANT 4: Unmount before navigating to explore (navigation path: splash → explore)
+          // ========================================================================
+          if (this.mod.create_post_ui && typeof this.mod.create_post_ui.onEditorUnmount === 'function') {
+            this.mod.create_post_ui.onEditorUnmount();
+          }
           this.mod.exploreOverlay.render();
         };
       }
@@ -71,6 +89,15 @@ class StackMain {
    * Checks for existing posts/drafts and shows welcome overlay if needed
    */
   handleStartWriting() {
+    // ========================================================================
+    // INVARIANT 4: Unmount before navigating to editor (navigation path: splash → editor)
+    // ========================================================================
+    // Note: Editor render() will also unmount if already mounted, but we unmount here
+    // to ensure clean state when coming from splash
+    if (this.mod.create_post_ui && typeof this.mod.create_post_ui.onEditorUnmount === 'function') {
+      this.mod.create_post_ui.onEditorUnmount();
+    }
+
     // Check session flag to prevent immediate re-showing
     const overlayShown = sessionStorage.getItem('stack-welcome-overlay-shown');
     

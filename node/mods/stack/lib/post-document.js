@@ -162,7 +162,7 @@ function parseMarkdownToDocument(markdown) {
       continue;
     }
 
-    // Check for images
+    // Check for images (including stack:image: references)
     const imageMatch = trimmedLine.match(imageRegex);
     if (imageMatch) {
       // Save any accumulated paragraph text first
@@ -176,13 +176,16 @@ function parseMarkdownToDocument(markdown) {
       }
 
       const alt = imageMatch[1] || '';
-      const src = imageMatch[2] || '';
+      let src = imageMatch[2] || '';
       const title = imageMatch[3] || '';
+      
+      // Preserve stack:image: references (will be resolved during rendering)
+      // For drafts loaded from storage, src may already be a data URL or stack:image: reference
 
       blocks.push({
         type: 'image',
         id: generateBlockId(blockIndex++),
-        src: src,
+        src: src, // Can be data URL, stack:image: reference, or external URL
         caption: alt || title || undefined
       });
       continue;

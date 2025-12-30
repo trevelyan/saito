@@ -10,25 +10,15 @@ class ChooseDraftOverlay {
     this.overlay.clickBackdropToClose = false;
   }
 
-  /**
-   * Check if overlay should be shown
-   * Returns true only if:
-   * 1. User has published at least once
-   * 2. At least one draft exists
-   */
-  shouldShow() {
-    const hasPublished = this.mod.hasPublished && this.mod.hasPublished();
-    const drafts = this.mod.getDrafts && this.mod.getDrafts();
-    return hasPublished && drafts && drafts.length > 0;
-  }
-
-  render() {
-    if (!this.shouldShow()) {
-      return; // Don't render if conditions aren't met
+  async render() {
+    // Ensure drafts are discovered before rendering
+    if (this.mod.discoverDrafts) {
+      await this.mod.discoverDrafts();
     }
 
     const drafts = this.mod.getDrafts();
-    const html = ChooseDraftTemplate(this.app, this.mod, drafts);
+    const draftCount = drafts ? drafts.length : 0;
+    const html = ChooseDraftTemplate(this.app, this.mod, drafts, draftCount);
     this.overlay.show(html);
     
     setTimeout(() => {
@@ -59,39 +49,42 @@ class ChooseDraftOverlay {
       }
     }, 50);
 
-    // Draft row click handlers
-    const draftRows = document.querySelectorAll('.stack-choose-draft-row');
+    // Draft row click handlers (up to 3 drafts)
+    const draftRows = document.querySelectorAll('.stack-choose-draft-row[data-draft-id]');
     draftRows.forEach(row => {
       const draftId = row.getAttribute('data-draft-id');
-      if (!draftId) return;
-
-      // Remove existing click handlers
-      const newRow = row.cloneNode(true);
-      row.parentNode.replaceChild(newRow, row);
-
-      // Attach click handler to entire row (excluding delete icon clicks)
-      newRow.addEventListener('click', async (e) => {
-        // Don't handle if clicking delete icon
-        if (e.target.closest('.stack-choose-draft-delete-icon')) {
-          return;
-        }
-        await this.handleDraftSelect(draftId);
-      });
-
-      // Delete icon handler
-      const deleteIcon = newRow.querySelector('.stack-choose-draft-delete-icon');
-      if (deleteIcon) {
-        deleteIcon.addEventListener('click', async (e) => {
-          e.stopPropagation(); // Prevent row click
-          await this.handleDraftDelete(draftId);
+      if (draftId) {
+        row.addEventListener('click', async (e) => {
+          // Don't select if clicking on delete button
+          if (e.target.closest('.stack-choose-draft-row-delete')) {
+            return;
+          }
+          
+          const intent = { mode: 'select', draftId: draftId };
+          this.overlay.hide();
+          if (this.mod.create_post_ui) {
+            await this.mod.create_post_ui.initializeDocument(intent);
+          }
         });
       }
     });
 
-    // Start new post card click handler
-    const createNewCard = document.querySelector('#stack-choose-draft-create-new');
-    if (createNewCard) {
-      createNewCard.addEventListener('click', () => {
+    // Delete icon click handlers (stop propagation to prevent row selection)
+    const deleteIcons = document.querySelectorAll('.stack-choose-draft-row-delete');
+    deleteIcons.forEach(icon => {
+      const draftId = icon.getAttribute('data-draft-id');
+      if (draftId) {
+        icon.addEventListener('click', (e) => {
+          e.stopPropagation(); // Prevent row selection
+          this.handleDraftDelete(draftId);
+        });
+      }
+    });
+
+    // Create New Post row click handler
+    const createNewRow = document.querySelector('#stack-choose-draft-create-new');
+    if (createNewRow) {
+      createNewRow.addEventListener('click', () => {
         this.handleCreateNew();
       });
     }
@@ -99,25 +92,31 @@ class ChooseDraftOverlay {
 
   /**
    * Handle selecting a draft to edit
+   * Returns session intent object to initializeDocument()
    */
   async handleDraftSelect(draftId) {
-    // Load the draft into the editor
-    if (this.mod.create_post_ui && this.mod.create_post_ui.loadDraftById) {
-      await this.mod.create_post_ui.loadDraftById(draftId);
-    }
-    
-    // Fade out overlay
+    // Return intent and re-initialize editor with it
+    const intent = { mode: 'select', draftId: draftId };
     this.overlay.hide();
+    
+    if (this.mod.create_post_ui) {
+      await this.mod.create_post_ui.initializeDocument(intent);
+    }
   }
 
   /**
-   * Handle default action (load most recent draft)
+   * Handle default action (resume most recent draft)
    */
   async handleDefaultDraft() {
     const drafts = this.mod.getDrafts();
     if (drafts && drafts.length > 0) {
       const mostRecent = drafts[0];
-      await this.handleDraftSelect(mostRecent.id);
+      const intent = { mode: 'resume', draftId: mostRecent.id };
+      this.overlay.hide();
+      
+      if (this.mod.create_post_ui) {
+        await this.mod.create_post_ui.initializeDocument(intent);
+      }
     } else {
       // No drafts, create new
       this.handleCreateNew();
@@ -126,39 +125,23 @@ class ChooseDraftOverlay {
 
   /**
    * Handle creating a new document
+   * Returns session intent object to initializeDocument()
    */
   handleCreateNew() {
-    // Clear editor to empty state
-    if (this.mod.create_post_ui) {
-      const { parseMarkdownToDocument, renderDocument } = require('../../post-document');
-      const editor = document.querySelector('#stack-post-body-editor');
-      const titleInput = document.querySelector('#stack-post-title-input');
-      
-      if (editor) {
-        const emptyDocument = parseMarkdownToDocument('');
-        renderDocument(emptyDocument, editor, { contentEditable: true });
-        this.mod.create_post_ui.updatePlaceholderVisibility();
-        this.mod.create_post_ui.updatePublishTriggerVisibility();
-      }
-      
-      if (titleInput) {
-        titleInput.value = '';
-      }
-
-      // Clear draft transaction reference
-      this.mod.create_post_ui.draftTransaction = null;
-      this.mod.create_post_ui.isPublished = false;
-      this.mod.create_post_ui.updatePublishTriggerState();
-    }
-
-    // Fade out overlay
+    const intent = { mode: 'new' };
     this.overlay.hide();
+    
+    if (this.mod.create_post_ui) {
+      this.mod.create_post_ui.initializeDocument(intent);
+    }
   }
+
 
   /**
    * Handle deleting a draft
    * Calls stack.js to delete the draft (archive + in-memory list)
    * Shows confirmation alert before deletion
+   * After deletion: rediscover drafts and re-render overlay
    */
   async handleDraftDelete(draftId) {
     if (!draftId) {
@@ -166,15 +149,9 @@ class ChooseDraftOverlay {
     }
 
     // Show confirmation alert
-    if (!confirm('Delete this draft? This cannot be undone.')) {
+    if (!confirm('Are you sure you want to delete this draft?')) {
       return;
     }
-
-    // Check if this is the currently loaded draft
-    const isCurrentDraft = this.mod.create_post_ui && 
-                           this.mod.create_post_ui.draftTransaction &&
-                           (this.mod.create_post_ui.draftTransaction.signature === draftId ||
-                            this.mod.create_post_ui.draftTransaction.hash === draftId);
 
     // Delete draft through stack.js (handles archive + in-memory list update)
     const deleted = await this.mod.deleteDraft && this.mod.deleteDraft(draftId);
@@ -184,21 +161,15 @@ class ChooseDraftOverlay {
       return;
     }
 
-    // If we deleted the currently loaded draft, clear editor state
-    if (isCurrentDraft && this.mod.create_post_ui) {
-      this.mod.create_post_ui.draftTransaction = null;
+    // ========================================================================
+    // INVARIANT: After deletion, rediscover drafts to get authoritative count
+    // ========================================================================
+    if (this.mod.discoverDrafts) {
+      await this.mod.discoverDrafts();
     }
 
-    // Check if any drafts remain
-    const drafts = this.mod.getDrafts && this.mod.getDrafts();
-    if (!drafts || drafts.length === 0) {
-      // No drafts remain, dismiss overlay and create new document
-      this.overlay.hide();
-      this.handleCreateNew();
-    } else {
-      // Re-render overlay with updated draft list
-      this.render();
-    }
+    // Re-render overlay with updated draft list (CREATE NEW POST will appear if count < 3)
+    this.render();
   }
 }
 

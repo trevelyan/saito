@@ -292,6 +292,107 @@ html:has(.stack-create-post-page) {
   letter-spacing: 0.02em;
 }
 
+/* Featured Image Section (above title) */
+.stack-featured-image-section {
+  width: 100%;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+/* Featured Image Dropzone (shown when no image) */
+.stack-featured-image-dropzone {
+  width: 100%;
+  min-height: 120px;
+  border: 2px dashed var(--saito-border-color);
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--saito-background-color);
+  position: relative;
+}
+
+.stack-featured-image-dropzone:hover {
+  border-color: var(--saito-primary);
+  background: var(--saito-background-color-secondary, var(--saito-background-color));
+}
+
+.stack-featured-image-dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.stack-featured-image-upload-icon {
+  font-size: 2.4rem;
+  color: var(--saito-font-color-light);
+  margin-bottom: 0.8rem;
+}
+
+.stack-featured-image-dropzone-text {
+  font-size: 1.4rem;
+  color: var(--saito-font-color);
+  margin: 0;
+  font-weight: 500;
+}
+
+.stack-featured-image-dropzone-subtext {
+  font-size: 1.2rem;
+  color: var(--saito-font-color);
+  opacity: 0.7;
+  margin: 0;
+}
+
+/* Featured Image Preview Container (shown when image exists) */
+.stack-featured-image-preview-container {
+  width: 100%;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--saito-background-color);
+}
+
+.stack-featured-image-preview {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: cover;
+  display: block;
+  border-radius: 8px;
+}
+
+.stack-featured-image-remove-btn {
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 3.2rem;
+  height: 3.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 1.4rem;
+  z-index: 10;
+}
+
+.stack-featured-image-remove-btn:hover {
+  background: rgba(220, 53, 69, 0.9);
+  transform: scale(1.1);
+}
+
+.stack-featured-image-remove-btn:active {
+  transform: scale(0.95);
+}
+
 .stack-create-post-page .stack-post-title-field {
   width: 100%;
   margin: 0;

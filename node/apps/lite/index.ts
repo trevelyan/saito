@@ -155,7 +155,7 @@ async function init() {
     saito.BROWSER = 1;
     saito.SPVMODE = 1;
 
-    if (saito.options.blockchain.fork_id){
+    if (saito.options?.blockchain?.fork_id) {
         await saito.blockchain.setForkId(saito.options.blockchain.fork_id);
     }
 

@@ -37,14 +37,44 @@
   background: var(--saito-primary);
   color: var(--saito-font-color-inverse);
   margin-bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .stack-explore-sidebar-header h2 {
-  font-size: 2rem; /* Larger, more prominent */
-  font-weight: 600;
+  font-size: 2rem;
+  font-weight: 800;
   margin: 0;
-  color: var(--saito-font-color-inverse);
+  color: var(--saito-primary-text);
   line-height: 1.3;
+  flex: 1;
+}
+
+.stack-explore-add-subscription-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--saito-primary-text);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  width: 3.2rem;
+  height: 3.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 150ms ease, background-color 150ms ease;
+  font-size: 1.6rem;
+  padding: 0;
+  margin-left: 1rem;
+}
+
+.stack-explore-add-subscription-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.stack-explore-add-subscription-btn:active {
+  transform: scale(0.95);
 }
 
 .stack-explore-sidebar-content {
@@ -159,7 +189,7 @@
   padding: 0;
   font-size: 1.4rem; /* 14px minimum - readable but subtle */
   line-height: 1.5;
-  color: var(--saito-font-color-secondary, var(--saito-font-color-light));
+  color: var(--saito-font-color);
   font-weight: 400;
 }
 
@@ -231,12 +261,87 @@
   overflow-y: auto; /* Main content scrolls, not nested */
 }
 
+/* Sidebar Header - Contains title and add subscription button */
+.stack-explore-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.stack-explore-sidebar-header h2 {
+  margin: 0;
+  font-size: 2.4rem;
+  font-weight: 600;
+  color: var(--saito-font-color);
+}
+
+.stack-explore-add-subscription-btn {
+  background: var(--saito-primary);
+  color: var(--saito-primary-text);
+  border: none;
+  border-radius: 50%;
+  width: 3.2rem;
+  height: 3.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 150ms ease, background-color 150ms ease;
+  font-size: 1.6rem;
+  padding: 0;
+}
+
+.stack-explore-add-subscription-btn:hover {
+  background: var(--saito-primary-dark);
+  transform: scale(1.1);
+}
+
+.stack-explore-add-subscription-btn:active {
+  transform: scale(0.95);
+}
+
 /* Author Identity Header - Context-aware publisher display using SaitoUser */
 .stack-explore-author-header {
   margin-bottom: 2.5rem;
   padding-bottom: 2rem;
   border-bottom: 1px solid var(--saito-border-color);
   flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+#stack-explore-author-identity {
+  flex: 1;
+}
+
+/* Subscribe button container (shown when viewing creator via URL and not subscribed) */
+#stack-explore-subscribe-button-container {
+  flex-shrink: 0;
+}
+
+.stack-explore-subscribe-btn {
+  background: var(--saito-primary);
+  color: var(--saito-primary-text);
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.6rem;
+  font-size: 1.6rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 150ms ease, transform 150ms ease;
+  white-space: nowrap;
+}
+
+.stack-explore-subscribe-btn:hover {
+  background: var(--saito-primary-dark);
+  transform: translateY(-1px);
+}
+
+.stack-explore-subscribe-btn:active {
+  transform: translateY(0);
 }
 
 /* Do NOT override SaitoUser CSS - use default Saito.css styling */
@@ -490,6 +595,13 @@
 
   .stack-explore-sidebar-header h2 {
     font-size: 1.5rem;
+  }
+
+  .stack-explore-add-subscription-btn {
+    width: 2.8rem;
+    height: 2.8rem;
+    font-size: 1.4rem;
+    margin-left: 0.5rem;
   }
 
   .stack-explore-sidebar-content {

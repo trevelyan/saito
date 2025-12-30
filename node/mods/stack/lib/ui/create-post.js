@@ -86,14 +86,34 @@ class CreatePost {
     
     this.saveState = 'draft'; // 'draft', 'saving', 'saved'
     this.saveStateTimeout = null;
+    this.savingStartTime = null; // Track when saving started (for minimum visibility guarantee)
     this.storedDropRange = null; // Store Range for drop position (legacy)
     this.storedInsertionPoint = null; // Store insertion point that matches visual indicator (single source of truth)
     this.isDragging = false; // Track drag state
     this.isPublished = false; // Track if post is published
     this.draftTransaction = null; // Track current draft transaction (unsigned, saved to localhost)
+    this.eventsAttached = false; // Track if event listeners have been attached (prevents double attachment)
+    this.sessionIntent = null; // Session intent: { mode: 'resume'|'select'|'new', draftId?: string }
+    this.activeDraftId = null; // Active draft ID for this session (bound to autosave)
+    this.featuredImage = null; // Featured/teaser image (base64 data, stored in tx.msg.image)
   }
 
   render(container = "") {
+    // ========================================================================
+    // INVARIANT 4: Unmount before re-entering editor (navigation path: editor → editor)
+    // ========================================================================
+    // If editor is already mounted, unmount first to clean up timers/state
+    if (this.isEditorMounted()) {
+      this.onEditorUnmount();
+    }
+
+    // ========================================================================
+    // LIFECYCLE: Reset ALL session-local state for fresh editing session
+    // ========================================================================
+    // CreatePost is long-lived, so we must explicitly reset all session state
+    // on every mount, regardless of previous session state
+    this.resetSessionState();
+
     if (container !== "") {
       this.container = container;
     }
@@ -104,8 +124,14 @@ class CreatePost {
 
     const html = CreatePostTemplate(this.app, this.mod);
 
-    // Always replace content in container to overwrite existing content
-    this.app.browser.replaceElementBySelector(html, this.container);
+    // ========================================================================
+    // FIX: Use replaceElementContentBySelector to preserve .saito-container
+    // ========================================================================
+    // replaceElementBySelector replaces the container itself (obj.outerHTML = html)
+    // This causes .saito-container to disappear, breaking mount verification.
+    // Use replaceElementContentBySelector to replace only the inner content,
+    // preserving the container element so mount verification works correctly.
+    this.app.browser.replaceElementContentBySelector(html, this.container);
 
     // Update container class
     const containerEl = document.querySelector(this.container);
@@ -123,27 +149,57 @@ class CreatePost {
       }
     });
 
-    this.attachEvents();
-    this.initializeDocument();
+    // ========================================================================
+    // LIFECYCLE: Initialize document and mount editor
+    // ========================================================================
+    // Mount happens FIRST (infrastructure), draft loading happens SECOND (data)
+    // Draft loading must NOT suppress mount - mount is independent of draft state
+    this.initializeDocument().then(() => {
+      this.onEditorMount();
+      // Update featured image display after mount (in case draft was loaded)
+      setTimeout(() => {
+        this.updateFeaturedImageDisplay();
+      }, 100);
+    }).catch(err => {
+      console.error('Stack: Error initializing document:', err);
+      // Even if document initialization fails, attempt mount (infrastructure must be ready)
+      this.onEditorMount();
+      setTimeout(() => {
+        this.updateFeaturedImageDisplay();
+      }, 100);
+    });
   }
 
   /**
-   * Initialize document from draft or create empty document
-   * Uses temporary document model only for initial markdown → DOM conversion
+   * Initialize document based on explicit session intent
    * 
-   * Flow logic:
-   * 1. If user hasn't published → load most recent draft (or empty), no overlay
-   * 2. If user has published AND has drafts → show overlay (draft loaded behind it)
-   * 3. If user has published BUT no drafts → new document, no overlay
+   * SESSION INTENT OBJECT: { mode: 'resume'|'select'|'new', draftId?: string }
+   * 
+   * Branching logic:
+   * - mode: 'new' → Initialize empty editor (draft created lazily on first edit)
+   * - mode: 'resume' → Load draft by draftId (most recent draft)
+   * - mode: 'select' → Load draft by draftId (specific draft from chooser)
+   * 
+   * If no intent is provided, shows draft chooser overlay and waits for user choice.
+   * 
+   * NOTE: Does NOT attach event listeners - that happens in onEditorMount()
    */
-  async initializeDocument() {
+  async initializeDocument(sessionIntent = null) {
     const editor = document.querySelector('#stack-post-body-editor');
-    if (!editor) return;
+    if (!editor) {
+      return;
+    }
 
-    // Ask stack.js for state (no archive queries in create-post.js)
-    const hasPublished = this.mod.hasPublished && this.mod.hasPublished();
-    
-    // Ensure drafts are discovered (non-blocking if already done)
+    // ========================================================================
+    // SESSION INTENT: Use provided intent or show chooser
+    // ========================================================================
+    if (!sessionIntent) {
+      // ========================================================================
+      // CRASH/RELOAD SAFETY: No sessionIntent means unsafe state - show chooser
+      // ========================================================================
+      console.warn('[EDITOR-INVARIANT] initializeDocument() called without sessionIntent - forcing chooser display');
+      
+      // No intent provided: discover drafts and show chooser
     if (this.mod.discoverDrafts) {
       await this.mod.discoverDrafts();
     }
@@ -151,30 +207,90 @@ class CreatePost {
     const drafts = this.mod.getDrafts && this.mod.getDrafts();
     const draftCount = drafts ? drafts.length : 0;
 
-    // Flow decision based on stack.js state
-    if (!hasPublished) {
-      // First-time writer: load most recent draft (or empty), no overlay
-      await this.loadMostRecentDraft();
-    } else if (draftCount > 0) {
-      // Experienced user with drafts: load most recent draft behind overlay, then show overlay
-      await this.loadMostRecentDraft();
-      this.showDraftChooserOverlay();
-    } else {
-      // Experienced user but no drafts: start with empty document, no overlay
-      // (loadMostRecentDraft will handle empty state)
-      await this.loadMostRecentDraft();
+      // ========================================================================
+      // FOURTH-DRAFT PREVENTION: If 3 drafts exist, load most recent draft
+      // ========================================================================
+      // This ensures closing the overlay reveals the draft, NOT an empty editor
+      // Only allow initializeEmptyEditor() when draftCount < 3
+      if (draftCount >= 3) {
+        const mostRecentDraft = drafts[0];
+        if (mostRecentDraft && mostRecentDraft.id) {
+          // Load most recent draft behind the overlay
+          this.activeDraftId = mostRecentDraft.id;
+          await this.loadDraftById(mostRecentDraft.id);
+        }
+      }
+
+      // Always show chooser overlay
+      await this.showDraftChooserOverlay();
+      // Chooser will call initializeDocument() with intent when dismissed
+      return;
     }
 
-    // If draft was loaded, it will have populated the editor
-    // Otherwise, create empty document
-    const editorContent = editor.querySelectorAll('[data-block-id]');
-    if (editorContent.length === 0) {
-      const tempDocument = { blocks: [{ type: 'paragraph', id: generateBlockId(0), text: '' }] };
+    // Store session intent for this session
+    this.sessionIntent = sessionIntent;
     
-    // Render document to editor (one-time conversion from markdown to DOM)
-    renderDocument(tempDocument, editor, {
-      contentEditable: true
-    });
+    // ========================================================================
+    // [EDITOR-INVARIANT] Log session start for validation
+    // ========================================================================
+    console.debug('[EDITOR-INVARIANT] Session started:', JSON.stringify(sessionIntent));
+    
+    // ========================================================================
+    // BRANCH ON INTENT: Initialize editor based solely on intent object
+    // ========================================================================
+    if (sessionIntent.mode === 'new') {
+      // Mode: new - Initialize empty editor, draft created lazily on first edit
+      // BUT: Only allow if fewer than 3 drafts exist (hard cap)
+      const drafts = this.mod.getDrafts && this.mod.getDrafts();
+      const draftCount = drafts ? drafts.length : 0;
+      
+      if (draftCount >= 3) {
+        console.warn('[EDITOR-INVARIANT] initializeEmptyEditor() prevented - 3 drafts already exist. Loading most recent draft instead.');
+        // Fallback to most recent draft instead of creating empty editor
+        const mostRecentDraft = drafts[0];
+        if (mostRecentDraft && mostRecentDraft.id) {
+          this.activeDraftId = mostRecentDraft.id;
+          await this.loadDraftById(mostRecentDraft.id);
+    } else {
+          // Should not happen, but handle gracefully
+          this.activeDraftId = null;
+          this.initializeEmptyEditor();
+        }
+      } else {
+        this.activeDraftId = null;
+        this.initializeEmptyEditor();
+      }
+    } else if (sessionIntent.mode === 'resume' || sessionIntent.mode === 'select') {
+      // Mode: resume or select - Load specified draft
+      if (!sessionIntent.draftId) {
+        console.error('Stack: initializeDocument() called with resume/select mode but no draftId');
+        this.initializeEmptyEditor();
+        return;
+      }
+      
+      this.activeDraftId = sessionIntent.draftId;
+      
+      // ========================================================================
+      // [EDITOR-INVARIANT] Log draft bind for validation
+      // ========================================================================
+      console.debug('[EDITOR-INVARIANT] Draft bound to session:', sessionIntent.draftId);
+      
+      await this.loadDraftById(sessionIntent.draftId);
+    } else {
+      console.error('Stack: initializeDocument() called with invalid session intent mode:', sessionIntent.mode);
+      this.initializeEmptyEditor();
+      return;
+    }
+    
+    // ========================================================================
+    // INVARIANT CHECK: Verify session state after initialization
+    // ========================================================================
+    try {
+      this.assertValidSessionIntent('after initializeDocument');
+      this.assertActiveDraftConsistency('after initializeDocument');
+    } catch (error) {
+      console.error('[EDITOR-INVARIANT] Session state invariant violation after initialization:', error);
+      // Continue - session may still be usable
     }
     
     // Ensure placeholder is shown if editor is empty
@@ -189,6 +305,8 @@ class CreatePost {
     // Update publish trigger visibility
     this.updatePublishTriggerVisibility();
     this.updatePublishTriggerState();
+    
+    // NOTE: Event listeners are attached in onEditorMount() after mount verification
     
     // Auto-focus title input on load if no content exists
     setTimeout(() => {
@@ -243,27 +361,298 @@ class CreatePost {
 
   /**
    * Show the draft chooser overlay
-   * Only called when user has published and has drafts
+   * Only called when draftCount > 0
    * Editor should already be rendered with most recent draft behind the overlay
    */
-  showDraftChooserOverlay() {
+  async showDraftChooserOverlay() {
+    // ========================================================================
+    // DIAGNOSTIC: Log when showDraftChooserOverlay() is called
+    // ========================================================================
+    console.log('[DIAG] showDraftChooserOverlay() CALLED');
+    
     // Lazy-load overlay if needed
     if (!this.mod.chooseDraftOverlay) {
       const ChooseDraftOverlay = require('./overlay/choose-draft');
       this.mod.chooseDraftOverlay = new ChooseDraftOverlay(this.app, this.mod);
+      console.log('[DIAG] showDraftChooserOverlay() Lazy-loaded ChooseDraftOverlay');
     }
 
     // Small delay to ensure editor is fully rendered behind overlay
-    setTimeout(() => {
-      this.mod.chooseDraftOverlay.render();
+    setTimeout(async () => {
+      console.log('[DIAG] showDraftChooserOverlay() About to call overlay.render()');
+      await this.mod.chooseDraftOverlay.render();
+      console.log('[DIAG] showDraftChooserOverlay() overlay.render() completed');
     }, 100);
+  }
+
+  /**
+   * ========================================================================
+   * LIFECYCLE: RESET SESSION STATE
+   * ========================================================================
+   * 
+   * Resets ALL session-local state for a fresh editing session.
+   * Called at the start of render() to ensure clean state regardless of:
+   * - prior navigation
+   * - prior publish
+   * - crash recovery
+   * - draft chooser re-entry
+   * 
+   * DO NOT rely on constructor defaults - CreatePost is long-lived.
+   */
+  resetSessionState() {
+    // ========================================================================
+    // TEMP: Log session reset for validation
+    // ========================================================================
+    console.debug('[TEMP] CreatePost: resetSessionState() called - starting fresh session');
+
+    // Publishing state - MUST be reset (publish must not poison future sessions)
+    this.isPublished = false;
+    this.draftTransaction = null;
+    this.sessionIntent = null;
+    this.activeDraftId = null;
+
+    // Drag/drop state
+    this.isDragging = false;
+    this.storedDropRange = null;
+    this.storedInsertionPoint = null;
+
+    // Timer state - cancel any existing timers (defensive)
+    if (this.serializeTimeout) {
+      clearTimeout(this.serializeTimeout);
+      this.serializeTimeout = null;
+    }
+    if (this.inactivityTimeout) {
+      clearTimeout(this.inactivityTimeout);
+      this.inactivityTimeout = null;
+    }
+    if (this.editingTimer) {
+      clearTimeout(this.editingTimer);
+      this.editingTimer = null;
+    }
+    if (this.saveStateTimeout) {
+      clearTimeout(this.saveStateTimeout);
+      this.saveStateTimeout = null;
+    }
+
+    // Editing/saving state
+    this.editingStartTime = null;
+    this.lastSaveContent = null;
+    this.lastTrackedContent = null;
+    this.changedBytes = 0;
+    this.isSaving = false;
+    this.queuedSave = false;
+    this.isComposing = false;
+    this.saveState = 'draft';
+    this.savingStartTime = null;
+
+    // Event listener attachment flag (prevents double attachment)
+    this.eventsAttached = false;
+  }
+
+  /**
+   * ========================================================================
+   * LIFECYCLE: MOUNT BOUNDARY
+   * ========================================================================
+   * 
+   * "Mounted" means all three required elements exist:
+   * - .saito-container exists
+   * - #stack-post-body-editor exists
+   * - #stack-post-title-input exists
+   * 
+   * Mount verification must happen BEFORE attaching event listeners.
+   */
+  isEditorMounted() {
+    const container = document.querySelector(this.container || '.saito-container');
+    const editor = document.querySelector('#stack-post-body-editor');
+    const titleInput = document.querySelector('#stack-post-title-input');
+    
+    return !!(container && editor && titleInput);
+  }
+
+  /**
+   * ========================================================================
+   * INVARIANT ASSERTIONS: Defensive hardening helpers
+   * ========================================================================
+   * 
+   * These helpers detect invariant violations early and fail loudly.
+   * They prevent silent bugs and make refactoring safer.
+   */
+
+  /**
+   * Assert that editor is mounted
+   * Fails loudly if editor DOM elements are missing
+   */
+  assertEditorMounted(context = '') {
+    if (!this.isEditorMounted()) {
+      const msg = `[EDITOR-INVARIANT] Editor must be mounted${context ? ` (${context})` : ''}`;
+      console.error(msg);
+      throw new Error(msg);
+    }
+  }
+
+  /**
+   * Assert that session intent is valid
+   * Fails loudly if sessionIntent is missing or invalid
+   */
+  assertValidSessionIntent(context = '') {
+    if (!this.sessionIntent) {
+      const msg = `[EDITOR-INVARIANT] sessionIntent must be defined${context ? ` (${context})` : ''}`;
+      console.error(msg);
+      throw new Error(msg);
+    }
+
+    const validModes = ['new', 'resume', 'select'];
+    if (!validModes.includes(this.sessionIntent.mode)) {
+      const msg = `[EDITOR-INVARIANT] Invalid sessionIntent.mode: ${this.sessionIntent.mode}${context ? ` (${context})` : ''}`;
+      console.error(msg);
+      throw new Error(msg);
+    }
+
+    // If mode is 'resume' or 'select', draftId must be present
+    if ((this.sessionIntent.mode === 'resume' || this.sessionIntent.mode === 'select') && !this.sessionIntent.draftId) {
+      const msg = `[EDITOR-INVARIANT] sessionIntent.draftId required for mode '${this.sessionIntent.mode}'${context ? ` (${context})` : ''}`;
+      console.error(msg);
+      throw new Error(msg);
+    }
+  }
+
+  /**
+   * Assert that active draft ID is consistent with session intent
+   * Fails loudly if activeDraftId state is invalid
+   */
+  assertActiveDraftConsistency(context = '') {
+    if (!this.sessionIntent) {
+      // No intent means no active session - skip check
+      return;
+    }
+
+    if (this.sessionIntent.mode === 'new') {
+      // New sessions should have activeDraftId = null initially
+      // (draft created lazily on first edit)
+      if (this.activeDraftId !== null && this.draftTransaction === null) {
+        const msg = `[EDITOR-INVARIANT] activeDraftId should be null for 'new' session without draftTransaction${context ? ` (${context})` : ''}`;
+        console.error(msg);
+        // Don't throw - this can happen legitimately after first save
+      }
+    } else if (this.sessionIntent.mode === 'resume' || this.sessionIntent.mode === 'select') {
+      // Resume/select sessions must have activeDraftId matching sessionIntent.draftId
+      if (this.activeDraftId !== this.sessionIntent.draftId) {
+        const msg = `[EDITOR-INVARIANT] activeDraftId (${this.activeDraftId}) must match sessionIntent.draftId (${this.sessionIntent.draftId})${context ? ` (${context})` : ''}`;
+        console.error(msg);
+        // Don't throw - this can be set during draft loading
+      }
+    }
+  }
+
+  /**
+   * ========================================================================
+   * LIFECYCLE: EDITOR MOUNT
+   * ========================================================================
+   * 
+   * Called after DOM is ready and initializeDocument() has completed.
+   * Verifies mount boundary, then attaches event listeners exactly once.
+   * 
+   * This ensures event listeners are only attached when editor is fully ready
+   * and prevents double attachment.
+   */
+  onEditorMount() {
+    // ========================================================================
+    // TEMP: Log mount attempt for validation
+    // ========================================================================
+    console.debug('[TEMP] CreatePost: onEditorMount() called');
+
+    // Verify mount boundary before proceeding
+    if (!this.isEditorMounted()) {
+      console.error('Stack: onEditorMount() called but editor is not mounted. Required elements missing.');
+      // Retry after a short delay (DOM might not be ready yet)
+      setTimeout(() => {
+        if (this.isEditorMounted()) {
+          this.onEditorMount();
+        } else {
+          console.error('Stack: Editor mount failed after retry. Editor elements still missing.');
+        }
+      }, 50);
+      return;
+    }
+
+    // ========================================================================
+    // INVARIANT CHECK: Guard against double attachment
+    // ========================================================================
+    if (this.eventsAttached) {
+      console.warn('[EDITOR-INVARIANT] onEditorMount() called but events already attached. Skipping.');
+      return;
+    }
+
+    // ========================================================================
+    // [EDITOR-INVARIANT] Log successful mount for validation
+    // ========================================================================
+    console.debug('[EDITOR-INVARIANT] Mount verified, attaching event listeners');
+
+    // Mount verified - attach event listeners exactly once
+    this.attachEvents();
+    this.eventsAttached = true;
+
+    // ========================================================================
+    // [EDITOR-INVARIANT] Log mount completion for validation
+    // ========================================================================
+    console.debug('[EDITOR-INVARIANT] Mount complete, event listeners attached');
+  }
+
+  /**
+   * ========================================================================
+   * LIFECYCLE: EDITOR UNMOUNT
+   * ========================================================================
+   * 
+   * Called before navigating away from the editor.
+   * Cancels all timers and cleans up state to prevent leaks.
+   * 
+   * Must be called before:
+   * - Navigating to splash
+   * - Navigating to viewer
+   * - Navigating to explore
+   * - Re-entering editor (another render() call)
+   */
+  onEditorUnmount() {
+    // Cancel all timers
+    if (this.inactivityTimeout) {
+      clearTimeout(this.inactivityTimeout);
+      this.inactivityTimeout = null;
+    }
+    if (this.serializeTimeout) {
+      clearTimeout(this.serializeTimeout);
+      this.serializeTimeout = null;
+    }
+    if (this.saveStateTimeout) {
+      clearTimeout(this.saveStateTimeout);
+      this.saveStateTimeout = null;
+    }
+    if (this.editingTimer) {
+      clearTimeout(this.editingTimer);
+      this.editingTimer = null;
+    }
+
+    // Reset editing state
+    this.editingStartTime = null;
+    this.queuedSave = false;
+    this.isComposing = false;
+    this.savingStartTime = null; // Reset saving start time on unmount
+    
+    // Reset event attachment flag so events can be re-attached on next mount
+    this.eventsAttached = false;
+    
+    // Note: We do NOT reset isPublished or draftTransaction here
+    // Those are reset in resetSessionState() at the start of render() to ensure fresh session state
   }
 
   /**
    * Serialize DOM directly to markdown
    * DOM is the single source of truth during editing
+   * 
+   * PUBLISH-TIME INVARIANT: This method reads directly from the live DOM.
+   * It does NOT use cached state, draft snapshots, or autosave output.
+   * What the user sees in the editor is exactly what gets serialized.
    */
-  serializeDOMToMarkdown() {
+  serializeDOMToMarkdown(imageIdMap = null) {
     const editor = document.querySelector('#stack-post-body-editor');
     if (!editor) return '';
 
@@ -291,8 +680,32 @@ class CreatePost {
           const img = blockEl.querySelector('img');
           const captionEl = blockEl.querySelector('.stack-image-caption');
           const alt = captionEl ? captionEl.textContent : '';
+          
+          // If imageIdMap is provided (publish-time), use image reference
+          // Otherwise (autosave), preserve original src for draft recovery
+          if (imageIdMap && img && img.src) {
+            // Find the imageId for this image src in the map
+            const imageId = imageIdMap.get(img.src);
+            if (imageId) {
+              markdownLines.push(`![${alt}](stack:image:${imageId})`);
+            } else {
+              // Fallback: if no ID found, use original src (should not happen)
+              markdownLines.push(`![${alt}](${img.src})`);
+            }
+          } else {
+            // Draft serialization: preserve original src
           const src = img ? img.src : '';
           markdownLines.push(`![${alt}](${src})`);
+          }
+          break;
+
+        case 'code':
+          // Code blocks: <pre> with data-block-type="code"
+          // Serialize as markdown code fence (```)
+          const codeText = (blockEl.textContent || '').replace(/\u200B/g, '');
+          markdownLines.push('```');
+          markdownLines.push(codeText);
+          markdownLines.push('```');
           break;
 
         case 'rawhtml':
@@ -438,16 +851,60 @@ class CreatePost {
   /**
    * Trigger save operation
    * Ensures only one save in-flight, queues follow-up if needed
+   * 
+   * INVARIANT: During normal typing, isEditorMounted() MUST be true.
+   * If false, that indicates a lifecycle bug - log it and abort.
    */
   async triggerSave() {
+    // ========================================================================
+    // [EDITOR-INVARIANT] Log autosave start for validation
+    // ========================================================================
+    console.debug('[EDITOR-INVARIANT] Autosave started');
+
+    // ========================================================================
+    // INVARIANT CHECK: Editor must be mounted
+    // ========================================================================
+    if (!this.isEditorMounted()) {
+      console.error('[EDITOR-INVARIANT] triggerSave() called but editor is not mounted. Aborting save.');
+      return;
+    }
+
+    // ========================================================================
+    // INVARIANT CHECK: Session intent must be valid
+    // ========================================================================
+    if (!this.sessionIntent) {
+      console.error('[EDITOR-INVARIANT] triggerSave() called without sessionIntent. Aborting save.');
+      return;
+    }
+
+    // ========================================================================
+    // INVARIANT CHECK: Autosave must not run after publish
+    // ========================================================================
+    if (this.isPublished) {
+      console.error('[EDITOR-INVARIANT] triggerSave() called after publish. Autosave must not run. Aborting save.');
+      return;
+    }
+
+    // ========================================================================
+    // INVARIANT CHECK: Active draft consistency (for resume/select sessions)
+    // ========================================================================
+    if (this.sessionIntent.mode !== 'new') {
+      // For resume/select sessions, activeDraftId should match sessionIntent.draftId
+      if (this.activeDraftId !== this.sessionIntent.draftId) {
+        console.error('[EDITOR-INVARIANT] triggerSave() called with mismatched activeDraftId. Expected:', this.sessionIntent.draftId, 'Got:', this.activeDraftId);
+        // Continue - draft may be in loading state
+      }
+    }
+
     // If save is already in progress, queue a follow-up
     if (this.isSaving) {
       this.queuedSave = true;
       return;
     }
     
-    // Mark as saving
+    // Mark as saving and record start time (for minimum visibility guarantee)
     this.isSaving = true;
+    this.savingStartTime = Date.now();
     this.updateSaveState('saving');
     
     // Clear all timers
@@ -474,13 +931,22 @@ class CreatePost {
       this.changedBytes = 0;
       this.editingStartTime = null;
       
-      // Update state back to "draft" after serialization
+      // ========================================================================
+      // GUARANTEE: Minimum 500ms "Saving…" visibility
+      // ========================================================================
+      // Calculate how long we've been showing "Saving…"
+      const elapsed = Date.now() - this.savingStartTime;
+      const minVisibilityMs = 500;
+      const remainingTime = Math.max(0, minVisibilityMs - elapsed);
+      
+      // Update state back to "draft" after minimum visibility period
       if (this.saveStateTimeout) {
         clearTimeout(this.saveStateTimeout);
       }
       this.saveStateTimeout = setTimeout(() => {
         this.updateSaveState('draft');
-      }, 0);
+        this.savingStartTime = null;
+      }, remainingTime);
       
       // Check if a save was queued while we were saving
       if (this.queuedSave) {
@@ -489,12 +955,59 @@ class CreatePost {
         this.scheduleSerialization();
       }
     } catch (error) {
-      console.error('Error saving draft:', error);
-      // Update state back to "draft" on error
+      console.error('Stack: Error saving draft:', error);
+      // On error, still enforce minimum visibility before showing "Draft"
+      const elapsed = Date.now() - (this.savingStartTime || Date.now());
+      const minVisibilityMs = 500;
+      const remainingTime = Math.max(0, minVisibilityMs - elapsed);
+      
+      if (this.saveStateTimeout) {
+        clearTimeout(this.saveStateTimeout);
+      }
+      this.saveStateTimeout = setTimeout(() => {
       this.updateSaveState('draft');
+        this.savingStartTime = null;
+      }, remainingTime);
     } finally {
       this.isSaving = false;
     }
+  }
+
+  /**
+   * Initialize empty editor (no draft loaded)
+   * Called when session intent mode is 'new'
+   * Draft transaction will be created lazily on first edit via triggerSave()
+   */
+  initializeEmptyEditor() {
+    const editor = document.querySelector('#stack-post-body-editor');
+    const titleInput = document.querySelector('#stack-post-title-input');
+    
+    if (!editor || !titleInput) return;
+
+    // Clear title
+    titleInput.value = '';
+    
+    // Create empty document
+    const tempDocument = { blocks: [{ type: 'paragraph', id: generateBlockId(0), text: '' }] };
+    renderDocument(tempDocument, editor, {
+      contentEditable: true
+    });
+
+    // Clear draft transaction reference (new draft, no transaction yet)
+    this.draftTransaction = null;
+
+    // Update UI state
+    this.updatePlaceholderVisibility();
+    this.updatePublishTriggerVisibility();
+    this.updatePublishTriggerState();
+    this.updateSaveState('draft');
+  }
+
+  /**
+   * @deprecated Use initializeEmptyEditor() instead. Kept for backward compatibility with chooser.
+   */
+  createNewDraft() {
+    this.initializeEmptyEditor();
   }
 
   /**
@@ -590,7 +1103,7 @@ class CreatePost {
 
   /**
    * Internal helper to load a draft transaction into the editor
-   * Populates title and content from the transaction
+   * Populates title, content, and featured image from the transaction
    */
   loadDraftTransaction(tx) {
     // Extract data from transaction
@@ -626,8 +1139,26 @@ class CreatePost {
       }
     }
 
-    // Store reference to draft transaction for future updates
+    // Store reference to draft transaction and set active draft ID for this session
     this.draftTransaction = tx;
+    this.activeDraftId = tx.signature || tx.hash || null;
+
+    // Load featured image from draft if present
+    if (data.image) {
+      this.featuredImage = data.image; // Base64 data
+      // Update display after a short delay to ensure DOM is ready
+      setTimeout(() => {
+        this.updateFeaturedImageDisplay();
+      }, 50);
+    } else {
+      this.featuredImage = null;
+      this.updateFeaturedImageDisplay();
+    }
+
+    // ========================================================================
+    // [EDITOR-INVARIANT] Log draft bind after loading for validation
+    // ========================================================================
+    console.debug('[EDITOR-INVARIANT] Draft loaded and bound:', this.activeDraftId);
 
     // Update UI state
     this.updatePlaceholderVisibility();
@@ -639,10 +1170,30 @@ class CreatePost {
   /**
    * Save or update draft transaction to localhost archive
    * Drafts are unsigned transactions saved with field4 = "stack:draft"
+   * 
+   * INVARIANT: This method must NEVER early-return due to stale state.
+   * isPublished is ALWAYS false when entering the editor (reset in render()).
+   * Publishing does NOT poison future editor sessions.
    */
   async saveDraftTransaction() {
-    // Skip if published (published posts should not be saved as drafts)
+    // ========================================================================
+    // [EDITOR-INVARIANT] Log save attempt for validation
+    // ========================================================================
+    console.debug('[EDITOR-INVARIANT] saveDraftTransaction() called, activeDraftId:', this.activeDraftId);
+
+    // ========================================================================
+    // INVARIANT CHECK: Must not save after publish
+    // ========================================================================
     if (this.isPublished) {
+      console.error('[EDITOR-INVARIANT] saveDraftTransaction() called with isPublished=true. Autosave must not run after publish.');
+      return; // Fail loudly - do not save
+    }
+
+    // ========================================================================
+    // INVARIANT CHECK: Session intent must be valid
+    // ========================================================================
+    if (!this.sessionIntent) {
+      console.error('[EDITOR-INVARIANT] saveDraftTransaction() called without sessionIntent. Aborting save.');
       return;
     }
 
@@ -652,13 +1203,25 @@ class CreatePost {
 
       // Skip if both title and content are empty
       if (!title.trim() && !content.trim()) {
+        console.log('[DIAG] saveDraftTransaction() EARLY RETURN: title and content are both empty');
         return;
       }
 
       // Get current draft transaction or create new one
+      // If activeDraftId is set, we must load that draft (session-scoped)
       let tx = this.draftTransaction;
 
+      if (!tx && this.activeDraftId) {
+        // Session has activeDraftId but no draftTransaction - load it
+        console.log('[DIAG] saveDraftTransaction() Loading existing draft for activeDraftId:', this.activeDraftId);
+        const loadedDraft = await this.loadDraftById(this.activeDraftId);
+        if (loadedDraft) {
+          tx = this.draftTransaction;
+        }
+      }
+
       if (!tx) {
+        console.log('[DIAG] saveDraftTransaction() Creating NEW draft transaction');
         // Create new unsigned transaction
         tx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(this.mod.publicKey);
         
@@ -668,7 +1231,7 @@ class CreatePost {
           title: title.trim() || '',
           content: content.trim() || '',
           tags: [],
-          image: '',
+          image: this.featuredImage || '', // Featured/teaser image (singular, separate)
           imageUrl: '',
           timestamp: Date.now(),
           subscriptionTier: 'free',
@@ -681,21 +1244,111 @@ class CreatePost {
           data: data
         };
 
+        // ========================================================================
+        // DIAGNOSTIC: Log field4 value being saved
+        // ========================================================================
+        const field4Value = 'stack:draft';
+        console.log('[DIAG] saveDraftTransaction() Saving NEW draft with field4 =', field4Value);
+
+        // ========================================================================
+        // DIAGNOSTIC: Log exact values being stored (field1, field2, field4, peer)
+        // ========================================================================
+        console.log('[DIAG] saveDraftTransaction() About to save with:');
+        console.log('[DIAG]   - field1: (auto-populated from tx.msg.module, expected: "Stack")');
+        console.log('[DIAG]   - field2: (auto-populated from tx.from[0].publicKey, expected:', this.mod.publicKey, ')');
+        console.log('[DIAG]   - field4:', field4Value);
+        console.log('[DIAG]   - peer: "localhost"');
+        console.log('[DIAG]   - tx.msg.module =', JSON.stringify(tx.msg?.module), '(type:', typeof tx.msg?.module, ')');
+        console.log('[DIAG]   - tx.from =', tx.from ? JSON.stringify(tx.from) : 'N/A');
+        console.log('[DIAG]   - tx.from[0].publicKey =', tx.from && tx.from[0] ? JSON.stringify(tx.from[0].publicKey) : 'N/A');
+        console.log('[DIAG]   - tx.signature =', tx.signature || 'N/A (unsigned transaction - signature may be generated on save)');
+        console.log('[DIAG]   - this.mod.publicKey =', JSON.stringify(this.mod.publicKey));
+
         // Save new draft transaction (field1 is auto-populated from tx.msg.module)
         await this.app.storage.saveTransaction(tx, {
-          field4: 'stack:draft'
+          field4: field4Value
         }, 'localhost');
 
-        // Store reference for future updates
+        // ========================================================================
+        // DIAGNOSTIC: Confirmation that storage.saveTransaction() resolved
+        // ========================================================================
+        console.log('[DIAG] saveDraftTransaction() storage.saveTransaction() RESOLVED (new draft created)');
+        console.log('[DIAG] saveDraftTransaction() After save, tx.signature =', tx.signature || 'N/A (still unsigned?)');
+        
+        // ========================================================================
+        // DIAGNOSTIC: Immediately verify what was stored by querying back
+        // ========================================================================
+        // Try verification with signature first (if available)
+        if (tx.signature) {
+          console.log('[DIAG] saveDraftTransaction() Verifying saved draft by signature...');
+          this.app.storage.loadTransactions(
+            { field1: 'Stack', field4: 'stack:draft', signature: tx.signature },
+            (verificationTxs) => {
+              const verifyCount = verificationTxs ? verificationTxs.length : 0;
+              console.log('[DIAG] saveDraftTransaction() Verification query (by signature) found', verifyCount, 'matching transactions');
+              if (verifyCount > 0 && verificationTxs[0]) {
+                const verifyTx = verificationTxs[0];
+                console.log('[DIAG] saveDraftTransaction() Verified transaction has:');
+                console.log('[DIAG]   - field1:', JSON.stringify(verifyTx.field1 || 'N/A'));
+                console.log('[DIAG]   - field2:', JSON.stringify(verifyTx.field2 || 'N/A'));
+                console.log('[DIAG]   - field4:', JSON.stringify(verifyTx.field4 || 'N/A'));
+                console.log('[DIAG]   - signature:', verifyTx.signature || 'N/A');
+              } else {
+                console.log('[DIAG] saveDraftTransaction() WARNING: Verification query (by signature) found NO matching transactions!');
+              }
+            },
+            'localhost'
+          );
+        } else {
+          console.log('[DIAG] saveDraftTransaction() Transaction has no signature after save (unsigned transaction)');
+        }
+        
+        // ========================================================================
+        // DIAGNOSTIC: Also verify by field1 + field4 (same query as discoverDrafts)
+        // ========================================================================
+        console.log('[DIAG] saveDraftTransaction() Verifying saved draft using discoverDrafts() query pattern...');
+        this.app.storage.loadTransactions(
+          { field1: 'Stack', field4: 'stack:draft' },
+          (verificationTxs) => {
+            const verifyCount = verificationTxs ? verificationTxs.length : 0;
+            console.log('[DIAG] saveDraftTransaction() Verification query (field1+field4) found', verifyCount, 'matching transactions');
+            if (verifyCount > 0) {
+              console.log('[DIAG] saveDraftTransaction() All matching drafts:');
+              verificationTxs.forEach((verifyTx, idx) => {
+                console.log(`[DIAG]   Draft ${idx + 1}:`);
+                console.log(`[DIAG]     - field1: ${JSON.stringify(verifyTx.field1 || 'N/A')}`);
+                console.log(`[DIAG]     - field2: ${JSON.stringify(verifyTx.field2 || 'N/A')}`);
+                console.log(`[DIAG]     - field4: ${JSON.stringify(verifyTx.field4 || 'N/A')}`);
+                console.log(`[DIAG]     - signature: ${verifyTx.signature || 'N/A'}`);
+              });
+            } else {
+              console.log('[DIAG] saveDraftTransaction() CRITICAL: Verification query (field1+field4) found NO matching transactions!');
+              console.log('[DIAG] saveDraftTransaction() This means the draft was NOT saved or was saved with different field values.');
+            }
+          },
+          'localhost'
+        );
+
+        // Log successful save (downgraded from diagnostic)
+        console.debug('Stack: storage.saveTransaction() resolved (new draft created)');
+
+        // Store reference for future updates and set active draft ID
         this.draftTransaction = tx;
+        this.activeDraftId = tx.signature || tx.hash || null;
+        
+        // ========================================================================
+        // [EDITOR-INVARIANT] Log new draft creation for validation
+        // ========================================================================
+        console.debug('[EDITOR-INVARIANT] New draft created and bound:', this.activeDraftId);
       } else {
+        console.log('[DIAG] saveDraftTransaction() Updating EXISTING draft transaction (signature:', tx.signature || tx.hash, ')');
         // Update existing draft transaction
         const data = {
           type: 'stack_post',
           title: title.trim() || '',
           content: content.trim() || '',
           tags: [],
-          image: '',
+          image: this.featuredImage || '', // Featured/teaser image (singular, separate)
           imageUrl: '',
           timestamp: tx.msg?.data?.timestamp || Date.now(),
           subscriptionTier: 'free',
@@ -708,13 +1361,71 @@ class CreatePost {
           data: data
         };
 
+        // ========================================================================
+        // DIAGNOSTIC: Log field4 value being saved
+        // ========================================================================
+        const field4Value = 'stack:draft';
+        console.log('[DIAG] saveDraftTransaction() Updating draft with field4 =', field4Value);
+
+        // ========================================================================
+        // DIAGNOSTIC: Log exact values being updated (field1, field2, field4, peer)
+        // ========================================================================
+        console.log('[DIAG] saveDraftTransaction() About to update with:');
+        console.log('[DIAG]   - field1: (should remain from original transaction, expected: "Stack")');
+        console.log('[DIAG]   - field2: (should remain from original transaction, expected: publicKey)');
+        console.log('[DIAG]   - field4:', field4Value);
+        console.log('[DIAG]   - peer: "localhost"');
+        console.log('[DIAG]   - tx.signature =', tx.signature || 'N/A');
+        console.log('[DIAG]   - tx.msg.module =', tx.msg?.module);
+
         // Update existing draft transaction (field1 is auto-populated from tx.msg.module)
         await this.app.storage.updateTransaction(tx, {
-          field4: 'stack:draft'
+          field4: field4Value
         }, 'localhost');
+
+        // ========================================================================
+        // DIAGNOSTIC: Confirmation that storage.updateTransaction() resolved
+        // ========================================================================
+        console.log('[DIAG] saveDraftTransaction() storage.updateTransaction() RESOLVED (draft updated)');
+        
+        // ========================================================================
+        // DIAGNOSTIC: Immediately verify what was stored by querying back
+        // ========================================================================
+        if (tx.signature) {
+          console.log('[DIAG] saveDraftTransaction() Verifying updated draft by querying storage...');
+          this.app.storage.loadTransactions(
+            { field1: 'Stack', field4: 'stack:draft', signature: tx.signature },
+            (verificationTxs) => {
+              const verifyCount = verificationTxs ? verificationTxs.length : 0;
+              console.log('[DIAG] saveDraftTransaction() Verification query found', verifyCount, 'matching transactions');
+              if (verifyCount > 0 && verificationTxs[0]) {
+                const verifyTx = verificationTxs[0];
+                console.log('[DIAG] saveDraftTransaction() Verified transaction has:');
+                console.log('[DIAG]   - field1:', verifyTx.field1 || 'N/A');
+                console.log('[DIAG]   - field2:', verifyTx.field2 || 'N/A');
+                console.log('[DIAG]   - field4:', verifyTx.field4 || 'N/A');
+                console.log('[DIAG]   - signature:', verifyTx.signature || 'N/A');
+              } else {
+                console.log('[DIAG] saveDraftTransaction() WARNING: Verification query found NO matching transactions!');
+              }
+            },
+            'localhost'
+          );
+        }
+
+        // Log successful update (downgraded from diagnostic)
+        console.debug('Stack: storage.updateTransaction() resolved (draft updated)');
       }
+      
+      // ========================================================================
+      // DIAGNOSTIC: Check whether refreshDrafts() is called afterward
+      // ========================================================================
+      console.log('[DIAG] saveDraftTransaction() EXIT: refreshDrafts() is NOT called (draft discovery happens on next editor entry)');
     } catch (error) {
-      console.error('Error saving draft transaction:', error);
+      console.error('[DIAG] saveDraftTransaction() ERROR:', error);
+      console.error('Stack: Error saving draft transaction:', error);
+      // Re-throw to allow caller to handle error (triggerSave catches it)
+      throw error;
     }
   }
 
@@ -728,7 +1439,12 @@ class CreatePost {
 
   /**
    * Update status display in sidebar
-   * Shows "Saving…" when saving, otherwise shows "Draft" or "Published" based on isPublished
+   * Shows "Saving…" (italic) when saving, otherwise shows "Draft" or "Published" based on isPublished
+   * 
+   * Status UI rules:
+   * - "Status:" label is always visible
+   * - When saving: "Saving…" in italic, visible for minimum 500ms (enforced in triggerSave)
+   * - After save: "Draft" again
    */
   updateStatusDisplay() {
     const statusValueElement = document.querySelector('#stack-editor-status-value');
@@ -737,7 +1453,7 @@ class CreatePost {
     let statusText;
     if (this.saveState === 'saving') {
       statusText = 'Saving…';
-      statusValueElement.classList.add('saving');
+      statusValueElement.classList.add('saving'); // CSS should style this as italic
     } else {
       statusText = this.isPublished ? 'Published' : 'Draft';
       statusValueElement.classList.remove('saving');
@@ -2970,6 +3686,14 @@ class CreatePost {
     newSelection.removeAllRanges();
     newSelection.addRange(newRange);
     newParagraphElement.focus();
+
+    // ========================================================================
+    // IMAGE INSERTION MUST TRIGGER AUTOSAVE
+    // ========================================================================
+    // Image insertion is a document edit - it must mark the document as dirty
+    // and trigger autosave logic, just like text edits do.
+    // This ensures images persist even if no text changes occur afterward.
+    this.scheduleSerialization();
   }
 
   /**
@@ -3192,24 +3916,14 @@ class CreatePost {
     const editor = document.querySelector('#stack-post-body-editor');
     const content = editor ? this.serializeDOMToMarkdown() : '';
 
-    // Get cover image if exists
-    const coverImageImg = document.querySelector('#stack-cover-image-img');
-    let image = null;
-    let imageUrl = null;
-    if (coverImageImg && coverImageImg.src) {
-      const src = coverImageImg.src;
-      if (src.startsWith('data:')) {
-        image = src.split(',')[1];
-      } else {
-        imageUrl = src;
-      }
-    }
+    // Get featured image from editor state
+    const featuredImage = this.featuredImage || null;
 
     this.mod.publishSettingsOverlay.render({
       published: this.isPublished,
       description: content.substring(0, 200).replace(/\n/g, ' ').trim(),
-      image: image,
-      imageUrl: imageUrl
+      image: featuredImage,
+      imageUrl: null // Featured image is always base64, no URL
     });
   }
 
@@ -3290,6 +4004,48 @@ class CreatePost {
 
   attachEvents() {
     try {
+      // ========================================================================
+      // FEATURED IMAGE: Drag-and-drop upload handler
+      // ========================================================================
+      const featuredImageDropzone = document.querySelector('#stack-featured-image-dropzone');
+      if (featuredImageDropzone) {
+        this.app.browser.addDragAndDropFileUploadToElement(
+          'stack-featured-image-dropzone',
+          (fileData) => {
+            if (!fileData) {
+              console.warn('Stack: Failed to read featured image file');
+              return;
+            }
+            
+            // Handle multiple files: use only the last one
+            // fileData is already base64 data URL from the helper
+            if (typeof fileData === 'string' && fileData.startsWith('data:image/')) {
+              // Extract base64 data (everything after the comma)
+              const base64Data = fileData.split(',')[1];
+              this.handleFeaturedImageUpload(base64Data);
+            } else {
+              console.warn('Stack: Invalid image data format');
+            }
+          },
+          true // click_to_upload
+        );
+      }
+
+      // Also enable drag-and-drop on preview container (for replacing image)
+      const previewContainer = document.querySelector('#stack-featured-image-preview-container');
+      if (previewContainer) {
+        this.app.browser.addDragAndDropFileUploadToElement(
+          'stack-featured-image-preview-container',
+          (fileData) => {
+            if (fileData && typeof fileData === 'string' && fileData.startsWith('data:image/')) {
+              const base64Data = fileData.split(',')[1];
+              this.handleFeaturedImageUpload(base64Data);
+            }
+          },
+          true // click_to_upload
+        );
+      }
+
       // Admin element (draft-state) - always clickable
       const adminElement = document.querySelector('#stack-draft-state');
       if (adminElement) {
@@ -3428,8 +4184,52 @@ class CreatePost {
     }
   }
 
+  /**
+   * ========================================================================
+   * PUBLISH: Pure DOM Read → Transaction Construction → Emission
+   * ========================================================================
+   * 
+   * PUBLISH-TIME INVARIANT: DOM is the SINGLE source of truth.
+   * - Reads title directly from #stack-post-title-input
+   * - Reads body directly from #stack-post-body-editor (via serializeDOMToMarkdown)
+   * - Does NOT depend on autosave state, cached content, or draft snapshots
+   * - Side-effect free: does NOT modify editor DOM or affect future sessions
+   * 
+   * Publishing consumes the active draft and ends the current session.
+   */
   async handlePublish() {
-    // Clear any pending saves during publish flow
+    // ========================================================================
+    // [EDITOR-INVARIANT] Log publish begin for validation
+    // ========================================================================
+    console.debug('[EDITOR-INVARIANT] Publish begin, activeDraftId:', this.activeDraftId);
+
+    // ========================================================================
+    // INVARIANT CHECK: Editor must be mounted
+    // ========================================================================
+    try {
+      this.assertEditorMounted('handlePublish');
+    } catch (error) {
+      console.error('[EDITOR-INVARIANT] Publish failed - editor not mounted:', error);
+      alert('Error: Editor not ready. Please refresh and try again.');
+      return;
+    }
+
+    // ========================================================================
+    // INVARIANT CHECK: Session intent must be valid
+    // ========================================================================
+    try {
+      this.assertValidSessionIntent('handlePublish');
+    } catch (error) {
+      console.error('[EDITOR-INVARIANT] Publish failed - invalid session intent:', error);
+      alert('Error: Invalid editor session state. Please refresh and try again.');
+      return;
+    }
+
+    // ========================================================================
+    // PRE-PUBLISH: Clear pending autosave operations (does not affect publish output)
+    // ========================================================================
+    // Cancel any pending autosave timers to avoid interference
+    // This is cleanup only - publish does not depend on autosave state
     if (this.inactivityTimeout) {
       clearTimeout(this.inactivityTimeout);
       this.inactivityTimeout = null;
@@ -3440,20 +4240,117 @@ class CreatePost {
     }
     this.queuedSave = false;
     
-    // Read FRESHEST editor-approved content (no cache reliance)
+    // ========================================================================
+    // PUBLISH SERIALIZATION: Direct DOM read (synchronous, pure)
+    // ========================================================================
+    // Read directly from live DOM elements - no cache, no draft state, no autosave
     const titleInput = document.querySelector('#stack-post-title-input');
-    const title = titleInput ? titleInput.value.trim() : '';
-    const content = this.serializeDOMToMarkdown().trim();
-    
-    // Debug: Log content to help diagnose issues
-    if (!content) {
-      const editor = document.querySelector('#stack-post-body-editor');
-      if (editor) {
-        console.log('Editor element found, blocks:', editor.querySelectorAll('[data-block-id]').length);
-        console.log('Editor textContent length:', editor.textContent ? editor.textContent.length : 0);
-      }
+    if (!titleInput) {
+      console.error('[EDITOR-INVARIANT] handlePublish() called but #stack-post-title-input not found');
+      alert('Error: Editor title input not found. Please refresh and try again.');
+      return;
     }
     
+      const editor = document.querySelector('#stack-post-body-editor');
+    if (!editor) {
+      console.error('[EDITOR-INVARIANT] handlePublish() called but #stack-post-body-editor not found');
+      alert('Error: Editor body not found. Please refresh and try again.');
+      return;
+    }
+
+    const title = titleInput.value.trim();
+    
+    // ========================================================================
+    // IMAGE EXTRACTION: Extract embedded images from editor DOM
+    // ========================================================================
+    const images = [];
+    const imageIdMap = new Map(); // Maps img.src -> imageId
+    
+    try {
+      // Walk the editor DOM to find all embedded images
+      const imageBlocks = editor.querySelectorAll('figure[data-block-type="image"]');
+      
+      for (const imageBlock of imageBlocks) {
+        const img = imageBlock.querySelector('img');
+        if (!img || !img.src) continue;
+        
+        // Skip if this image src is already processed (deduplication within a post)
+        if (imageIdMap.has(img.src)) continue;
+        
+        // Generate unique imageId
+        const imageId = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        // Extract image data
+        let imageData = '';
+        let mimeType = 'image/png';
+        let width = null;
+        let height = null;
+        
+        if (img.src.startsWith('data:image/')) {
+          // Extract base64 data from data URL
+          const dataUrlParts = img.src.split(',');
+          if (dataUrlParts.length === 2) {
+            // Extract mime type from data URL
+            const mimeMatch = img.src.match(/data:image\/([^;]+)/);
+            if (mimeMatch) {
+              mimeType = `image/${mimeMatch[1]}`;
+            }
+            imageData = dataUrlParts[1];
+          } else {
+            console.error('Stack: Invalid data URL format for image:', img.src.substring(0, 50));
+            alert('Error: Invalid image format. Please remove and re-add the image.');
+            return;
+          }
+        } else {
+          // External URL - not supported for embedded images (only data URLs)
+          console.warn('Stack: Skipping external image URL (not supported for embedded images):', img.src);
+          continue;
+        }
+        
+        // Extract dimensions if available
+        if (img.naturalWidth && img.naturalHeight) {
+          width = img.naturalWidth;
+          height = img.naturalHeight;
+        } else if (img.width && img.height) {
+          width = img.width;
+          height = img.height;
+        }
+        
+        // Extract caption/alt text
+        const captionEl = imageBlock.querySelector('.stack-image-caption');
+        const alt = captionEl ? captionEl.textContent : (img.alt || '');
+        
+        // Create image object
+        const imageObj = {
+          id: imageId,
+          data: imageData,
+          mime: mimeType,
+          alt: alt
+        };
+        
+        if (width !== null) imageObj.width = width;
+        if (height !== null) imageObj.height = height;
+        
+        images.push(imageObj);
+        imageIdMap.set(img.src, imageId);
+      }
+    } catch (imageExtractionError) {
+      console.error('Stack: Error extracting images from editor:', imageExtractionError);
+      alert('Error: Failed to extract images. Please check for malformed images and try again.');
+      return; // Do NOT publish partial content
+    }
+    
+    // Serialize DOM to markdown with image references
+    let content = '';
+    try {
+      content = this.serializeDOMToMarkdown(imageIdMap).trim();
+    } catch (serializationError) {
+      console.error('Stack: Error serializing editor content to markdown:', serializationError);
+      alert('Error: Failed to serialize editor content. Please check for malformed content and try again.');
+      return; // Do NOT publish partial content
+    }
+    
+    // Validation: Require both title and content
     if (!title) {
       alert('Please enter a title for your post');
       return;
@@ -3464,6 +4361,9 @@ class CreatePost {
       return;
     }
 
+    // ========================================================================
+    // TRANSACTION CONSTRUCTION: Build from serialized DOM content
+    // ========================================================================
     try {
       // Show loading message
       if (this.app.connection) {
@@ -3473,19 +4373,13 @@ class CreatePost {
         });
       }
 
-      // Get uploaded images
-      const uploadedImages = document.querySelectorAll('.stack-uploaded-image-item img');
+      // Get featured image from editor state (authoritative source)
+      // Featured image is stored in this.featuredImage as base64 data
       let image = '';
       let imageUrl = '';
       
-      if (uploadedImages.length > 0) {
-        const firstImage = uploadedImages[0];
-        const imageSrc = firstImage.getAttribute('src');
-        if (imageSrc && imageSrc.startsWith('data:')) {
-          image = imageSrc.split(',')[1] || '';
-        } else if (imageSrc) {
-          imageUrl = imageSrc;
-        }
+      if (this.featuredImage) {
+        image = this.featuredImage; // Base64 data (already extracted, no data: prefix)
       }
 
       // Create excerpt from content
@@ -3499,8 +4393,9 @@ class CreatePost {
         type: 'stack_post',
         title: title,
         content: content,
+        images: images, // Embedded content images array
         tags: [],
-        image: image,
+        image: this.featuredImage || image, // Featured/teaser image (singular, separate) - use editor state
         imageUrl: imageUrl,
         timestamp: Date.now(),
         subscriptionTier: 'free',
@@ -3526,12 +4421,31 @@ class CreatePost {
       // Propagate the signed transaction to the network
       await this.app.network.propagateTransaction(newtx);
 
-      // Set published state
+      // ========================================================================
+      // PUBLISH CONSUMES ACTIVE DRAFT: Mark draft as consumed, stop autosaving
+      // ========================================================================
+      // Draft is consumed by publish - clear references but do NOT delete yet
+      // Actual deletion can be deferred (handled by cleanupPendingDrafts)
+      // This ends the current session - autosave will stop for this draft
+      const consumedDraftId = this.activeDraftId;
+      this.draftTransaction = null;
+      this.activeDraftId = null; // Stop autosaving to this draft
+      
+      // ========================================================================
+      // INVARIANT CHECK: Verify activeDraftId was cleared (must not be reused)
+      // ========================================================================
+      if (this.activeDraftId !== null) {
+        console.error('[EDITOR-INVARIANT] activeDraftId was not cleared after publish:', this.activeDraftId);
+      }
+      
+      // Set published state (for UI feedback only - reset on next session mount)
       this.isPublished = true;
       this.updatePublishTriggerState();
 
-      // Clear draft transaction reference (post is now pending/processing)
-      this.draftTransaction = null;
+      // ========================================================================
+      // [EDITOR-INVARIANT] Log publish end for validation
+      // ========================================================================
+      console.debug('[EDITOR-INVARIANT] Publish end, consumed draft:', consumedDraftId, 'activeDraftId cleared:', this.activeDraftId === null);
 
       // Update status
       if (this.app.connection) {
@@ -3542,14 +4456,83 @@ class CreatePost {
       }
 
     } catch (error) {
-      console.error('Error publishing post:', error);
-      alert('Failed to publish post. Please try again.');
+      // ========================================================================
+      // EXPLICIT ERROR HANDLING: Do NOT publish partial content, leave editor intact
+      // ========================================================================
+      console.error('Stack: Error publishing post:', error);
+      
+      // Show clear error message to user
+      const errorMessage = error.message || 'Unknown error occurred';
+      alert(`Failed to publish post: ${errorMessage}\n\nThe editor content has been preserved. Please try again.`);
+      
+      // Clear any loading indicators
       if (this.app.connection) {
         this.app.connection.emit('saito-header-update-message', {
           msg: 'Error publishing post',
-          timeout: 2000
+          timeout: 3000
         });
       }
+      
+      // Editor session remains intact - user can retry without data loss
+      // isPublished remains false, autosave continues, draft remains active
+    }
+  }
+
+  /**
+   * Update featured image display above title input
+   * Shows/hides the featured image section based on this.featuredImage
+   * Manages both dropzone (when no image) and preview (when image exists)
+   */
+  updateFeaturedImageDisplay() {
+    const featuredImageSection = document.querySelector('#stack-featured-image-section');
+    const dropzone = document.querySelector('#stack-featured-image-dropzone');
+    const previewContainer = document.querySelector('#stack-featured-image-preview-container');
+    const featuredImagePreview = document.querySelector('#stack-featured-image-preview');
+    const removeBtn = document.querySelector('#stack-featured-image-remove-btn');
+
+    if (!featuredImageSection) {
+      return;
+    }
+
+    if (this.featuredImage) {
+      // Show preview, hide dropzone
+      if (dropzone) dropzone.style.display = 'none';
+      if (previewContainer) {
+        previewContainer.style.display = 'block';
+        const dataUrl = `data:image/png;base64,${this.featuredImage}`;
+        if (featuredImagePreview) {
+          featuredImagePreview.src = dataUrl;
+        }
+      }
+
+      // Attach remove button handler if not already attached
+      if (removeBtn && !removeBtn.dataset.handlerAttached) {
+        removeBtn.dataset.handlerAttached = 'true';
+        removeBtn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.handleFeaturedImageRemove();
+        };
+      }
+    } else {
+      // Show dropzone, hide preview
+      if (dropzone) dropzone.style.display = 'block';
+      if (previewContainer) previewContainer.style.display = 'none';
+      if (featuredImagePreview) featuredImagePreview.src = '';
+    }
+  }
+
+  /**
+   * Handle featured image removal
+   */
+  handleFeaturedImageRemove() {
+    this.featuredImage = null;
+    this.updateFeaturedImageDisplay();
+    
+    // If publish settings overlay is open, update it too
+    if (this.mod.publishSettingsOverlay && this.mod.publishSettingsOverlay.postState) {
+      this.mod.publishSettingsOverlay.postState.image = null;
+      this.mod.publishSettingsOverlay.updateFeaturedImageDropzone(null);
     }
   }
 }

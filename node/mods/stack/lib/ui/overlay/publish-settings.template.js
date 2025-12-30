@@ -36,11 +36,11 @@ module.exports = (app, mod, postState = {}) => {
     });
   };
 
-  // Map internal 'nft' to display 'subscribers'
-  const displayAccessLevel = accessLevel === 'nft' ? 'subscribers' : accessLevel;
-  const isPublic = displayAccessLevel === 'public';
-  const isSubscribers = displayAccessLevel === 'subscribers';
-  const isCustom = displayAccessLevel === 'custom';
+  // Map internal access levels to display
+  // 'public' -> 'public', 'private' -> 'private', 'subscription' -> 'subscription'
+  const isPublic = accessLevel === 'public';
+  const isPrivate = accessLevel === 'private';
+  const isSubscription = accessLevel === 'subscription';
 
   return `
     <div class="stack-publish-overlay">
@@ -77,31 +77,32 @@ module.exports = (app, mod, postState = {}) => {
                 </div>
               </label>
 
-              <label class="stack-publish-access-card ${isSubscribers ? 'stack-publish-access-card-active' : ''}" data-access="subscribers">
+              <label class="stack-publish-access-card ${isPrivate ? 'stack-publish-access-card-active' : ''}" data-access="private">
                 <input 
                   type="checkbox" 
                   name="stack-publish-access" 
-                  value="subscribers" 
-                  ${isSubscribers ? 'checked' : ''}
+                  value="private" 
+                  ${isPrivate ? 'checked' : ''}
                   class="stack-publish-access-checkbox"
                 />
                 <div class="stack-publish-access-card-content">
-                  <div class="stack-publish-access-card-label">Subscribers</div>
-                  <div class="stack-publish-access-card-description">Only people who own a subscription NFT you created.</div>
+                  <div class="stack-publish-access-card-label">Private</div>
+                  <div class="stack-publish-access-card-description">Only people who own NFTs you issued can read this post.</div>
                 </div>
               </label>
 
-              <label class="stack-publish-access-card ${isCustom ? 'stack-publish-access-card-active' : ''}" data-access="custom">
+              <label class="stack-publish-access-card stack-publish-access-card-disabled ${isSubscription ? 'stack-publish-access-card-active' : ''}" data-access="subscription">
                 <input 
                   type="checkbox" 
                   name="stack-publish-access" 
-                  value="custom" 
-                  ${isCustom ? 'checked' : ''}
+                  value="subscription" 
+                  ${isSubscription ? 'checked' : ''}
+                  disabled
                   class="stack-publish-access-checkbox"
                 />
                 <div class="stack-publish-access-card-content">
-                  <div class="stack-publish-access-card-label">Custom</div>
-                  <div class="stack-publish-access-card-description">Use a custom access rule. (Advanced)</div>
+                  <div class="stack-publish-access-card-label">Subscription</div>
+                  <div class="stack-publish-access-card-description">Coming soon – time limited access</div>
                 </div>
               </label>
             </div>

@@ -7,16 +7,17 @@ module.exports = (app, mod, tx) => {
   const msg = tx.returnMessage();
   const data = msg.data || {};
   
-  // Extract fields - use text for body, never summary
+  // Extract fields - use content for body, never summary
   const title = data.title || null;
   const subtitle = data.subtitle || null;
-  const bodyText = data.text || ''; // Use 'text' field, not 'content' or 'summary'
-  const image = data.image || null;
+  const bodyText = data.content || data.text || ''; // Use 'content' field (preferred), fallback to 'text'
+  const images = Array.isArray(data.images) ? data.images : []; // Embedded content images array
+  const image = data.image || null; // Teaser/header image (singular, separate)
   const imageUrl = data.imageUrl || null;
   const url = data.url || null;
   const timestamp = tx.timestamp || data.timestamp || Date.now();
   
-  // Get feature image URL (only if exists)
+  // Get feature image URL (only if exists) - this is the teaser/header image
   let featureImageUrl = null;
   if (imageUrl) {
     featureImageUrl = imageUrl;
@@ -26,18 +27,45 @@ module.exports = (app, mod, tx) => {
     featureImageUrl = `data:image/${mimeType};base64,${image}`;
   }
   
-  // Render markdown body text to HTML
+  // Create image lookup map for resolving stack:image: references
+  const imageMap = new Map();
+  images.forEach(img => {
+    if (img && img.id) {
+      imageMap.set(img.id, img);
+    }
+  });
+  
+  // Render markdown body text to HTML with image reference resolution
   const renderMarkdown = (markdown) => {
     if (!markdown) return '';
+    
+    // Resolve stack:image:<imageId> references before markdown processing
+    let processedMarkdown = markdown;
+    const imageReferenceRegex = /!\[([^\]]*)\]\(stack:image:([^)]+)\)/g;
+    
+    processedMarkdown = processedMarkdown.replace(imageReferenceRegex, (match, alt, imageId) => {
+      const imageObj = imageMap.get(imageId);
+      if (imageObj && imageObj.data) {
+        // Construct data URL from stored image data
+        const mimeType = imageObj.mime || 'image/png';
+        const dataUrl = `data:${mimeType};base64,${imageObj.data}`;
+        return `![${alt}](${dataUrl})`;
+      } else {
+        // Image reference not found - render broken image placeholder
+        console.warn('Stack: Image reference not found:', imageId);
+        const placeholderUrl = '/saito/img/dreamscape.png';
+        return `![${alt || 'Image not found'}](${placeholderUrl})`;
+      }
+    });
     
     let html = '';
     
     // Use browser sanitize if available (handles markdown)
     if (app.browser.sanitize) {
-      html = app.browser.sanitize(markdown, true);
+      html = app.browser.sanitize(processedMarkdown, true);
     } else {
       // Fallback: basic HTML escape
-      html = app.browser.escapeHTML ? app.browser.escapeHTML(markdown) : markdown;
+      html = app.browser.escapeHTML ? app.browser.escapeHTML(processedMarkdown) : processedMarkdown;
     }
     
     // Remove H1 tags from body content (title is already rendered separately)

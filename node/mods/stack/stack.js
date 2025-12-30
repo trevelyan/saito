@@ -121,9 +121,206 @@ class Stack extends ModTemplate {
       console.error('Stack: Error discovering drafts:', err);
     });
 
-    // Render the main component (splash page)
+    // ========================================================================
+    // URL ROUTING: Parse pathname and route to appropriate view
+    // ========================================================================
+    const pathname = window.location.pathname;
+    const slug = '/' + this.slug;
+    
+    // Check if pathname starts with /stack
+    if (pathname.startsWith(slug)) {
+      // Extract path segments after /stack
+      const pathAfterSlug = pathname.substring(slug.length);
+      const segments = pathAfterSlug.split('/').filter(seg => seg.length > 0);
+      
+      if (segments.length === 1) {
+        // /stack/<publicKey> - Show creator's posts in Explorer
+        const publicKey = segments[0];
+        await this.handleCreatorView(publicKey);
+        return;
+      } else if (segments.length === 2) {
+        // /stack/<publicKey>/<transactionSignature> - Show specific blog post
+        const publicKey = segments[0];
+        const transactionSignature = segments[1];
+        await this.handlePostView(publicKey, transactionSignature);
+        return;
+      } else if (segments.length > 2) {
+        // Invalid URL - too many segments
+        this.handleInvalidURL();
+        return;
+      }
+      // segments.length === 0 means /stack (no additional path) - fall through to default
+    }
+
+    // Default: Render the main component (splash page)
     this.main.render();
 
+  }
+
+  ////////////////////////////
+  // URL Routing Handlers  //
+  ////////////////////////////
+  /**
+   * Handle creator view: /stack/<publicKey>
+   * Shows Explorer overlay with posts from that creator
+   */
+  async handleCreatorView(publicKey) {
+    if (!publicKey) {
+      this.handleInvalidURL();
+      return;
+    }
+
+    // Initialize ExploreOverlay if needed
+    if (!this.exploreOverlay) {
+      this.exploreOverlay = new ExploreOverlay(this.app, this);
+    }
+
+    // Show overlay immediately with loading state
+    this.exploreOverlay.isLoading = true;
+    this.exploreOverlay.posts = [];
+    this.exploreOverlay.currentFilter = 'creator';
+    this.exploreOverlay.targetPublicKey = publicKey;
+    this.exploreOverlay.render();
+
+    // Query archive for posts by this publicKey
+    try {
+      const posts = await new Promise((resolve) => {
+        this.app.storage.loadTransactions(
+          {
+            field1: 'Stack',
+            field2: publicKey
+          },
+          (txs) => {
+            if (!txs || txs.length === 0) {
+              resolve([]);
+              return;
+            }
+            
+            // Filter out drafts and pending posts
+            // Published posts have field4 = 'stack:post' (or no field4 for legacy posts)
+            // Drafts have field4 = 'stack:draft', pending have field4 = 'stack:pending'
+            const publishedTxs = txs.filter(tx => {
+              const field4 = tx.field4 || '';
+              // Include posts with field4 = 'stack:post' or no field4 (legacy published posts)
+              return field4 === 'stack:post' || field4 === '';
+            });
+            
+            // Extract signatures from published transactions
+            const signatures = publishedTxs
+              .map(tx => tx.signature)
+              .filter(sig => sig);
+            
+            // Load full transactions using loadPosts (handles cache → peers → archive)
+            this.loadPosts(signatures, 0, {}, (loadedPosts) => {
+              resolve(loadedPosts || []);
+            });
+          },
+          null // Query all peers, not just localhost
+        );
+      });
+
+      // Update overlay with loaded posts
+      this.exploreOverlay.posts = posts;
+      this.exploreOverlay.isLoading = false;
+      this.exploreOverlay.updatePostsGrid();
+    } catch (error) {
+      console.error('Stack: Error loading creator posts:', error);
+      // Show error state
+      this.exploreOverlay.isLoading = false;
+      this.exploreOverlay.posts = [];
+      this.exploreOverlay.updatePostsGrid();
+    }
+  }
+
+  /**
+   * Handle blog post view: /stack/<publicKey>/<transactionSignature>
+   * Shows ViewPost for the specific transaction
+   */
+  async handlePostView(publicKey, transactionSignature) {
+    if (!publicKey || !transactionSignature) {
+      this.handleInvalidURL();
+      return;
+    }
+
+    // Initialize ViewPost if needed (cache for reuse)
+    if (!this.viewPostComponent) {
+      const ViewPost = require('./lib/ui/view-post');
+      this.viewPostComponent = new ViewPost(this.app, this, '.saito-container');
+    }
+
+    // Show loading state immediately
+    const container = document.querySelector('.saito-container');
+    if (container) {
+      container.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; padding: 4rem 2rem;">
+          <i class="fa-solid fa-spinner fa-spin" style="font-size: 3rem; color: var(--saito-font-color-light); margin-bottom: 1rem;"></i>
+          <p style="color: var(--saito-font-color-light); font-size: 1.6rem;">Loading blog post for you…</p>
+        </div>
+      `;
+    }
+
+    // Load the transaction by signature
+    try {
+      const tx = await this.loadPost(transactionSignature, {}, null);
+      
+      if (!tx) {
+        // Transaction not found - show error
+        if (container) {
+          container.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; padding: 4rem 2rem; text-align: center;">
+              <i class="fa-solid fa-exclamation-triangle" style="font-size: 3rem; color: var(--saito-font-color-light); margin-bottom: 1rem;"></i>
+              <h3 style="font-size: 2rem; font-weight: 600; color: var(--saito-font-color); margin: 0 0 1rem 0;">Unable to load this blog post</h3>
+              <p style="font-size: 1.6rem; color: var(--saito-font-color-light); margin: 0; max-width: 500px; line-height: 1.6;">
+                The blog post you're looking for could not be found. It may have been deleted, or you may not have permission to view it.
+              </p>
+            </div>
+          `;
+        }
+        return;
+      }
+
+      // Verify the transaction is from the expected publicKey (for security)
+      const txPublicKey = tx.from && tx.from.length > 0 ? (tx.from[0].publicKey || tx.from[0].address) : null;
+      if (txPublicKey !== publicKey) {
+        console.warn('Stack: Transaction publicKey mismatch. Expected:', publicKey, 'Got:', txPublicKey);
+        // Still render, but log the mismatch
+      }
+
+      // Render the post
+      this.viewPostComponent.render(tx);
+    } catch (error) {
+      console.error('Stack: Error loading blog post:', error);
+      // Show error state
+      if (container) {
+        container.innerHTML = `
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; padding: 4rem 2rem; text-align: center;">
+            <i class="fa-solid fa-exclamation-triangle" style="font-size: 3rem; color: var(--saito-font-color-light); margin-bottom: 1rem;"></i>
+            <h3 style="font-size: 2rem; font-weight: 600; color: var(--saito-font-color); margin: 0 0 1rem 0;">Unable to load this blog post</h3>
+            <p style="font-size: 1.6rem; color: var(--saito-font-color-light); margin: 0; max-width: 500px; line-height: 1.6;">
+              An error occurred while loading the blog post. Please try again later.
+            </p>
+          </div>
+        `;
+      }
+    }
+  }
+
+  /**
+   * Handle invalid URL - show error state
+   */
+  handleInvalidURL() {
+    const container = document.querySelector('.saito-container');
+    if (container) {
+      container.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; padding: 4rem 2rem; text-align: center;">
+          <i class="fa-solid fa-exclamation-triangle" style="font-size: 3rem; color: var(--saito-font-color-light); margin-bottom: 1rem;"></i>
+          <h3 style="font-size: 2rem; font-weight: 600; color: var(--saito-font-color); margin: 0 0 1rem 0;">Invalid URL</h3>
+          <p style="font-size: 1.6rem; color: var(--saito-font-color-light); margin: 0; max-width: 500px; line-height: 1.6;">
+            The URL you requested is not valid. Please check the URL and try again.
+          </p>
+        </div>
+      `;
+    }
   }
 
   toggleSubscriptionsSidebar() {
@@ -274,7 +471,8 @@ class Stack extends ModTemplate {
       tags: [],
       timestamp: Date.now(),
       subscriptionTier: 'free',
-      excerpt: ''
+      excerpt: '',
+      accessLevel: 'public' // 'public' or 'private'
     },
     callback
   ) {
@@ -287,16 +485,111 @@ class Stack extends ModTemplate {
         type: 'stack_post',
         title: post.title || 'Untitled',
         content: typeof post.content === 'string' ? post.content : JSON.stringify(post.content),
+        images: Array.isArray(post.images) ? post.images : [], // Embedded content images array
         tags: Array.isArray(post.tags) ? post.tags : [],
-        image: post.image || '',
+        image: post.image || '', // Teaser/header image (singular, separate)
         imageUrl: post.imageUrl || '',
         timestamp: post.timestamp || Date.now(),
         subscriptionTier: post.subscriptionTier || 'free',
         excerpt: post.excerpt || ''
       };
 
+      // ========================================================================
+      // ACCESS SCRIPT GENERATION: Attach access script and hash based on mode
+      // ========================================================================
+      // Public mode: unrestricted access (script that always passes)
+      // Private mode: NFT-restricted access (CHECKOWNNFT script)
+      // Subscription mode: no script (disabled path)
+      // ========================================================================
+      const accessLevel = post.accessLevel || 'public';
+      let access_script = null;
+      let access_hash = '';
+
+      // Check if Scripting module is available
+      const scripting_mod = this.app.modules.returnModule("Scripting");
+      if (scripting_mod) {
+        if (accessLevel === 'public') {
+          // Public mode: Create a script that permits unrestricted access
+          // For public access, we use a script that always evaluates to true
+          // Since there's no "always true" opcode, we use OR with a condition
+          // that checks if the sender is the publisher OR not the publisher (always true)
+          // However, a simpler approach: use a minimal script structure that
+          // effectively allows unrestricted access by checking a condition that's
+          // always true for any sender
+          // 
+          // Note: In practice, Archive module may handle missing access scripts
+          // as public, but we attach a script here to be explicit about access mode
+          access_script = {
+            op: "OR",
+            args: [
+              {
+                op: "CHECKSENDER",
+                publickey: this.publicKey
+              },
+              {
+                op: "NOT",
+                args: [
+                  {
+                    op: "CHECKSENDER",
+                    publickey: this.publicKey
+                  }
+                ]
+              }
+            ]
+          };
+          // This script structure: (sender == publisher) OR (sender != publisher)
+          // Always evaluates to true for any sender, effectively allowing unrestricted access
+          const access_script_json = JSON.stringify(access_script);
+          access_hash = scripting_mod.hash(access_script_json);
+          
+          // Attach to transaction message
+          if (!newtx.msg) {
+            newtx.msg = {};
+          }
+          newtx.msg.access_script = access_script_json;
+          newtx.msg.access_hash = access_hash;
+        } else if (accessLevel === 'private') {
+          // Private mode: Restrict access to NFTs issued by the publisher
+          // This uses CHECKOWNNFT to verify the requester owns an NFT issued by the publisher
+          // 
+          // NOTE: In a full implementation, this would require:
+          // 1. The publisher to have minted a subscription NFT
+          // 2. The NFT ID to be known and passed here
+          // 
+          // For now, we use the publisher's public key as a placeholder NFT ID.
+          // This is a stub - full private access requires subscription NFT infrastructure.
+          // 
+          // The script structure follows Vault's pattern for NFT-gated access.
+          const publisherPublicKey = this.publicKey;
+          
+          // Create CHECKOWNNFT script (similar to Vault's createVaultAddFileTransaction pattern)
+          // This script requires the requester to provide witness data (utxokeys) proving
+          // they own an NFT with the specified nftid
+          access_script = {
+            op: "CHECKOWNNFT",
+            nftid: publisherPublicKey // Placeholder - in production, this must be the actual subscription NFT ID
+          };
+          
+          // Convert to JSON string and compute hash using Scripting module helper
+          const access_script_json = JSON.stringify(access_script);
+          access_hash = scripting_mod.hash(access_script_json);
+          
+          // Attach to transaction message (following Vault pattern: access_script and access_hash in msg)
+          if (!newtx.msg) {
+            newtx.msg = {};
+          }
+          newtx.msg.access_script = access_script_json;
+          newtx.msg.access_hash = access_hash;
+        }
+        // Subscription mode: no script attached (disabled path)
+      } else {
+        console.warn('Stack: Scripting module not available - access scripts will not be attached');
+        // Fail safely: continue without access scripts
+      }
+
       // Set the transaction message
       newtx.msg = {
+        ...newtx.msg,
         module: this.name,
         request: 'create stack post request',
         data: data
@@ -356,21 +649,34 @@ class Stack extends ModTemplate {
     }
     this.postsCache.byAuthor.get(from).push(post);
 
-    // Save to app.options.stack.posts for local UX state (only for user's own posts)
+    // ========================================================================
+    // Save lightweight reference to app.options.stack.posts (only for user's own posts)
+    // INVARIANT: app.options.stack is lightweight - no post bodies, images, or heavy data
+    // ========================================================================
     if (tx.isFrom(this.publicKey)) {
       this.load();
       if (!this.app.options.stack.posts) {
         this.app.options.stack.posts = [];
       }
       
+      // Store only lightweight reference (sig, publicKey, timestamp, status)
+      // Full content must be loaded from archive when needed
+      const lightweightPost = {
+        sig: tx.signature,
+        publicKey: tx.from[0].publicKey,
+        timestamp: txmsg.data.timestamp || tx.timestamp,
+        lastEdited: txmsg.data.timestamp || tx.timestamp,
+        status: 'published' // Can be 'published', 'unpublished', etc.
+      };
+      
       // Check if post already exists (update) or add new
-      const existingIndex = this.app.options.stack.posts.findIndex(p => p.sig === post.sig);
+      const existingIndex = this.app.options.stack.posts.findIndex(p => p.sig === lightweightPost.sig);
       if (existingIndex >= 0) {
-        // Update existing post
-        this.app.options.stack.posts[existingIndex] = post;
+        // Update existing post reference
+        this.app.options.stack.posts[existingIndex] = lightweightPost;
       } else {
-        // Add new post
-        this.app.options.stack.posts.push(post);
+        // Add new post reference
+        this.app.options.stack.posts.push(lightweightPost);
       }
       
       this.save();
@@ -446,6 +752,12 @@ class Stack extends ModTemplate {
    * Load persistent local UX state from app.options
    * Initializes app.options.stack if it doesn't exist
    * This is CLIENT-SIDE STATE ONLY - not authoritative
+   * 
+   * Structure:
+   * app.options.stack = {
+   *   posts: [ { sig, publicKey, timestamp, lastEdited, status } ],  // Lightweight references only
+   *   subscriptions: [ { publicKey, addedAt } ]  // List of subscribed creator publicKeys
+   * }
    */
   load() {
     if (!this.app.options.stack) {
@@ -454,9 +766,67 @@ class Stack extends ModTemplate {
     if (!this.app.options.stack.posts) {
       this.app.options.stack.posts = [];
     }
-    // Add other default state properties here as needed
+    if (!this.app.options.stack.subscriptions) {
+      this.app.options.stack.subscriptions = [];
+    }
+    // Note: app.options.stack is lightweight - no post bodies, images, or heavy data
+    // Full post content must be loaded from archive transactions when needed
     
     return this.app.options.stack;
+  }
+
+  ////////////////////////////
+  // Subscription Management //
+  ////////////////////////////
+  /**
+   * Add a subscription to a creator by publicKey
+   * @param {string} publicKey - The creator's publicKey
+   * @returns {boolean} - True if added, false if already subscribed
+   */
+  addSubscription(publicKey) {
+    if (!publicKey || !this.app.wallet.isValidPublicKey(publicKey)) {
+      return false;
+    }
+
+    this.load();
+    const subscriptions = this.app.options.stack.subscriptions || [];
+    
+    // Check if already subscribed
+    if (subscriptions.some(sub => sub.publicKey === publicKey)) {
+      return false;
+    }
+
+    // Add subscription
+    subscriptions.push({
+      publicKey: publicKey,
+      addedAt: Date.now()
+    });
+
+    this.app.options.stack.subscriptions = subscriptions;
+    this.save();
+    return true;
+  }
+
+  /**
+   * Check if a publicKey is subscribed
+   * @param {string} publicKey - The creator's publicKey
+   * @returns {boolean}
+   */
+  isSubscribed(publicKey) {
+    if (!publicKey) return false;
+    this.load();
+    const subscriptions = this.app.options.stack.subscriptions || [];
+    return subscriptions.some(sub => sub.publicKey === publicKey);
+  }
+
+  /**
+   * Get all subscribed publicKeys
+   * @returns {Array<string>}
+   */
+  getSubscriptions() {
+    this.load();
+    const subscriptions = this.app.options.stack.subscriptions || [];
+    return subscriptions.map(sub => sub.publicKey);
   }
 
   /**
@@ -494,16 +864,79 @@ class Stack extends ModTemplate {
    * Non-blocking, can be called on render/activation
    */
   async discoverDrafts() {
+    // ========================================================================
+    // DIAGNOSTIC: Log entry into discoverDrafts()
+    // ========================================================================
+    console.log('[DIAG] discoverDrafts() ENTRY');
+    
     if (!this.app.storage) {
+      console.log('[DIAG] discoverDrafts() EARLY RETURN: this.app.storage is not available');
       return;
     }
 
+    // ========================================================================
+    // DIAGNOSTIC: Log query parameters
+    // ========================================================================
+    const queryParams = { field1: 'Stack', field4: 'stack:draft' };
+    console.log('[DIAG] discoverDrafts() Query parameters:', JSON.stringify(queryParams, null, 2));
+    console.log('[DIAG] discoverDrafts() Query peer: localhost');
+    console.log('[DIAG] discoverDrafts() Expected match: field1="Stack" AND field4="stack:draft" AND peer="localhost"');
+
     return new Promise((resolve) => {
       this.app.storage.loadTransactions(
-        { field1: 'Stack', field4: 'stack:draft' },
+        queryParams,
         (txs) => {
+          // ========================================================================
+          // DIAGNOSTIC: Log raw results count
+          // ========================================================================
+          const rawCount = txs ? txs.length : 0;
+          console.log('[DIAG] discoverDrafts() Raw results count:', rawCount);
+          
+          // ========================================================================
+          // DIAGNOSTIC: Log field values of returned transactions for comparison
+          // ========================================================================
+          if (txs && txs.length > 0) {
+            console.log('[DIAG] discoverDrafts() Returned transactions have the following field values:');
+            txs.forEach((tx, idx) => {
+              console.log(`[DIAG]   Transaction ${idx + 1}:`);
+              console.log(`[DIAG]     - field1: "${tx.field1 || 'N/A'}"`);
+              console.log(`[DIAG]     - field2: "${tx.field2 || 'N/A'}"`);
+              console.log(`[DIAG]     - field4: "${tx.field4 || 'N/A'}"`);
+              console.log(`[DIAG]     - signature: ${tx.signature || 'N/A'}`);
+            });
+          } else {
+            console.log('[DIAG] discoverDrafts() No transactions returned - checking if ANY drafts exist with different field values...');
+            
+            // ========================================================================
+            // DIAGNOSTIC: Try querying with just field4 to see if drafts exist with different field1
+            // ========================================================================
+            this.app.storage.loadTransactions(
+              { field4: 'stack:draft' },
+              (allDrafts) => {
+                const allDraftsCount = allDrafts ? allDrafts.length : 0;
+                console.log('[DIAG] discoverDrafts() Query with ONLY field4="stack:draft" found', allDraftsCount, 'transactions');
+                if (allDrafts && allDraftsCount > 0) {
+                  console.log('[DIAG] discoverDrafts() These drafts have the following field values:');
+                  allDrafts.forEach((tx, idx) => {
+                    console.log(`[DIAG]   Draft ${idx + 1}:`);
+                    console.log(`[DIAG]     - field1: "${tx.field1 || 'N/A'}" (query expected "Stack")`);
+                    console.log(`[DIAG]     - field2: "${tx.field2 || 'N/A'}"`);
+                    console.log(`[DIAG]     - field4: "${tx.field4 || 'N/A'}" (matches)`);
+                    console.log(`[DIAG]     - signature: ${tx.signature || 'N/A'}`);
+                  });
+                }
+              },
+              'localhost'
+            );
+          }
+          
           if (!txs || txs.length === 0) {
             this.drafts = [];
+            
+            // Log draftCount after discovery (downgraded from diagnostic)
+            console.debug('Stack: discoverDrafts() completed. draftCount = 0');
+            console.log('[DIAG] discoverDrafts() EXIT: No drafts found');
+            
             resolve();
             return;
           }
@@ -536,6 +969,16 @@ class Stack extends ModTemplate {
           draftList.sort((a, b) => b.lastModified - a.lastModified);
 
           this.drafts = draftList;
+
+          // ========================================================================
+          // DIAGNOSTIC: Log parsed drafts added to this.mod.drafts
+          // ========================================================================
+          console.log('[DIAG] discoverDrafts() Parsed drafts added to this.mod.drafts:', JSON.stringify(draftList, null, 2));
+
+          // Log draftCount after discovery (downgraded from diagnostic)
+          console.debug(`Stack: discoverDrafts() completed. draftCount = ${draftList.length}`);
+          console.log('[DIAG] discoverDrafts() EXIT: Drafts found and parsed');
+
           resolve();
         },
         'localhost'

@@ -4,6 +4,26 @@ module.exports = (app, mod) => {
       <div class="stack-create-post-container">
         <div class="stack-editor-content-wrapper">
           <div class="stack-document-column">
+            <!-- Featured Image Upload Section (above title) -->
+            <div id="stack-featured-image-section" class="stack-featured-image-section">
+              <!-- Upload Dropzone (shown when no image) -->
+              <div id="stack-featured-image-dropzone" class="stack-featured-image-dropzone" style="display: none;">
+                <div class="stack-featured-image-dropzone-content">
+                  <i class="fa-solid fa-image stack-featured-image-upload-icon"></i>
+                  <p class="stack-featured-image-dropzone-text">Drag and drop an image here</p>
+                  <p class="stack-featured-image-dropzone-subtext">or click to upload</p>
+                </div>
+              </div>
+              
+              <!-- Image Preview (shown when image exists) -->
+              <div id="stack-featured-image-preview-container" class="stack-featured-image-preview-container" style="display: none;">
+                <img id="stack-featured-image-preview" class="stack-featured-image-preview" src="" alt="Featured image" />
+                <button id="stack-featured-image-remove-btn" class="stack-featured-image-remove-btn" title="Remove featured image">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </div>
+            
             <div class="stack-post-title-field">
               <input 
                 type="text" 

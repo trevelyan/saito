@@ -12,9 +12,17 @@ class ExploreOverlay {
     this.posts = [];
     this.isLoading = false;
     this.currentFilter = 'all';
+    this.targetPublicKey = null; // For URL-based routing: publicKey to show posts for
   }
 
   async render() {
+    // ========================================================================
+    // INVARIANT 4: Unmount before navigating to explore (navigation path: editor → explore)
+    // ========================================================================
+    if (this.mod.create_post_ui && typeof this.mod.create_post_ui.onEditorUnmount === 'function') {
+      this.mod.create_post_ui.onEditorUnmount();
+    }
+
     // Show loading state initially
     this.isLoading = true;
     this.posts = [];
@@ -25,8 +33,10 @@ class ExploreOverlay {
     setTimeout(() => {
       this.attachEvents();
       this.updateHelpNoteVisibility();
-      // Load posts after attaching events
-      this.loadPostsForFilter(this.currentFilter);
+      // Load posts after attaching events (skip if URL-based routing already loaded posts)
+      if (!(this.targetPublicKey && this.currentFilter === 'creator')) {
+        this.loadPostsForFilter(this.currentFilter);
+      }
     }, 25);
   }
 
@@ -48,7 +58,45 @@ class ExploreOverlay {
     const authorHeader = document.querySelector('#stack-explore-author-header');
     if (!authorHeader) return;
 
-    // Clear existing content
+    // URL-based routing: if targetPublicKey is set, use it
+    if (this.targetPublicKey) {
+      // Preserve subscribe button container structure
+      const subscribeContainer = document.querySelector('#stack-explore-subscribe-button-container');
+      const subscribeButtonHtml = subscribeContainer ? subscribeContainer.outerHTML : '';
+      
+      // Clear and rebuild header with subscribe button container
+      authorHeader.innerHTML = subscribeButtonHtml || '';
+
+      // Create container for author identity
+      const authorIdentityContainer = document.createElement('div');
+      authorIdentityContainer.id = 'stack-explore-author-identity';
+      if (authorHeader.firstChild) {
+        authorHeader.insertBefore(authorIdentityContainer, authorHeader.firstChild);
+      } else {
+        authorHeader.appendChild(authorIdentityContainer);
+      }
+
+      // Render author identity
+      const saitoUser = new SaitoUser(
+        this.app,
+        this.mod,
+        '#stack-explore-author-identity',
+        this.targetPublicKey,
+        'Posts by this author', // Use notice parameter for description
+        '' // fourthelem
+      );
+      saitoUser.render();
+
+      // Show/hide subscribe button based on subscription status
+      const isSubscribed = this.mod.isSubscribed(this.targetPublicKey);
+      const subscribeBtnContainer = document.querySelector('#stack-explore-subscribe-button-container');
+      if (subscribeBtnContainer) {
+        subscribeBtnContainer.style.display = isSubscribed ? 'none' : 'block';
+      }
+      return;
+    }
+
+    // Clear existing content for non-URL routing
     authorHeader.innerHTML = '';
 
     // Find the currently active subscription item
@@ -107,6 +155,13 @@ class ExploreOverlay {
   getKeysForFilter(filter) {
     if (!this.mod.postsCache) {
       return [];
+    }
+
+    // URL-based routing: if targetPublicKey is set, posts are already loaded directly
+    // For creator view, posts array is already populated by handleCreatorView
+    if (this.targetPublicKey && filter === 'creator') {
+      // Posts are already loaded in handleCreatorView, return their signatures
+      return this.posts.map(post => post.signature).filter(sig => sig);
     }
 
     if (filter === 'my-posts') {
@@ -257,6 +312,13 @@ class ExploreOverlay {
    * @param {string} txSignature - The transaction signature (for error messages)
    */
   loadViewPost(tx = null, txSignature = null) {
+    // ========================================================================
+    // INVARIANT 4: Unmount before navigating to viewer (navigation path: explore → viewer)
+    // ========================================================================
+    if (this.mod.create_post_ui && typeof this.mod.create_post_ui.onEditorUnmount === 'function') {
+      this.mod.create_post_ui.onEditorUnmount();
+    }
+
     const container = document.querySelector('.saito-container');
     if (!container) return;
 
@@ -335,6 +397,26 @@ class ExploreOverlay {
       // Update author header on initial load
       this.updateAuthorHeader();
       
+      // Add subscription button ("+" icon) in sidebar header
+      const addSubscriptionBtn = document.querySelector('#stack-explore-add-subscription-btn');
+      if (addSubscriptionBtn) {
+        addSubscriptionBtn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.handleAddSubscription();
+        };
+      }
+
+      // Subscribe button (for URL-based creator view)
+      const subscribeBtn = document.querySelector('#stack-explore-subscribe-btn');
+      if (subscribeBtn) {
+        subscribeBtn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.handleSubscribeToCreator();
+        };
+      }
+      
       // Subscription/Identity list items
       const subscriptionItems = document.querySelectorAll('.stack-explore-subscription-item');
       subscriptionItems.forEach(item => {
@@ -357,6 +439,93 @@ class ExploreOverlay {
       this.attachPostClickHandlers();
     } catch (err) {
       console.error('Explore overlay attachEvents error:', err);
+    }
+  }
+
+  /**
+   * Handle manual subscription addition via "+" icon
+   * Opens a modal/overlay to enter username or publicKey
+   */
+  handleAddSubscription() {
+    const promptText = prompt('Enter Saito username or public key:');
+    if (!promptText || !promptText.trim()) {
+      return; // User cancelled or entered empty
+    }
+
+    const input = promptText.trim();
+    this.resolveAndSubscribe(input);
+  }
+
+  /**
+   * Resolve username/publicKey and add subscription
+   * @param {string} input - Username or publicKey
+   */
+  async resolveAndSubscribe(input) {
+    try {
+      let publicKey = input;
+
+      // Check if input is a valid publicKey
+      if (!this.app.wallet.isValidPublicKey(input)) {
+        // Try to resolve username to publicKey via keychain
+        const keyResponse = this.app.connection.respondTo('saito-return-key');
+        if (keyResponse && keyResponse.returnKey) {
+          const keyData = keyResponse.returnKey({ identifier: input });
+          if (keyData && keyData.publicKey) {
+            publicKey = keyData.publicKey;
+          } else {
+            alert('Unable to find user with that username or public key. Please check and try again.');
+            return;
+          }
+        } else {
+          alert('Unable to resolve username. Please enter a valid public key.');
+          return;
+        }
+      }
+
+      // Validate publicKey
+      if (!this.app.wallet.isValidPublicKey(publicKey)) {
+        alert('Invalid public key. Please check and try again.');
+        return;
+      }
+
+      // Add subscription
+      const added = this.mod.addSubscription(publicKey);
+      if (added) {
+        // Refresh the overlay to show new subscription
+        this.mod.exploreOverlay.render();
+      } else {
+        alert('Already subscribed to this creator.');
+      }
+    } catch (error) {
+      console.error('Stack: Error adding subscription:', error);
+      alert('Error adding subscription. Please try again.');
+    }
+  }
+
+  /**
+   * Handle contextual subscription (when viewing creator via URL)
+   * Adds the targetPublicKey to subscriptions
+   */
+  handleSubscribeToCreator() {
+    if (!this.targetPublicKey) {
+      return;
+    }
+
+    const added = this.mod.addSubscription(this.targetPublicKey);
+    if (added) {
+      // Hide subscribe button and update UI
+      const subscribeContainer = document.querySelector('#stack-explore-subscribe-button-container');
+      if (subscribeContainer) {
+        subscribeContainer.style.display = 'none';
+      }
+      
+      // Show success message
+      if (this.app.connection && this.app.connection.emit) {
+        this.app.connection.emit('saito-header-update-message', {
+          msg: 'Subscribed!',
+          timeout: 2000
+        });
+      }
     }
   }
 }

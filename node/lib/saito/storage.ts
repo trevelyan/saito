@@ -115,11 +115,15 @@ class Storage {
       if (!data.field1) {
         data.field1 = txmsg.module;
       }
-      if (!data.field2) {
-        data.field2 = tx.from[0].publicKey;
+      if (tx.from && tx.from.length > 0) {
+        if (!data.field2 && tx.from && tx.from.length > 0) {
+          data.field2 = tx.from[0].publicKey;
+        }
       }
-      if (!data.field3) {
-        data.field3 = tx.to[0].publicKey;
+      if (tx.to && tx.to.length > 0) {
+        if (!data.field3 && tx.to && tx.to.length > 0) {
+          data.field3 = tx.to[0].publicKey;
+        }
       }
 
       if (blk) {
