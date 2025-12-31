@@ -4,7 +4,8 @@
  * Complete rewrite - three-card layout for the moment of publishing.
  */
 module.exports = (app, mod, postState = {}) => {
-  const title = document.querySelector('#stack-post-title-input')?.value || 'Untitled';
+  const titleInput = document.querySelector('#stack-post-title-input');
+  const title = titleInput ? titleInput.value || 'Untitled' : 'Untitled';
   
   // Check if post is published (from postState or create_post_ui.isPublished)
   const isPublished = postState.published || (mod.create_post_ui && mod.create_post_ui.isPublished) || false;

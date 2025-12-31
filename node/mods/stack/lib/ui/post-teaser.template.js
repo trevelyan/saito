@@ -29,7 +29,7 @@ module.exports = (app, mod, post) => {
     data = post || {};
     timestamp = post.timestamp || null;
     postId = post.id || post.signature || post.sig || '';
-    publicKey = post.publicKey || post.author?.publicKey || post.author || '';
+    publicKey = post.publicKey || (post.author && post.author.publicKey) || post.author || '';
   }
   
   // Extract fields from transaction data structure

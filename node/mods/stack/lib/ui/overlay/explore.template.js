@@ -6,9 +6,6 @@ module.exports = (app, mod, posts = [], isLoading = false) => {
       <div class="stack-explore-sidebar">
         <div class="stack-explore-sidebar-header">
           <h2>Explore</h2>
-          <button class="stack-explore-add-subscription-btn" id="stack-explore-add-subscription-btn" title="Add subscription">
-            <i class="fa-solid fa-plus"></i>
-          </button>
         </div>
         <div class="stack-explore-sidebar-content">
           <div class="stack-explore-subscriptions-list">
@@ -30,13 +27,33 @@ module.exports = (app, mod, posts = [], isLoading = false) => {
       </div>
       
       <div class="stack-explore-main">
-        <!-- Author Identity Header - Context-aware based on selected subscription -->
-        <div class="stack-explore-author-header" id="stack-explore-author-header">
-          <!-- Will be populated by JavaScript using SaitoUser component -->
-          <!-- Subscribe button appears here when viewing via URL routing and not already subscribed -->
-          <div id="stack-explore-subscribe-button-container" style="display: none;">
-            <button class="stack-explore-subscribe-btn" id="stack-explore-subscribe-btn">
-              Subscribe
+        <!-- Main Panel Header - Contains author identity and action links -->
+        <div class="stack-explore-main-header">
+          <!-- Author Identity Header - Context-aware based on selected subscription -->
+          <div class="stack-explore-author-header" id="stack-explore-author-header">
+            <!-- TEMPORARY: Hardcoded identity placeholder - will be replaced by JavaScript SaitoUser component -->
+            <!-- This ensures the left-side anchor is always present for layout stability -->
+            <div class="saito-user" style="display: flex; align-items: center; gap: 1rem;">
+              <div class="saito-userline" style="display: flex; align-items: center; gap: 1rem;">
+                <div class="saito-userline-identicon" style="width: 3.6rem; height: 3.6rem; border-radius: 50%; background: var(--saito-primary); opacity: 0.3;"></div>
+                <div class="saito-userline-name" style="font-size: 1.8rem; font-weight: 600; color: var(--saito-font-color);">Loading...</div>
+              </div>
+            </div>
+            <!-- Subscribe button appears here when viewing via URL routing and not already subscribed -->
+            <div id="stack-explore-subscribe-button-container" style="display: none;">
+              <button class="stack-explore-subscribe-btn" id="stack-explore-subscribe-btn">
+                Subscribe
+              </button>
+            </div>
+          </div>
+          
+          <!-- Action Button Container (in main panel header, right-aligned) -->
+          <div class="stack-explore-action-button-container">
+            <button class="stack-explore-add-subscription-btn" id="stack-explore-add-subscription-btn" style="display: none;">
+              Add user
+            </button>
+            <button class="stack-explore-settings-btn" id="stack-explore-settings-btn" style="display: none;">
+              Settings
             </button>
           </div>
         </div>

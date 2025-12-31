@@ -51,37 +51,16 @@
   flex: 1;
 }
 
-.stack-explore-add-subscription-btn {
-  background: rgba(255, 255, 255, 0.2);
-  color: var(--saito-primary-text);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  width: 3.2rem;
-  height: 3.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 150ms ease, background-color 150ms ease;
-  font-size: 1.6rem;
-  padding: 0;
-  margin-left: 1rem;
-}
-
-.stack-explore-add-subscription-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
-}
-
-.stack-explore-add-subscription-btn:active {
-  transform: scale(0.95);
-}
+/* Old "+" button removed - replaced with text link in main panel header */
 
 .stack-explore-sidebar-content {
   flex: 1;
   /* No overflow-y - overlay handles scroll */
   padding: 0;
+  padding-top: 0; /* INVARIANT 4: No top padding - flush with header */
   padding-bottom: 0; /* Explicitly remove bottom padding */
+  margin: 0; /* INVARIANT 4: No margin - flush with header */
+  margin-top: 0; /* INVARIANT 4: Explicitly no top margin */
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -92,13 +71,17 @@
 /* Filter section removed - subscriptions list flows directly */
 
 /* Subscriptions List - Flat navigation rows, not buttons */
+/* INVARIANT 4: Must be flush with Explore header box - no gap */
 .stack-explore-subscriptions-list {
   display: flex;
   flex-direction: column;
   gap: 0;
   width: 100%;
   margin: 0;
-  padding: 0; /* No padding - items begin immediately below header */
+  margin-top: 0; /* INVARIANT 4: Explicitly no top margin */
+  padding: 0; /* INVARIANT 4: No padding - items begin immediately below header */
+  padding-top: 0; /* INVARIANT 4: Explicitly no top padding */
+  border-left: 2px solid var(--saito-primary); /* Left border aligned with header */
 }
 
 .stack-explore-subscription-item {
@@ -108,6 +91,7 @@
   background: transparent;
   border: none;
   border-bottom: 1px solid var(--saito-border-color);
+  border-top: none; /* No top border */
   color: var(--saito-font-color);
   text-align: left;
   cursor: pointer;
@@ -119,6 +103,13 @@
   line-height: 1.5;
   font-weight: 400;
   user-select: none;
+}
+
+.stack-explore-subscription-item:first-child {
+  /* INVARIANT 4: First item aligns with header - no top gap */
+  border-top: none;
+  margin-top: 0; /* Explicitly no top margin */
+  padding-top: 1.2rem; /* Normal padding */
 }
 
 .stack-explore-subscription-item:last-child {
@@ -276,41 +267,29 @@
   color: var(--saito-font-color);
 }
 
-.stack-explore-add-subscription-btn {
-  background: var(--saito-primary);
-  color: var(--saito-primary-text);
-  border: none;
-  border-radius: 50%;
-  width: 3.2rem;
-  height: 3.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 150ms ease, background-color 150ms ease;
-  font-size: 1.6rem;
-  padding: 0;
-}
+/* Old "+" button styles removed - replaced with text link in main panel header */
 
-.stack-explore-add-subscription-btn:hover {
-  background: var(--saito-primary-dark);
-  transform: scale(1.1);
-}
-
-.stack-explore-add-subscription-btn:active {
-  transform: scale(0.95);
-}
-
-/* Author Identity Header - Context-aware publisher display using SaitoUser */
-.stack-explore-author-header {
+/* Main Panel Header - Contains author identity and action links */
+/* INVARIANT 2: Header row alignment must not shift - use space-between */
+.stack-explore-main-header {
   margin-bottom: 2.5rem;
   padding-bottom: 2rem;
   border-bottom: 1px solid var(--saito-border-color);
   flex-shrink: 0;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  justify-content: space-between; /* Left: SaitoUser, Right: action button - never shifts */
+  align-items: center; /* Vertically center items */
   gap: 2rem;
+}
+
+/* Author Identity Header - Context-aware publisher display using SaitoUser */
+.stack-explore-author-header {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start; /* Left-align author identity */
+  align-items: center; /* Vertically center with action button */
+  gap: 2rem;
+  min-width: 0; /* Allow shrinking */
 }
 
 #stack-explore-author-identity {
@@ -318,8 +297,12 @@
 }
 
 /* Subscribe button container (shown when viewing creator via URL and not subscribed) */
+/* Positioned identically to Add user button for layout consistency */
 #stack-explore-subscribe-button-container {
   flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end; /* Right-align button */
+  align-items: flex-start;
 }
 
 .stack-explore-subscribe-btn {
@@ -347,10 +330,67 @@
 /* Do NOT override SaitoUser CSS - use default Saito.css styling */
 /* Only container-level styling is allowed */
 
-/* Hide author header when empty */
-.stack-explore-author-header:empty {
-  display: none;
+/* Action Button Container (in main panel header, right-aligned) */
+.stack-explore-action-button-container {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end; /* Right-align button */
+  align-items: center; /* Vertically center with SaitoUser */
+  gap: 1rem;
 }
+
+/* Add Subscription Button - Secondary styling (no orange fill) */
+.stack-explore-add-subscription-btn {
+  padding: 0.8rem 1.6rem;
+  background: transparent;
+  color: var(--saito-primary);
+  border: 1px solid var(--saito-primary);
+  border-radius: 8px;
+  font-size: 1.6rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 150ms ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.stack-explore-add-subscription-btn:hover {
+  background: color-mix(in srgb, var(--saito-primary) 10%, transparent 90%);
+  border-color: var(--saito-primary);
+  transform: translateY(-1px);
+}
+
+.stack-explore-add-subscription-btn:active {
+  transform: translateY(0);
+}
+
+/* Settings Button - Secondary styling (no orange fill) */
+.stack-explore-settings-btn {
+  padding: 0.8rem 1.6rem;
+  background: transparent;
+  color: var(--saito-primary);
+  border: 1px solid var(--saito-primary);
+  border-radius: 8px;
+  font-size: 1.6rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 150ms ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.stack-explore-settings-btn:hover {
+  background: color-mix(in srgb, var(--saito-primary) 10%, transparent 90%);
+  border-color: var(--saito-primary);
+  transform: translateY(-1px);
+}
+
+.stack-explore-settings-btn:active {
+  transform: translateY(0);
+}
+
+/* INVARIANT 1: Never hide author header - user identity must always be visible */
+/* Removed :empty hiding rule - header should never be empty */
 
 .stack-explore-header {
   margin-bottom: 2rem;
@@ -597,12 +637,7 @@
     font-size: 1.5rem;
   }
 
-  .stack-explore-add-subscription-btn {
-    width: 2.8rem;
-    height: 2.8rem;
-    font-size: 1.4rem;
-    margin-left: 0.5rem;
-  }
+  /* Old "+" button responsive styles removed - replaced with text link */
 
   .stack-explore-sidebar-content {
     padding: 0;
@@ -648,9 +683,34 @@
     overflow-y: auto; /* Main content scrolls */
   }
 
-  .stack-explore-author-header {
+  .stack-explore-main-header {
     margin-bottom: 2rem;
     padding-bottom: 1.5rem;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .stack-explore-author-header {
+    width: 100%;
+  }
+
+  .stack-explore-action-button-container {
+    width: 100%;
+    justify-content: center; /* Center on mobile */
+  }
+
+  .stack-explore-add-subscription-btn,
+  .stack-explore-settings-btn {
+    width: 100%; /* Full width on mobile */
+  }
+  
+  #stack-explore-subscribe-button-container {
+    width: 100%;
+    justify-content: center; /* Center on mobile */
+  }
+  
+  .stack-explore-subscribe-btn {
+    width: 100%; /* Full width on mobile */
   }
 
   /* Removed SaitoUser CSS override - use default Saito.css styling */

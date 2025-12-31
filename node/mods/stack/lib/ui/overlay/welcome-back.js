@@ -223,7 +223,7 @@ class WelcomeBackOverlay {
 
     // Extract post data from transaction
     const txmsg = tx.returnMessage();
-    const postData = txmsg?.data || {};
+    const postData = (txmsg && txmsg.data) || {};
 
     // Load post data into editor
     if (this.mod.create_post_ui) {

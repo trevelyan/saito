@@ -75,8 +75,8 @@ class StackMain {
       if (learnMoreBackBtn) {
         learnMoreBackBtn.onclick = (e) => {
           e.preventDefault();
-          // Will implement learn more functionality later
-          console.log('Learn how Saito Stack works clicked');
+          // Open Stack wiki page in new tab
+          window.open('https://wiki.saito.io/en/applications/stack', '_blank');
         };
       }
     } catch (err) {
@@ -129,8 +129,10 @@ class StackMain {
         this.mod.welcomeBackOverlay.render(posts, hasDraft);
       }, 100);
     } else {
-      // No posts or overlay already shown - proceed directly to editor
+      // No posts or overlay already shown - proceed directly to editor with explicit intent
+      // INVARIANT 2: Always pass explicit intent - default to "new" mode
       this.mod.create_post_ui.render();
+      // render() will call initializeDocument() with default intent { mode: 'new' }
     }
   }
 }

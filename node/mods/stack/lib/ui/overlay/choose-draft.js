@@ -10,14 +10,41 @@ class ChooseDraftOverlay {
     this.overlay.clickBackdropToClose = false;
   }
 
-  async render() {
-    // Ensure drafts are discovered before rendering
-    if (this.mod.discoverDrafts) {
+  async render(skipDiscovery = false) {
+    // ========================================================================
+    // DISCOVER DRAFTS: Only if not explicitly skipped (e.g., after deletion)
+    // ========================================================================
+    // When skipDiscovery is true, we trust that this.mod.drafts is already
+    // up to date (e.g., after deleteDraft() which already called refreshDrafts())
+    // This prevents race conditions where discoverDrafts() might re-query
+    // the archive before deletion has fully propagated
+    if (!skipDiscovery && this.mod.discoverDrafts) {
       await this.mod.discoverDrafts();
     }
 
+    // ========================================================================
+    // [DRAFT-CHECK] Log overlay render decision
+    // ========================================================================
+    console.log('[DRAFT-CHECK] ChooseDraftOverlay.render() called, skipDiscovery=' + skipDiscovery);
+    
+    // Double-check that valid drafts exist (defensive check)
+    const hasValidDrafts = this.mod.hasValidDrafts && this.mod.hasValidDrafts();
+    if (!hasValidDrafts) {
+      console.log('[DRAFT-CHECK] Overlay render blocked - no valid drafts exist (defensive check)');
+      // Hide overlay if already shown
+      this.overlay.hide();
+      return;
+    }
+
+    // ========================================================================
+    // RENDER FROM IN-MEMORY DRAFT LIST (single source of truth)
+    // ========================================================================
+    // Always use this.mod.getDrafts() which returns this.mod.drafts
+    // This ensures we're rendering from the same list that was mutated on delete
     const drafts = this.mod.getDrafts();
     const draftCount = drafts ? drafts.length : 0;
+    console.log('[DRAFT-CHECK] Rendering overlay with draftCount=' + draftCount);
+    
     const html = ChooseDraftTemplate(this.app, this.mod, drafts, draftCount);
     this.overlay.show(html);
     
@@ -153,7 +180,11 @@ class ChooseDraftOverlay {
       return;
     }
 
-    // Delete draft through stack.js (handles archive + in-memory list update)
+    // ========================================================================
+    // DELETE DRAFT: This updates both archive and in-memory this.mod.drafts
+    // ========================================================================
+    // deleteDraft() already calls refreshDrafts() which updates this.mod.drafts
+    // No need to call discoverDrafts() again - deleteDraft() handles it
     const deleted = await this.mod.deleteDraft && this.mod.deleteDraft(draftId);
     
     if (!deleted) {
@@ -162,14 +193,20 @@ class ChooseDraftOverlay {
     }
 
     // ========================================================================
-    // INVARIANT: After deletion, rediscover drafts to get authoritative count
+    // FORCE OVERLAY STATE UPDATE AFTER DELETE
     // ========================================================================
-    if (this.mod.discoverDrafts) {
-      await this.mod.discoverDrafts();
-    }
-
-    // Re-render overlay with updated draft list (CREATE NEW POST will appear if count < 3)
-    this.render();
+    // deleteDraft() has already:
+    // 1. Deleted from archive
+    // 2. Removed from this.mod.drafts immediately
+    // 3. Called refreshDrafts() which updated this.mod.drafts from archive
+    // 
+    // We skip discoverDrafts() in render() to prevent race conditions where
+    // the archive query might still see the old draft before deletion propagates.
+    // We trust that this.mod.drafts is already correct.
+    // 
+    // This ensures the deleted draft disappears immediately and "Create New Post"
+    // appears if draftCount < 3
+    await this.render(true); // skipDiscovery = true
   }
 }
 

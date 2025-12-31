@@ -154,9 +154,7 @@ class CreatePost {
     // ========================================================================
     // Mount happens FIRST (infrastructure), draft loading happens SECOND (data)
     // Draft loading must NOT suppress mount - mount is independent of draft state
-    // INVARIANT 2: Editor requires explicit intent - default to "new" mode if no intent provided
-    const defaultIntent = { mode: 'new' };
-    this.initializeDocument(defaultIntent).then(() => {
+    this.initializeDocument().then(() => {
       this.onEditorMount();
       // Update featured image display after mount (in case draft was loaded)
       setTimeout(() => {
@@ -175,32 +173,70 @@ class CreatePost {
   /**
    * Initialize document based on explicit session intent
    * 
-   * SESSION INTENT OBJECT: { mode: 'resume'|'select'|'new'|'choose', draftId?: string }
+   * SESSION INTENT OBJECT: { mode: 'resume'|'select'|'new', draftId?: string }
    * 
    * Branching logic:
    * - mode: 'new' → Initialize empty editor (draft created lazily on first edit)
    * - mode: 'resume' → Load draft by draftId (most recent draft)
    * - mode: 'select' → Load draft by draftId (specific draft from chooser)
-   * - mode: 'choose' → Show draft chooser overlay and wait for user choice
    * 
-   * INVARIANT 2: Editor MUST NEVER guess intent from draft existence.
-   * Intent must ALWAYS be explicitly provided. If missing, defaults to { mode: 'new' } with error log.
+   * If no intent is provided, shows draft chooser overlay and waits for user choice.
    * 
    * NOTE: Does NOT attach event listeners - that happens in onEditorMount()
    */
-  async initializeDocument(sessionIntent) {
+  async initializeDocument(sessionIntent = null) {
     const editor = document.querySelector('#stack-post-body-editor');
     if (!editor) {
       return;
     }
 
     // ========================================================================
-    // INVARIANT 2: Session intent is REQUIRED - no guessing allowed
+    // SESSION INTENT: Use provided intent or show chooser
     // ========================================================================
     if (!sessionIntent) {
-      console.error('[EDITOR-INVARIANT] initializeDocument() called without sessionIntent - this violates INVARIANT 2');
-      // Fail-safe: Default to "new" mode if intent is missing (but log error)
-      sessionIntent = { mode: 'new' };
+      // ========================================================================
+      // NO INTENT PROVIDED: Discover drafts and decide whether to show chooser
+      // ========================================================================
+      // No intent provided: discover drafts first
+      if (this.mod.discoverDrafts) {
+        await this.mod.discoverDrafts();
+      }
+      
+      const drafts = this.mod.getDrafts && this.mod.getDrafts();
+      const draftCount = drafts ? drafts.length : 0;
+
+      // ========================================================================
+      // CONDITIONAL OVERLAY DISPLAY: Only show chooser if drafts exist
+      // ========================================================================
+      // If there are NO drafts, skip the overlay and go directly to "new" mode
+      // The overlay exists to choose between drafts, not to confirm creating a new one
+      if (draftCount === 0) {
+        // No drafts to resume - go directly to new post mode
+        this.sessionIntent = { mode: 'new' };
+        // Initialize empty editor (draft created lazily on first edit)
+        await this.initializeEmptyEditor();
+        return;
+      }
+
+      // ========================================================================
+      // DRAFTS EXIST: Show chooser overlay for user to choose
+      // ========================================================================
+      // FOURTH-DRAFT PREVENTION: If 3 drafts exist, load most recent draft
+      // This ensures closing the overlay reveals the draft, NOT an empty editor
+      // Only allow initializeEmptyEditor() when draftCount < 3
+      if (draftCount >= 3) {
+        const mostRecentDraft = drafts[0];
+        if (mostRecentDraft && mostRecentDraft.id) {
+          // Load most recent draft behind the overlay
+          this.activeDraftId = mostRecentDraft.id;
+          await this.loadDraftById(mostRecentDraft.id);
+        }
+      }
+
+      // Show chooser overlay (draftCount >= 1)
+      await this.showDraftChooserOverlay();
+      // Chooser will call initializeDocument() with intent when dismissed
+      return;
     }
 
     // Store session intent for this session
@@ -212,26 +248,34 @@ class CreatePost {
     console.debug('[EDITOR-INVARIANT] Session started:', JSON.stringify(sessionIntent));
     
     // ========================================================================
-    // INVARIANT 2: BRANCH ON INTENT - No inference from draft existence
+    // BRANCH ON INTENT: Initialize editor based solely on intent object
     // ========================================================================
-    if (sessionIntent.mode === 'choose') {
-      // Mode: choose - Show draft chooser overlay and wait for user choice
-      // Note: showDraftChooserOverlay() will check hasValidDrafts() and force
-      // mode="new" if no valid drafts exist (hard guard)
-      await this.showDraftChooserOverlay();
-      // Chooser will call initializeDocument() with intent when dismissed
-      return;
-    } else if (sessionIntent.mode === 'new') {
+    if (sessionIntent.mode === 'new') {
       // Mode: new - Initialize empty editor, draft created lazily on first edit
-      // INVARIANT 2: Do NOT check draft count - honor the explicit "new" intent
-      this.activeDraftId = null;
-      this.initializeEmptyEditor();
+      // BUT: Only allow if fewer than 3 drafts exist (hard cap)
+      const drafts = this.mod.getDrafts && this.mod.getDrafts();
+      const draftCount = drafts ? drafts.length : 0;
+      
+      if (draftCount >= 3) {
+        console.warn('[EDITOR-INVARIANT] initializeEmptyEditor() prevented - 3 drafts already exist. Loading most recent draft instead.');
+        // Fallback to most recent draft instead of creating empty editor
+        const mostRecentDraft = drafts[0];
+        if (mostRecentDraft && mostRecentDraft.id) {
+          this.activeDraftId = mostRecentDraft.id;
+          await this.loadDraftById(mostRecentDraft.id);
+    } else {
+          // Should not happen, but handle gracefully
+          this.activeDraftId = null;
+          this.initializeEmptyEditor();
+        }
+      } else {
+        this.activeDraftId = null;
+        this.initializeEmptyEditor();
+      }
     } else if (sessionIntent.mode === 'resume' || sessionIntent.mode === 'select') {
       // Mode: resume or select - Load specified draft
       if (!sessionIntent.draftId) {
-        console.error('[EDITOR-INVARIANT] initializeDocument() called with resume/select mode but no draftId');
-        // Fail-safe: Default to empty editor
-        this.activeDraftId = null;
+        console.error('Stack: initializeDocument() called with resume/select mode but no draftId');
         this.initializeEmptyEditor();
         return;
       }
@@ -245,9 +289,7 @@ class CreatePost {
       
       await this.loadDraftById(sessionIntent.draftId);
     } else {
-      console.error('[EDITOR-INVARIANT] initializeDocument() called with invalid session intent mode:', sessionIntent.mode);
-      // Fail-safe: Default to empty editor
-      this.activeDraftId = null;
+      console.error('Stack: initializeDocument() called with invalid session intent mode:', sessionIntent.mode);
       this.initializeEmptyEditor();
       return;
     }
@@ -336,41 +378,22 @@ class CreatePost {
    */
   async showDraftChooserOverlay() {
     // ========================================================================
-    // INVARIANT: Hard guard before showing overlay - must have valid drafts
+    // DIAGNOSTIC: Log when showDraftChooserOverlay() is called
     // ========================================================================
-    // [DRAFT-CHECK] Log entry
-    console.log('[DRAFT-CHECK] showDraftChooserOverlay() called');
-    
-    // Ensure drafts are discovered before checking validity
-    if (this.mod.discoverDrafts) {
-      await this.mod.discoverDrafts();
-    }
-
-    // Check if there are valid drafts using centralized function
-    const hasValidDrafts = this.mod.hasValidDrafts && this.mod.hasValidDrafts();
-    console.log('[DRAFT-CHECK] intent=choose hasValidDrafts=' + hasValidDrafts);
-
-    if (!hasValidDrafts) {
-      // ========================================================================
-      // HARD GUARD: No valid drafts - force editor initialization with "new" mode
-      // ========================================================================
-      console.log('[DRAFT-CHECK] Overlay blocked - no valid drafts exist, forcing mode="new"');
-      await this.initializeDocument({ mode: 'new' });
-      return;
-    }
-
-    // Valid drafts exist - proceed with showing overlay
-    console.log('[DRAFT-CHECK] Overlay allowed - valid drafts exist');
+    console.log('[DIAG] showDraftChooserOverlay() CALLED');
     
     // Lazy-load overlay if needed
     if (!this.mod.chooseDraftOverlay) {
       const ChooseDraftOverlay = require('./overlay/choose-draft');
       this.mod.chooseDraftOverlay = new ChooseDraftOverlay(this.app, this.mod);
+      console.log('[DIAG] showDraftChooserOverlay() Lazy-loaded ChooseDraftOverlay');
     }
 
     // Small delay to ensure editor is fully rendered behind overlay
     setTimeout(async () => {
+      console.log('[DIAG] showDraftChooserOverlay() About to call overlay.render()');
       await this.mod.chooseDraftOverlay.render();
+      console.log('[DIAG] showDraftChooserOverlay() overlay.render() completed');
     }, 100);
   }
 
@@ -782,7 +805,8 @@ class CreatePost {
 
     // Get current content to track changes
     const currentContent = this.serializeDOMToMarkdown();
-    const title = document.querySelector('#stack-post-title-input')?.value || '';
+    const titleInput = document.querySelector('#stack-post-title-input');
+    const title = titleInput ? titleInput.value || '' : '';
     const fullContent = title + currentContent;
     
     // Calculate bytes changed since last save (incremental tracking)
@@ -912,7 +936,8 @@ class CreatePost {
       
       // Update last saved content
       const currentContent = this.serializeDOMToMarkdown();
-      const title = document.querySelector('#stack-post-title-input')?.value || '';
+      const titleInput = document.querySelector('#stack-post-title-input');
+      const title = titleInput ? titleInput.value || '' : '';
       this.lastSaveContent = title + currentContent;
       this.lastTrackedContent = this.lastSaveContent; // Reset tracked content to saved content
       
@@ -1021,8 +1046,8 @@ class CreatePost {
             // Sort by updated_at DESC (most recent first)
             // Use tx.optional.updated_at if available, fallback to tx.timestamp
             txs.sort((a, b) => {
-              const aTime = a.optional?.updated_at || a.timestamp || 0;
-              const bTime = b.optional?.updated_at || b.timestamp || 0;
+              const aTime = (a.optional && a.optional.updated_at) || a.timestamp || 0;
+              const bTime = (b.optional && b.optional.updated_at) || b.timestamp || 0;
               return bTime - aTime; // DESC order
             });
 
@@ -1093,25 +1118,14 @@ class CreatePost {
   /**
    * Internal helper to load a draft transaction into the editor
    * Populates title, content, and featured image from the transaction
-   * 
-   * IMPORTANT: Clones transaction data to prevent shared reference bugs.
-   * Archived drafts are treated as immutable snapshots. Editor mutations
-   * must not affect the stored draft until explicitly saved.
    */
   loadDraftTransaction(tx) {
     // Extract data from transaction
     const msg = tx.returnMessage();
-    const data = msg?.data || {};
+    const data = (msg && msg.data) || {};
 
-    // ========================================================================
-    // CLONE DATA: Deep clone to prevent shared reference mutations
-    // ========================================================================
-    // When loading a draft, we must clone the transaction data to ensure
-    // that editing one draft doesn't mutate other drafts that share the
-    // same underlying transaction object reference.
-    const clonedData = JSON.parse(JSON.stringify(data));
-    const title = clonedData.title || '';
-    const content = clonedData.content || '';
+    const title = data.title || '';
+    const content = data.content || '';
 
     // Populate title input
     const titleInput = document.querySelector('#stack-post-title-input');
@@ -1139,27 +1153,13 @@ class CreatePost {
       }
     }
 
-    // ========================================================================
-    // STORE CLONED TRANSACTION: Clone msg.data to prevent shared reference mutations
-    // ========================================================================
-    // When loading a draft, we clone the transaction's message data to ensure
-    // that editing one draft doesn't mutate other drafts that share the same
-    // underlying transaction object reference. We create a shallow copy of the
-    // transaction (preserving its prototype/methods) and replace msg with a
-    // cloned version containing cloned data. Since we only mutate tx.msg during
-    // saves, this ensures isolation - each draft has independent data.
-    const clonedTx = Object.assign(Object.create(Object.getPrototypeOf(tx)), tx);
-    if (msg) {
-      clonedTx.msg = JSON.parse(JSON.stringify(msg));
-      clonedTx.msg.data = clonedData;
-    }
-    
-    this.draftTransaction = clonedTx;
+    // Store reference to draft transaction and set active draft ID for this session
+    this.draftTransaction = tx;
     this.activeDraftId = tx.signature || tx.hash || null;
 
-    // Load featured image from draft if present (use cloned data)
-    if (clonedData.image) {
-      this.featuredImage = clonedData.image; // Base64 data (from cloned data)
+    // Load featured image from draft if present
+    if (data.image) {
+      this.featuredImage = data.image; // Base64 data
       // Update display after a short delay to ensure DOM is ready
       setTimeout(() => {
         this.updateFeaturedImageDisplay();
@@ -1212,7 +1212,8 @@ class CreatePost {
     }
 
     try {
-      const title = document.querySelector('#stack-post-title-input')?.value || '';
+      const titleInput = document.querySelector('#stack-post-title-input');
+      const title = titleInput ? titleInput.value || '' : '';
       const content = this.serializeDOMToMarkdown();
 
       // Skip if both title and content are empty
@@ -1272,7 +1273,9 @@ class CreatePost {
         console.log('[DIAG]   - field2: (auto-populated from tx.from[0].publicKey, expected:', this.mod.publicKey, ')');
         console.log('[DIAG]   - field4:', field4Value);
         console.log('[DIAG]   - peer: "localhost"');
-        console.log('[DIAG]   - tx.msg.module =', JSON.stringify(tx.msg?.module), '(type:', typeof tx.msg?.module, ')');
+        const msgModule = tx.msg && tx.msg.module;
+        const msgModuleType = typeof msgModule;
+        console.log('[DIAG]   - tx.msg.module =', JSON.stringify(msgModule), '(type:', msgModuleType, ')');
         console.log('[DIAG]   - tx.from =', tx.from ? JSON.stringify(tx.from) : 'N/A');
         console.log('[DIAG]   - tx.from[0].publicKey =', tx.from && tx.from[0] ? JSON.stringify(tx.from[0].publicKey) : 'N/A');
         console.log('[DIAG]   - tx.signature =', tx.signature || 'N/A (unsigned transaction - signature may be generated on save)');
@@ -1364,7 +1367,7 @@ class CreatePost {
           tags: [],
           image: this.featuredImage || '', // Featured/teaser image (singular, separate)
           imageUrl: '',
-          timestamp: tx.msg?.data?.timestamp || Date.now(),
+          timestamp: (tx.msg && tx.msg.data && tx.msg.data.timestamp) || Date.now(),
           subscriptionTier: 'free',
           excerpt: ''
         };
@@ -1390,7 +1393,8 @@ class CreatePost {
         console.log('[DIAG]   - field4:', field4Value);
         console.log('[DIAG]   - peer: "localhost"');
         console.log('[DIAG]   - tx.signature =', tx.signature || 'N/A');
-        console.log('[DIAG]   - tx.msg.module =', tx.msg?.module);
+        const msgModule = tx.msg && tx.msg.module;
+        console.log('[DIAG]   - tx.msg.module =', msgModule);
 
         // Update existing draft transaction (field1 is auto-populated from tx.msg.module)
         await this.app.storage.updateTransaction(tx, {
@@ -1483,7 +1487,8 @@ class CreatePost {
     const nextStepBtn = document.querySelector('#stack-next-step-btn');
     if (!nextStepBtn) return;
 
-    const title = document.querySelector('#stack-post-title-input')?.value || '';
+    const titleInput = document.querySelector('#stack-post-title-input');
+    const title = titleInput ? titleInput.value || '' : '';
     const editor = document.querySelector('#stack-post-body-editor');
     let hasContent = false;
     if (editor) {
@@ -3926,7 +3931,8 @@ class CreatePost {
     }
 
     // Get current post data
-    const title = document.querySelector('#stack-post-title-input')?.value || '';
+    const titleInput = document.querySelector('#stack-post-title-input');
+    const title = titleInput ? titleInput.value || '' : '';
     const editor = document.querySelector('#stack-post-body-editor');
     const content = editor ? this.serializeDOMToMarkdown() : '';
 
@@ -4018,12 +4024,10 @@ class CreatePost {
 
   attachEvents() {
     try {
-      // Capture 'this' context for callbacks
-      const self = this;
-      
       // ========================================================================
       // FEATURED IMAGE: Drag-and-drop upload handler
       // ========================================================================
+      const self = this; // Capture CreatePost instance for callbacks
       const featuredImageDropzone = document.querySelector('#stack-featured-image-dropzone');
       if (featuredImageDropzone) {
         this.app.browser.addDragAndDropFileUploadToElement(
@@ -4048,6 +4052,20 @@ class CreatePost {
         );
       }
 
+      // Also enable drag-and-drop on image display (for replacing image)
+      const featuredImageDisplay = document.querySelector('#stack-featured-image-display');
+      if (featuredImageDisplay) {
+        this.app.browser.addDragAndDropFileUploadToElement(
+          'stack-featured-image-display',
+          (fileData) => {
+            if (fileData && typeof fileData === 'string' && fileData.startsWith('data:image/')) {
+              const base64Data = fileData.split(',')[1];
+              self.handleFeaturedImageUpload(base64Data);
+            }
+          },
+          true // click_to_upload
+        );
+      }
 
       // Admin element (draft-state) - always clickable
       const adminElement = document.querySelector('#stack-draft-state');
@@ -4188,75 +4206,370 @@ class CreatePost {
   }
 
   /**
-   * Update featured image display in main column (read-only preview)
-   * Dropzone in sidebar always remains visible for upload/replace
+   * ========================================================================
+   * PUBLISH: Pure DOM Read → Transaction Construction → Emission
+   * ========================================================================
+   * 
+   * PUBLISH-TIME INVARIANT: DOM is the SINGLE source of truth.
+   * - Reads title directly from #stack-post-title-input
+   * - Reads body directly from #stack-post-body-editor (via serializeDOMToMarkdown)
+   * - Does NOT depend on autosave state, cached content, or draft snapshots
+   * - Side-effect free: does NOT modify editor DOM or affect future sessions
+   * 
+   * Publishing consumes the active draft and ends the current session.
+   */
+  async handlePublish() {
+    // ========================================================================
+    // [EDITOR-INVARIANT] Log publish begin for validation
+    // ========================================================================
+    console.debug('[EDITOR-INVARIANT] Publish begin, activeDraftId:', this.activeDraftId);
+
+    // ========================================================================
+    // INVARIANT CHECK: Editor must be mounted
+    // ========================================================================
+    try {
+      this.assertEditorMounted('handlePublish');
+    } catch (error) {
+      console.error('[EDITOR-INVARIANT] Publish failed - editor not mounted:', error);
+      alert('Error: Editor not ready. Please refresh and try again.');
+      return;
+    }
+
+    // ========================================================================
+    // INVARIANT CHECK: Session intent must be valid
+    // ========================================================================
+    try {
+      this.assertValidSessionIntent('handlePublish');
+    } catch (error) {
+      console.error('[EDITOR-INVARIANT] Publish failed - invalid session intent:', error);
+      alert('Error: Invalid editor session state. Please refresh and try again.');
+      return;
+    }
+
+    // ========================================================================
+    // PRE-PUBLISH: Clear pending autosave operations (does not affect publish output)
+    // ========================================================================
+    // Cancel any pending autosave timers to avoid interference
+    // This is cleanup only - publish does not depend on autosave state
+    if (this.inactivityTimeout) {
+      clearTimeout(this.inactivityTimeout);
+      this.inactivityTimeout = null;
+    }
+    if (this.serializeTimeout) {
+      clearTimeout(this.serializeTimeout);
+      this.serializeTimeout = null;
+    }
+    this.queuedSave = false;
+    
+    // ========================================================================
+    // PUBLISH SERIALIZATION: Direct DOM read (synchronous, pure)
+    // ========================================================================
+    // Read directly from live DOM elements - no cache, no draft state, no autosave
+    const titleInput = document.querySelector('#stack-post-title-input');
+    if (!titleInput) {
+      console.error('[EDITOR-INVARIANT] handlePublish() called but #stack-post-title-input not found');
+      alert('Error: Editor title input not found. Please refresh and try again.');
+      return;
+    }
+    
+      const editor = document.querySelector('#stack-post-body-editor');
+    if (!editor) {
+      console.error('[EDITOR-INVARIANT] handlePublish() called but #stack-post-body-editor not found');
+      alert('Error: Editor body not found. Please refresh and try again.');
+      return;
+    }
+
+    const title = titleInput.value.trim();
+    
+    // ========================================================================
+    // IMAGE EXTRACTION: Extract embedded images from editor DOM
+    // ========================================================================
+    const images = [];
+    const imageIdMap = new Map(); // Maps img.src -> imageId
+    
+    try {
+      // Walk the editor DOM to find all embedded images
+      const imageBlocks = editor.querySelectorAll('figure[data-block-type="image"]');
+      
+      for (const imageBlock of imageBlocks) {
+        const img = imageBlock.querySelector('img');
+        if (!img || !img.src) continue;
+        
+        // Skip if this image src is already processed (deduplication within a post)
+        if (imageIdMap.has(img.src)) continue;
+        
+        // Generate unique imageId
+        const imageId = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        // Extract image data
+        let imageData = '';
+        let mimeType = 'image/png';
+        let width = null;
+        let height = null;
+        
+        if (img.src.startsWith('data:image/')) {
+          // Extract base64 data from data URL
+          const dataUrlParts = img.src.split(',');
+          if (dataUrlParts.length === 2) {
+            // Extract mime type from data URL
+            const mimeMatch = img.src.match(/data:image\/([^;]+)/);
+            if (mimeMatch) {
+              mimeType = `image/${mimeMatch[1]}`;
+            }
+            imageData = dataUrlParts[1];
+          } else {
+            console.error('Stack: Invalid data URL format for image:', img.src.substring(0, 50));
+            alert('Error: Invalid image format. Please remove and re-add the image.');
+            return;
+          }
+        } else {
+          // External URL - not supported for embedded images (only data URLs)
+          console.warn('Stack: Skipping external image URL (not supported for embedded images):', img.src);
+          continue;
+        }
+        
+        // Extract dimensions if available
+        if (img.naturalWidth && img.naturalHeight) {
+          width = img.naturalWidth;
+          height = img.naturalHeight;
+        } else if (img.width && img.height) {
+          width = img.width;
+          height = img.height;
+        }
+        
+        // Extract caption/alt text
+        const captionEl = imageBlock.querySelector('.stack-image-caption');
+        const alt = captionEl ? captionEl.textContent : (img.alt || '');
+        
+        // Create image object
+        const imageObj = {
+          id: imageId,
+          data: imageData,
+          mime: mimeType,
+          alt: alt
+        };
+        
+        if (width !== null) imageObj.width = width;
+        if (height !== null) imageObj.height = height;
+        
+        images.push(imageObj);
+        imageIdMap.set(img.src, imageId);
+      }
+    } catch (imageExtractionError) {
+      console.error('Stack: Error extracting images from editor:', imageExtractionError);
+      alert('Error: Failed to extract images. Please check for malformed images and try again.');
+      return; // Do NOT publish partial content
+    }
+    
+    // Serialize DOM to markdown with image references
+    let content = '';
+    try {
+      content = this.serializeDOMToMarkdown(imageIdMap).trim();
+    } catch (serializationError) {
+      console.error('Stack: Error serializing editor content to markdown:', serializationError);
+      alert('Error: Failed to serialize editor content. Please check for malformed content and try again.');
+      return; // Do NOT publish partial content
+    }
+    
+    // Validation: Require both title and content
+    if (!title) {
+      alert('Please enter a title for your post');
+      return;
+    }
+
+    if (!content) {
+      alert('Please enter content for your post');
+      return;
+    }
+
+    // ========================================================================
+    // TRANSACTION CONSTRUCTION: Build from serialized DOM content
+    // ========================================================================
+    try {
+      // Show loading message
+      if (this.app.connection) {
+        this.app.connection.emit('saito-header-update-message', {
+          msg: 'Publishing post...',
+          timeout: 0
+        });
+      }
+
+      // Get featured image from editor state (authoritative source)
+      // Featured image is stored in this.featuredImage as base64 data
+      let image = '';
+      let imageUrl = '';
+      
+      if (this.featuredImage) {
+        image = this.featuredImage; // Base64 data (already extracted, no data: prefix)
+      }
+
+      // Create excerpt from content
+      const excerpt = content.substring(0, 200).replace(/\n/g, ' ').trim();
+      const excerptWithEllipsis = excerpt.length < content.length ? excerpt + '...' : excerpt;
+
+      // BUILD A NEW TRANSACTION from fresh editor state (no stale objects)
+      const newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(this.mod.publicKey);
+      
+      const data = {
+        type: 'stack_post',
+        title: title,
+        content: content,
+        images: images, // Embedded content images array
+        tags: [],
+        image: this.featuredImage || image, // Featured/teaser image (singular, separate) - use editor state
+        imageUrl: imageUrl,
+        timestamp: Date.now(),
+        subscriptionTier: 'free',
+        excerpt: excerptWithEllipsis
+      };
+
+      newtx.msg = {
+        module: 'Stack',
+        request: 'create stack post request',
+        data: data
+      };
+
+      // SIGN the transaction
+      await newtx.sign();
+
+      // Update the local draft entry to "stack:pending" (if draft exists)
+      if (this.draftTransaction) {
+        await this.app.storage.updateTransaction(this.draftTransaction, {
+          field4: 'stack:pending'
+        }, 'localhost');
+      }
+
+      // Propagate the signed transaction to the network
+      await this.app.network.propagateTransaction(newtx);
+
+      // ========================================================================
+      // PUBLISH CONSUMES ACTIVE DRAFT: Mark draft as consumed, stop autosaving
+      // ========================================================================
+      // Draft is consumed by publish - clear references but do NOT delete yet
+      // Actual deletion can be deferred (handled by cleanupPendingDrafts)
+      // This ends the current session - autosave will stop for this draft
+      const consumedDraftId = this.activeDraftId;
+      this.draftTransaction = null;
+      this.activeDraftId = null; // Stop autosaving to this draft
+      
+      // ========================================================================
+      // INVARIANT CHECK: Verify activeDraftId was cleared (must not be reused)
+      // ========================================================================
+      if (this.activeDraftId !== null) {
+        console.error('[EDITOR-INVARIANT] activeDraftId was not cleared after publish:', this.activeDraftId);
+      }
+      
+      // Set published state (for UI feedback only - reset on next session mount)
+      this.isPublished = true;
+      this.updatePublishTriggerState();
+
+      // ========================================================================
+      // [EDITOR-INVARIANT] Log publish end for validation
+      // ========================================================================
+      console.debug('[EDITOR-INVARIANT] Publish end, consumed draft:', consumedDraftId, 'activeDraftId cleared:', this.activeDraftId === null);
+
+      // Update status
+      if (this.app.connection) {
+        this.app.connection.emit('saito-header-update-message', {
+          msg: 'Post published',
+          timeout: 2000
+        });
+      }
+
+    } catch (error) {
+      // ========================================================================
+      // EXPLICIT ERROR HANDLING: Do NOT publish partial content, leave editor intact
+      // ========================================================================
+      console.error('Stack: Error publishing post:', error);
+      
+      // Show clear error message to user
+      const errorMessage = error.message || 'Unknown error occurred';
+      alert(`Failed to publish post: ${errorMessage}\n\nThe editor content has been preserved. Please try again.`);
+      
+      // Clear any loading indicators
+      if (this.app.connection) {
+        this.app.connection.emit('saito-header-update-message', {
+          msg: 'Error publishing post',
+          timeout: 3000
+        });
+      }
+      
+      // Editor session remains intact - user can retry without data loss
+      // isPublished remains false, autosave continues, draft remains active
+    }
+  }
+
+  /**
+   * Update featured image display
+   * Image appears in main page layout above title, not in sidebar
+   * Sidebar upload box is only a chooser
    */
   updateFeaturedImageDisplay() {
+    const dropzone = document.querySelector('#stack-featured-image-dropzone');
     const featuredImageDisplay = document.querySelector('#stack-featured-image-display');
     const featuredImageDisplayImg = document.querySelector('#stack-featured-image-display-img');
     const featuredImageDisplayRemove = document.querySelector('#stack-featured-image-display-remove');
 
-    if (this.featuredImage && featuredImageDisplay && featuredImageDisplayImg) {
-      // Show the display and set image source
-      featuredImageDisplay.style.display = 'block';
-      const dataUrl = `data:image/png;base64,${this.featuredImage}`;
-      featuredImageDisplayImg.src = dataUrl;
+    if (this.featuredImage) {
+      // Hide sidebar dropzone (upload box is only a chooser)
+      if (dropzone) dropzone.style.display = 'none';
       
-      // Hide remove button (display is read-only, removal via sidebar only)
-      if (featuredImageDisplayRemove) {
-        featuredImageDisplayRemove.style.display = 'none';
+      // Show image in main page layout above title
+      if (featuredImageDisplay && featuredImageDisplayImg) {
+        const dataUrl = `data:image/png;base64,${this.featuredImage}`;
+        featuredImageDisplayImg.src = dataUrl;
+        
+        // Add transition animation class for smooth appearance
+        featuredImageDisplay.style.display = 'block';
+        // Trigger reflow to ensure transition works
+        void featuredImageDisplay.offsetWidth;
+        featuredImageDisplay.classList.add('stack-featured-image-display-visible');
+      }
+
+      // Attach remove button handler if not already attached
+      if (featuredImageDisplayRemove && !featuredImageDisplayRemove.dataset.handlerAttached) {
+        featuredImageDisplayRemove.dataset.handlerAttached = 'true';
+        featuredImageDisplayRemove.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.handleFeaturedImageRemove();
+        };
       }
     } else {
-      // Hide the display if no image
+      // Show dropzone in sidebar, hide image display
+      if (dropzone) dropzone.style.display = 'flex';
       if (featuredImageDisplay) {
-        featuredImageDisplay.style.display = 'none';
+        featuredImageDisplay.classList.remove('stack-featured-image-display-visible');
+        // Hide after transition completes
+        setTimeout(() => {
+          if (!this.featuredImage && featuredImageDisplay) {
+            featuredImageDisplay.style.display = 'none';
+          }
+        }, 300);
       }
       if (featuredImageDisplayImg) {
         featuredImageDisplayImg.src = '';
       }
     }
-    
-    // Dropzone in sidebar always remains visible (never hide it)
   }
 
   /**
    * Handle featured image upload
    * @param {string} base64Data - Base64 image data (without data URL prefix)
    */
-  async handleFeaturedImageUpload(base64Data) {
+  handleFeaturedImageUpload(base64Data) {
     if (!base64Data) {
       return;
     }
     
-    // Resize image if resizeImg is available
-    let processedBase64 = base64Data;
-    if (this.app.browser && this.app.browser.resizeImg) {
-      try {
-        const dataUrl = `data:image/png;base64,${base64Data}`;
-        const resizedDataUrl = await this.app.browser.resizeImg(dataUrl);
-        processedBase64 = resizedDataUrl.split(',')[1] || base64Data;
-      } catch (err) {
-        console.warn('Stack: Image resize failed, using original:', err);
-        // Use original if resize fails
-      }
-    }
-    
     // Store featured image in editor state
-    this.featuredImage = processedBase64;
+    this.featuredImage = base64Data;
     
-    // Update display
+    // Update display immediately
     this.updateFeaturedImageDisplay();
     
-    // Trigger autosave to persist featured image
+    // Trigger autosave to persist the featured image in draft
     this.scheduleSerialization();
-    
-    // If publish settings overlay is open, update it too
-    if (this.mod.publishSettingsOverlay && this.mod.publishSettingsOverlay.postState) {
-      this.mod.publishSettingsOverlay.postState.image = processedBase64;
-      if (typeof this.mod.publishSettingsOverlay.updateFeaturedImageDropzone === 'function') {
-        this.mod.publishSettingsOverlay.updateFeaturedImageDropzone(processedBase64);
-      }
-    }
   }
 
   /**
@@ -4271,6 +4584,9 @@ class CreatePost {
       this.mod.publishSettingsOverlay.postState.image = null;
       this.mod.publishSettingsOverlay.updateFeaturedImageDropzone(null);
     }
+    
+    // Trigger autosave to persist the removal in draft
+    this.scheduleSerialization();
   }
 }
 

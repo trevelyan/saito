@@ -10,7 +10,7 @@ module.exports = (user) => {
   let uuid = user?.id;
   let icon = user?.icon || '';
 
-  let myPublicKey = user.app.wallet.publicKey;
+  let myPublicKey = user.app.wallet?.publicKey || user.mod?.publicKey || '';
 
   imgsrc = app.keychain.returnIdenticon(publicKey);
   imgcolor = app.keychain.returnIdenticonColor(publicKey);

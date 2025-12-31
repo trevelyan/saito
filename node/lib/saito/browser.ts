@@ -1225,7 +1225,7 @@ class Browser {
           [...files].forEach(function (file) {
             // Early size validation - check BEFORE reading
             // This prevents memory issues with very large files when using readAsDataURL
-            if (!read_as_array_buffer && !read_as_text && file.size > MAX_FILE_SIZE) {
+            if (!read_as_array_buffer && !read_as_text && file.size > self.MAX_FILE_SIZE) {
               console.warn(`File ${file.name} (${file.size} bytes) exceeds safe size limit for readAsDataURL`);
               // Call handler with null file to indicate failure
               if (handleFileDrop) {

@@ -56,14 +56,6 @@ class Stack extends ModTemplate {
     // Ordered by last-modified DESC (most recent first)
     this.drafts = [];
 
-    // ========================================================================
-    // INVARIANT 1: SYSTEM IDENTITY - Canonical identity constants
-    // ========================================================================
-    // "Saito Official" is a hardcoded system identity that must never be inferred
-    // All references to "Saito Official" must use this constant
-    // TODO: Replace with actual Saito Official public key when available
-    this.STACK_OFFICIAL_PUBLICKEY = 'saito-official-placeholder-publickey-12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
-
     this.overlay = new SaitoOverlay(app, this);
     this.exploreOverlay = new ExploreOverlay(app, this);
     this.main = new StackMain(app, this, '.saito-container');
@@ -373,7 +365,7 @@ class Stack extends ModTemplate {
   async onPeerServiceUp(app, peer, service = {}) {
     // Only track peers offering Stack service
     if (service.service === 'stack') {
-      const peerKey = peer?.publicKey || 'unknown';
+      const peerKey = (peer && peer.publicKey) || 'unknown';
       this.peers[peerKey] = {
         peer: peer,
         publicKey: peerKey,
@@ -410,25 +402,43 @@ class Stack extends ModTemplate {
   // Transaction Handling  //
   ////////////////////////////
   async onConfirmation(blk, tx, conf) {
+    // ========================================================================
+    // [DIAGNOSTIC] Log confirmation entry
+    // ========================================================================
+    console.log('[DIAG] ========================================');
+    console.log('[DIAG] onConfirmation() CALLED');
+    console.log('[DIAG] ========================================');
+    console.log('[DIAG] Transaction signature:', tx.signature);
+    console.log('[DIAG] Confirmation number:', conf);
+    
     const txmsg = tx.returnMessage();
+    console.log('[DIAG] Transaction message module:', txmsg.module);
+    console.log('[DIAG] Transaction message request:', txmsg.request);
     
     // Check if transaction is relevant to Stack module
     if (txmsg.module !== this.name) {
+      console.log('[DIAG] Transaction not for Stack module, ignoring');
       return;
     }
 
     // Only process initial confirmations (conf == 0)
     if (Number(conf) == 0) {
       if (txmsg.request === 'create stack post request') {
-        console.log('Stack onConfirmation: createStackPost');
+        console.log('[DIAG] Processing create stack post request');
+        console.log('[DIAG] callbackAfterPost before receiveStackPostTransaction:', !!this.callbackAfterPost);
+        
         await this.receiveStackPostTransaction(tx, blk);
+        // Note: callbackAfterPost is invoked inside receiveStackPostTransaction
         
         // Clean up pending drafts after successful confirmation (only for user's own posts)
         if (tx.isFrom(this.publicKey)) {
+          console.log('[DIAG] Transaction is from user, cleaning up pending drafts');
           await this.cleanupPendingDrafts();
         }
       }
       // Add other request types here as needed (update, delete, etc.)
+    } else {
+      console.log('[DIAG] Not initial confirmation (conf != 0), skipping');
     }
   }
 
@@ -484,9 +494,25 @@ class Stack extends ModTemplate {
     },
     callback
   ) {
+    // ========================================================================
+    // [DIAGNOSTIC] Log entry into createStackPostTransaction
+    // ========================================================================
+    console.log('[DIAG] ========================================');
+    console.log('[DIAG] createStackPostTransaction() CALLED');
+    console.log('[DIAG] ========================================');
+    console.log('[DIAG] Post data:');
+    console.log('[DIAG]   - title:', post.title);
+    console.log('[DIAG]   - content length:', post.content ? post.content.length : 0);
+    console.log('[DIAG]   - images count:', post.images ? post.images.length : 0);
+    console.log('[DIAG]   - image (featured):', post.image ? 'exists' : 'null');
+    console.log('[DIAG]   - accessLevel:', post.accessLevel);
+    console.log('[DIAG] Callback provided:', !!callback);
+    
     try {
+      console.log('[DIAG] Creating unsigned transaction...');
       // Create new transaction
       let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(this.publicKey);
+      console.log('[DIAG] Unsigned transaction created, signature:', newtx.signature || 'pending');
 
       // Validate and sanitize the post data
       const data = {
@@ -603,14 +629,23 @@ class Stack extends ModTemplate {
         data: data
       };
 
+      console.log('[DIAG] Transaction message set, signing...');
       await newtx.sign();
+      console.log('[DIAG] Transaction signed, signature:', newtx.signature);
 
-alert("Propagating the Transaction!");
+      console.log('[DIAG] Propagating transaction to network...');
       await this.app.network.propagateTransaction(newtx);
+      console.log('[DIAG] Transaction propagated successfully');
+      
       if (callback) {
+        console.log('[DIAG] Callback provided - storing in callbackAfterPost');
+        console.log('[DIAG] NOTE: Callback will be called later on transaction confirmation');
         this.callbackAfterPost = callback;
+      } else {
+        console.log('[DIAG] No callback provided');
       }
 
+      console.log('[DIAG] createStackPostTransaction() returning transaction');
       return newtx;
     } catch (error) {
       console.error('Error creating stack post transaction:', error);
@@ -633,13 +668,25 @@ alert("Propagating the Transaction!");
    * @param {Block} blk - The block containing the transaction
    */
   async receiveStackPostTransaction(tx, blk) {
-    let from = tx?.from[0]?.publicKey;
+    // ========================================================================
+    // [DIAGNOSTIC] Log entry into receiveStackPostTransaction
+    // ========================================================================
+    console.log('[DIAG] ========================================');
+    console.log('[DIAG] receiveStackPostTransaction() CALLED');
+    console.log('[DIAG] ========================================');
+    console.log('[DIAG] Transaction signature:', tx.signature);
+    console.log('[DIAG] callbackAfterPost exists:', !!this.callbackAfterPost);
+    
+    let from = (tx && tx.from && tx.from[0] && tx.from[0].publicKey) || null;
     if (!from) {
+      console.error('[DIAG] EARLY EXIT: Invalid TX (no from publicKey)');
       console.error('Stack: Invalid TX');
       return;
     }
+    console.log('[DIAG] Transaction from publicKey:', from);
 
     let txmsg = tx.returnMessage();
+    console.log('[DIAG] Transaction message data:', txmsg.data ? 'exists' : 'null');
 
     let post = { 
       ...txmsg.data, 
@@ -648,34 +695,16 @@ alert("Propagating the Transaction!");
       timestamp: txmsg.data.timestamp || tx.timestamp,
       lastEdited: txmsg.data.timestamp || tx.timestamp
     };
+    console.log('[DIAG] Post object created, signature:', post.sig);
 
-    // Add to transactionCache
-    if (tx.signature) {
-      this.transactionCache[tx.signature] = tx;
-    }
-
-    // Add to cache (check for duplicates to avoid adding the same post twice)
-    // This can happen if post was added optimistically during publish
-    const existingInAllPosts = this.postsCache.allPosts.findIndex(p => p.sig === tx.signature);
-    if (existingInAllPosts < 0) {
-      this.postsCache.allPosts.push(post);
-    } else {
-      // Update existing entry in case data changed
-      this.postsCache.allPosts[existingInAllPosts] = post;
-    }
+    // Add to cache
+    this.postsCache.allPosts.push(post);
     
-    // Also cache by author (check for duplicates)
+    // Also cache by author
     if (!this.postsCache.byAuthor.has(from)) {
       this.postsCache.byAuthor.set(from, []);
     }
-    const authorPosts = this.postsCache.byAuthor.get(from);
-    const existingInAuthorPosts = authorPosts.findIndex(p => p.sig === tx.signature);
-    if (existingInAuthorPosts < 0) {
-      authorPosts.push(post);
-    } else {
-      // Update existing entry in case data changed
-      authorPosts[existingInAuthorPosts] = post;
-    }
+    this.postsCache.byAuthor.get(from).push(post);
 
     // ========================================================================
     // Save lightweight reference to app.options.stack.posts (only for user's own posts)
@@ -979,7 +1008,7 @@ alert("Propagating the Transaction!");
               if (msg && msg.data) {
                 title = msg.data.title || title;
                 // Use optional.updated_at if available, otherwise timestamp
-                lastModified = tx.optional?.updated_at || tx.timestamp || 0;
+                lastModified = (tx.optional && tx.optional.updated_at) || tx.timestamp || 0;
               }
             } catch (err) {
               // If transaction can't be parsed, use defaults
@@ -1023,70 +1052,6 @@ alert("Propagating the Transaction!");
   }
 
   /**
-   * Check if there are any valid drafts available
-   * 
-   * INVARIANT: Centralized function for determining draft existence
-   * Filters drafts defensively to exclude:
-   * - null/undefined entries
-   * - malformed entries without valid IDs
-   * - published drafts (checked against postsCache)
-   * 
-   * All UI and editor logic must rely on this function.
-   * No other draft-count logic is allowed.
-   * 
-   * @returns {boolean} True if at least one valid draft exists, false otherwise
-   */
-  hasValidDrafts() {
-    // ========================================================================
-    // [DRAFT-CHECK] Log entry
-    // ========================================================================
-    console.log('[DRAFT-CHECK] hasValidDrafts() called');
-    const draftsBeforeFilter = this.drafts ? this.drafts.length : 0;
-    console.log('[DRAFT-CHECK] drafts_before_filter =', draftsBeforeFilter);
-
-    // Defensive check: if drafts array is null/undefined/empty, return false
-    if (!this.drafts || this.drafts.length === 0) {
-      console.log('[DRAFT-CHECK] drafts_after_filter = 0 (array empty or null)');
-      console.log('[DRAFT-CHECK] hasValidDrafts() returning false');
-      return false;
-    }
-
-    // Filter drafts defensively
-    const validDrafts = this.drafts.filter(draft => {
-      // Exclude null/undefined entries
-      if (!draft) {
-        console.log('[DRAFT-CHECK] Filtering out null/undefined draft entry');
-        return false;
-      }
-
-      // Exclude entries without valid IDs
-      if (!draft.id || typeof draft.id !== 'string' || draft.id.trim() === '') {
-        console.log('[DRAFT-CHECK] Filtering out draft without valid ID:', draft);
-        return false;
-      }
-
-      // Check if draft has been published (exists in postsCache)
-      // Published drafts should not appear in draft chooser
-      if (this.postsCache && this.postsCache.allPosts) {
-        const isPublished = this.postsCache.allPosts.some(post => post.sig === draft.id);
-        if (isPublished) {
-          console.log('[DRAFT-CHECK] Filtering out published draft:', draft.id);
-          return false;
-        }
-      }
-
-      // Draft is valid
-      return true;
-    });
-
-    const draftsAfterFilter = validDrafts.length;
-    console.log('[DRAFT-CHECK] drafts_after_filter =', draftsAfterFilter);
-    console.log('[DRAFT-CHECK] hasValidDrafts() returning', draftsAfterFilter > 0);
-
-    return draftsAfterFilter > 0;
-  }
-
-  /**
    * Refresh draft list from archive
    * Call this after draft save/delete/publish operations
    */
@@ -1106,35 +1071,39 @@ alert("Propagating the Transaction!");
     }
 
     try {
-      // [DRAFT-CHECK] Log draft deletion
-      console.log('[DRAFT-CHECK] deleteDraft() called for draftId:', draftId);
-
       // Load the draft transaction to delete
       const tx = await this.loadDraftTransactionById(draftId);
       if (!tx) {
-        console.warn('[DRAFT-CHECK] Draft transaction not found for deletion:', draftId);
+        console.warn('Stack: Draft transaction not found for deletion:', draftId);
         return false;
       }
 
-      // Delete from archive
+      // ========================================================================
+      // DELETE FROM ARCHIVE (persistent storage)
+      // ========================================================================
       await this.app.storage.deleteTransaction(tx, null, 'localhost');
-      console.log('[DRAFT-CHECK] Draft deleted from archive');
 
-      // Refresh in-memory draft list (this removes it from this.drafts)
-      await this.refreshDrafts();
-      console.log('[DRAFT-CHECK] In-memory draft list refreshed - draft removed');
-
-      // Verify draft is gone
-      const stillExists = this.drafts.some(d => d.id === draftId);
-      if (stillExists) {
-        console.warn('[DRAFT-CHECK] WARNING: Draft still exists in memory after deletion!');
-      } else {
-        console.log('[DRAFT-CHECK] Draft successfully removed from memory');
+      // ========================================================================
+      // IMMEDIATELY REMOVE FROM IN-MEMORY DRAFT LIST (single source of truth)
+      // ========================================================================
+      // Remove the draft from this.drafts array immediately to prevent stale state
+      // This ensures the overlay sees the updated list even before refreshDrafts() completes
+      const draftIndex = this.drafts.findIndex(d => d.id === draftId);
+      if (draftIndex >= 0) {
+        this.drafts.splice(draftIndex, 1);
       }
+
+      // ========================================================================
+      // REFRESH IN-MEMORY DRAFT LIST FROM ARCHIVE (authoritative update)
+      // ========================================================================
+      // This re-queries the archive to ensure this.drafts matches storage exactly
+      // This is the authoritative source - the immediate removal above prevents
+      // race conditions, but refreshDrafts() ensures correctness
+      await this.refreshDrafts();
 
       return true;
     } catch (error) {
-      console.error('[DRAFT-CHECK] Error deleting draft:', error);
+      console.error('Stack: Error deleting draft:', error);
       return false;
     }
   }
@@ -1191,7 +1160,7 @@ alert("Propagating the Transaction!");
 
     // Handle request for a single post by signature
     if (txmsg.request === 'load stack post') {
-      const signature = txmsg.data?.signature;
+      const signature = (txmsg.data && txmsg.data.signature) || null;
       
       if (!signature || typeof signature !== 'string') {
         // Invalid request - respond with empty array
@@ -1235,7 +1204,7 @@ alert("Propagating the Transaction!");
     // Handle receiving a post transaction from a peer
     // This happens when a peer sends us a post they have cached
     if (txmsg.request === 'stack post transaction') {
-      const serializedTx = txmsg.data?.transaction;
+      const serializedTx = (txmsg.data && txmsg.data.transaction) || null;
       
       if (!serializedTx) {
         return 0; // Not a valid Stack post transaction
@@ -1248,7 +1217,7 @@ alert("Propagating the Transaction!");
         
         // Basic validation - ensure it's a Stack post
         const receivedMsg = receivedTx.returnMessage();
-        if (receivedMsg.module !== 'Stack' || receivedMsg.data?.type !== 'stack_post') {
+        if (receivedMsg.module !== 'Stack' || (receivedMsg.data && receivedMsg.data.type !== 'stack_post')) {
           return 0; // Not a Stack post, don't handle
         }
 
@@ -1288,7 +1257,7 @@ alert("Propagating the Transaction!");
    */
   async loadPost(signature, options = {}, callback = null) {
     // Extract peer from options if provided
-    const peer = options?.peer || null;
+    const peer = (options && options.peer) || null;
 
     // Validate signature
     if (!signature || typeof signature !== 'string') {
@@ -1388,7 +1357,7 @@ alert("Propagating the Transaction!");
     const peerKeys = Object.keys(this.peers);
     if (peerKeys.length > 0) {
       const firstPeerKey = peerKeys[0];
-      const peerObj = this.peers[firstPeerKey]?.peer;
+      const peerObj = (this.peers[firstPeerKey] && this.peers[firstPeerKey].peer) || null;
       
       if (peerObj && peerObj.peerIndex !== undefined) {
         try {

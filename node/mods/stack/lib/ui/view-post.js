@@ -99,13 +99,26 @@ class ViewPost {
 
   attachEvents() {
     try {
-      // Build On icon - opens editor to write new post referencing this transaction
-      const buildOnBtn = document.querySelector('#stack-view-post-build-on');
-      if (buildOnBtn) {
-        buildOnBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          this.handleBuildOn();
-        });
+      // EDITOR icon (pencil) - only visible to post author, opens editor with post content
+      const editorIcon = document.querySelector('#stack-view-post-build-on');
+      if (editorIcon) {
+        // Check if current user is the author
+        const authorPublicKey = this.tx.from && this.tx.from.length > 0 
+          ? (this.tx.from[0].publicKey || this.tx.from[0].address || '')
+          : '';
+        const currentUserPublicKey = this.mod.publicKey || '';
+        
+        if (authorPublicKey === currentUserPublicKey && authorPublicKey) {
+          // Show icon for author
+          editorIcon.style.display = '';
+          editorIcon.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.handleBuildOn();
+          });
+        } else {
+          // Hide icon for non-authors
+          editorIcon.style.display = 'none';
+        }
       }
 
       // Copy Link icon - copies canonical URL
@@ -131,38 +144,109 @@ class ViewPost {
   }
 
   handleBuildOn() {
-    if (!this.tx || !this.mod) return;
+    if (!this.tx || !this.mod || !this.mod.create_post_ui) return;
 
-    // Open the editor to write a new post referencing this transaction
-    // Store reference transaction for potential use in new post
-    if (this.mod.create_post_ui) {
-      // ========================================================================
-      // INVARIANT 4: Unmount before navigating to editor (navigation path: viewer → editor)
-      // ========================================================================
-      if (typeof this.mod.create_post_ui.onEditorUnmount === 'function') {
-        this.mod.create_post_ui.onEditorUnmount();
-      }
-      // Render the editor
-      this.mod.create_post_ui.render();
-      
-      // Optionally, could pre-populate with reference to this post
-      // For now, just open empty editor
-      this.showMessage('Editor opened');
+    // Extract post data from transaction
+    const msg = this.tx.returnMessage();
+    const data = msg && msg.data ? msg.data : {};
+    const title = data.title || '';
+    const content = data.content || data.text || '';
+
+    // ========================================================================
+    // INVARIANT 4: Unmount before navigating to editor (navigation path: viewer → editor)
+    // ========================================================================
+    if (typeof this.mod.create_post_ui.onEditorUnmount === 'function') {
+      this.mod.create_post_ui.onEditorUnmount();
     }
+
+    // ========================================================================
+    // INVARIANT 2: Editor requires explicit intent - use "edit" mode for building on existing post
+    // ========================================================================
+    // Note: The editor will render with default "new" intent, then we load the post content
+    // This is acceptable as "edit" mode is essentially "new" mode with pre-filled content
+    // Render the editor (will use default "new" intent from render())
+    this.mod.create_post_ui.render();
+
+    // Load post content into editor after a short delay to ensure DOM is ready
+    setTimeout(() => {
+      const { parseMarkdownToDocument, renderDocument } = require('../post-document');
+
+      // Set title
+      const titleInput = document.querySelector('#stack-post-title-input');
+      if (titleInput) {
+        titleInput.value = title;
+      }
+
+      // Load content into editor
+      const editor = document.querySelector('#stack-post-body-editor');
+      if (editor) {
+        if (content.trim()) {
+          // Parse markdown content to document structure
+          const tempDocument = parseMarkdownToDocument(content);
+          
+          // Render document to editor
+          renderDocument(tempDocument, editor, {
+            contentEditable: true
+          });
+        } else {
+          // Empty content - render empty document
+          const { generateBlockId } = require('../post-document');
+          const tempDocument = { blocks: [{ type: 'paragraph', id: generateBlockId(0), text: '' }] };
+          renderDocument(tempDocument, editor, {
+            contentEditable: true
+          });
+        }
+      }
+
+      // Load featured image if present
+      if (data.image && this.mod.create_post_ui) {
+        this.mod.create_post_ui.featuredImage = data.image;
+        setTimeout(() => {
+          if (this.mod.create_post_ui && typeof this.mod.create_post_ui.updateFeaturedImageDisplay === 'function') {
+            this.mod.create_post_ui.updateFeaturedImageDisplay();
+          }
+        }, 50);
+      }
+
+      // Update UI state
+      if (this.mod.create_post_ui) {
+        if (typeof this.mod.create_post_ui.updatePlaceholderVisibility === 'function') {
+          this.mod.create_post_ui.updatePlaceholderVisibility();
+        }
+        if (typeof this.mod.create_post_ui.updatePublishTriggerVisibility === 'function') {
+          this.mod.create_post_ui.updatePublishTriggerVisibility();
+        }
+        if (typeof this.mod.create_post_ui.updatePublishTriggerState === 'function') {
+          this.mod.create_post_ui.updatePublishTriggerState();
+        }
+      }
+    }, 100);
   }
 
   handleCopyLink() {
     if (!this.tx) return;
 
     // Get canonical URL from transaction or fallback to current page URL
-    const msg = this.tx.returnMessage();
-    const data = msg.data || {};
-    let shareUrl = data.url || window.location.href;
+    const authorPublicKey = this.tx.from && this.tx.from.length > 0 
+      ? (this.tx.from[0].publicKey || this.tx.from[0].address || '')
+      : '';
+    
+    let shareUrl = window.location.href;
+    if (authorPublicKey && this.tx.signature) {
+      // Build canonical URL: /stack/<authorPublicKey>/<signature>
+      shareUrl = `/${this.mod.slug}/${authorPublicKey}/${this.tx.signature}`;
+      // Make absolute URL if needed
+      if (!shareUrl.startsWith('http')) {
+        shareUrl = window.location.origin + shareUrl;
+      }
+    }
 
     // Copy to clipboard
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(shareUrl).then(() => {
-        this.showMessage('Link copied to clipboard');
+        if (typeof siteMessage === 'function') {
+          siteMessage('Link copied to clipboard', 1500);
+        }
       }).catch(err => {
         console.error('Failed to copy:', err);
         this.fallbackCopy(shareUrl);
@@ -175,10 +259,21 @@ class ViewPost {
   handleShare() {
     if (!this.tx) return;
 
-    // Get URL from transaction or fallback to current page URL
+    // Get canonical URL
+    const authorPublicKey = this.tx.from && this.tx.from.length > 0 
+      ? (this.tx.from[0].publicKey || this.tx.from[0].address || '')
+      : '';
+    
+    let shareUrl = window.location.href;
+    if (authorPublicKey && this.tx.signature) {
+      shareUrl = `/${this.mod.slug}/${authorPublicKey}/${this.tx.signature}`;
+      if (!shareUrl.startsWith('http')) {
+        shareUrl = window.location.origin + shareUrl;
+      }
+    }
+
     const msg = this.tx.returnMessage();
-    const data = msg.data || {};
-    let shareUrl = data.url || window.location.href;
+    const data = msg && msg.data ? msg.data : {};
 
     // Use Web Share API if available, otherwise fall back to copy
     if (navigator.share) {
@@ -207,25 +302,17 @@ class ViewPost {
     
     try {
       document.execCommand('copy');
-      this.showMessage('Link copied to clipboard');
+      if (typeof siteMessage === 'function') {
+        siteMessage('Link copied to clipboard', 1500);
+      }
     } catch (err) {
       console.error('Fallback copy failed:', err);
-      this.showMessage('Failed to copy link');
+      if (typeof siteMessage === 'function') {
+        siteMessage('Failed to copy link', 1500);
+      }
     }
     
     document.body.removeChild(textArea);
-  }
-
-  showMessage(msg) {
-    // Use Saito connection emit pattern for messages
-    if (this.app.connection) {
-      this.app.connection.emit('saito-header-update-message', {
-        msg: msg,
-        timeout: 2000
-      });
-    } else if (typeof siteMessage === 'function') {
-      siteMessage(msg, 2000);
-    }
   }
 
   /**

@@ -61,7 +61,10 @@ class PublishSettingsOverlay {
         accessCheckboxes.forEach(cb => {
           if (cb !== checkbox) {
             cb.checked = false;
-            cb.closest('.stack-publish-access-card')?.classList.remove('stack-publish-access-card-active');
+            const closestCard = cb.closest('.stack-publish-access-card');
+            if (closestCard) {
+              closestCard.classList.remove('stack-publish-access-card-active');
+            }
           }
         });
         
@@ -85,7 +88,7 @@ class PublishSettingsOverlay {
     accessCheckboxes.forEach(checkbox => {
       checkbox.addEventListener('change', (e) => {
         const card = checkbox.closest('.stack-publish-access-card');
-        const accessValue = card?.getAttribute('data-access');
+        const accessValue = card ? card.getAttribute('data-access') : null;
         
         if (checkbox.checked) {
           // Prevent selection of disabled subscription option
@@ -98,10 +101,15 @@ class PublishSettingsOverlay {
           accessCheckboxes.forEach(cb => {
             if (cb !== checkbox) {
               cb.checked = false;
-              cb.closest('.stack-publish-access-card')?.classList.remove('stack-publish-access-card-active');
+              const closestCard = cb.closest('.stack-publish-access-card');
+              if (closestCard) {
+                closestCard.classList.remove('stack-publish-access-card-active');
+              }
             }
           });
-          card?.classList.add('stack-publish-access-card-active');
+          if (card) {
+            card.classList.add('stack-publish-access-card-active');
+          }
           
           this.setAccessLevel(accessValue);
         } else {
@@ -123,10 +131,41 @@ class PublishSettingsOverlay {
     // Primary action button (Publish)
     const primaryBtn = document.querySelector('#stack-publish-primary-btn');
     if (primaryBtn) {
+      // ========================================================================
+      // [DIAGNOSTIC] Log button attachment and handler count
+      // ========================================================================
+      console.log('[DIAG] Publish overlay primary button found, attaching click handler');
+      const handlerCount = primaryBtn.getAttribute('data-handler-count') || 0;
+      console.log('[DIAG] Overlay publish button handler count before attach:', handlerCount);
+      
       primaryBtn.addEventListener('click', (e) => {
+        // ========================================================================
+        // [DIAGNOSTIC] Log click handler firing
+        // ========================================================================
+        console.log('[DIAG] ========================================');
+        console.log('[DIAG] OVERLAY PUBLISH BUTTON CLICK HANDLER FIRED');
+        console.log('[DIAG] ========================================');
+        console.log('[DIAG] Event:', e);
+        console.log('[DIAG] Button element:', primaryBtn);
+        console.log('[DIAG] Overlay postState:', this.postState);
+        console.log('[DIAG] Editor state (from create_post_ui):');
+        if (this.mod.create_post_ui) {
+          console.log('[DIAG]   - isPublished:', this.mod.create_post_ui.isPublished);
+          console.log('[DIAG]   - activeDraftId:', this.mod.create_post_ui.activeDraftId);
+          console.log('[DIAG]   - sessionIntent:', this.mod.create_post_ui.sessionIntent);
+          console.log('[DIAG]   - draftTransaction:', this.mod.create_post_ui.draftTransaction ? 'exists' : 'null');
+        } else {
+          console.log('[DIAG]   - create_post_ui is null/undefined');
+        }
+        
         e.preventDefault();
         this.handlePublish();
       });
+      
+      primaryBtn.setAttribute('data-handler-count', parseInt(handlerCount) + 1);
+      console.log('[DIAG] Overlay publish button handler count after attach:', primaryBtn.getAttribute('data-handler-count'));
+    } else {
+      console.warn('[DIAG] Overlay publish button NOT FOUND in DOM');
     }
   }
 
@@ -276,32 +315,58 @@ class PublishSettingsOverlay {
 
 
   async handlePublish() {
-    const title = document.querySelector('#stack-post-title-input') ? (document.querySelector('#stack-post-title-input').value || '') : '';
+    // ========================================================================
+    // [DIAGNOSTIC] Log entry into overlay handlePublish
+    // ========================================================================
+    console.log('[DIAG] ========================================');
+    console.log('[DIAG] PublishSettingsOverlay.handlePublish() CALLED');
+    console.log('[DIAG] ========================================');
+    console.log('[DIAG] Overlay postState:', this.postState);
+    console.log('[DIAG] Editor state check:');
+    console.log('[DIAG]   - create_post_ui exists:', !!this.mod.create_post_ui);
+    if (this.mod.create_post_ui) {
+      console.log('[DIAG]   - isPublished:', this.mod.create_post_ui.isPublished);
+      console.log('[DIAG]   - activeDraftId:', this.mod.create_post_ui.activeDraftId);
+      console.log('[DIAG]   - sessionIntent:', this.mod.create_post_ui.sessionIntent);
+      console.log('[DIAG]   - draftTransaction:', this.mod.create_post_ui.draftTransaction ? 'exists' : 'null');
+    }
+    
+    const titleInput = document.querySelector('#stack-post-title-input');
+    const title = titleInput ? titleInput.value || '' : '';
+    console.log('[DIAG] Title from DOM:', title);
+    
     // Use DOM-based serialization (DOM is single source of truth)
     const content = this.mod.create_post_ui ? this.mod.create_post_ui.serializeDOMToMarkdown() : '';
+    console.log('[DIAG] Content length from serialization:', content.length);
 
+    // ========================================================================
+    // [DIAGNOSTIC] Check early exit conditions
+    // ========================================================================
     if (!title.trim()) {
+      console.log('[DIAG] EARLY EXIT: No title');
       alert('Please enter a title for your post');
       return;
     }
 
     if (!content.trim()) {
+      console.log('[DIAG] EARLY EXIT: No content');
       alert('Please enter content for your post');
       return;
     }
 
+    console.log('[DIAG] Validation passed, proceeding to transaction creation');
+
     try {
+      console.log('[DIAG] Emitting "Publishing post..." message');
       this.app.connection.emit('saito-header-update-message', { msg: 'Publishing post...' });
       
-      // Capture draft ID and transaction reference before publishing
-      const draftIdToDelete = this.mod.create_post_ui ? this.mod.create_post_ui.activeDraftId : null;
-      const draftTxToDelete = this.mod.create_post_ui ? this.mod.create_post_ui.draftTransaction : null;
-      
       // Get featured image from editor state (authoritative source)
-      const featuredImage = this.mod.create_post_ui && this.mod.create_post_ui.featuredImage ? this.mod.create_post_ui.featuredImage : (this.postState.image || '');
+      const featuredImage = (this.mod.create_post_ui && this.mod.create_post_ui.featuredImage) || this.postState.image || '';
+      console.log('[DIAG] Featured image:', featuredImage ? 'exists' : 'null');
+      console.log('[DIAG] Access level:', this.postState.accessLevel);
       
-      // Create and propagate the transaction
-      const publishedTx = await this.mod.createStackPostTransaction({
+      console.log('[DIAG] Calling createStackPostTransaction()...');
+      await this.mod.createStackPostTransaction({
         title,
         content,
         image: featuredImage, // Featured/teaser image (singular)
@@ -312,127 +377,49 @@ class PublishSettingsOverlay {
         excerpt: this.postState.description || content.substring(0, 200).replace(/\n/g, ' ').trim(),
         accessLevel: this.postState.accessLevel // 'public' or 'private'
       }, () => {
-        // This callback runs after network confirmation (may take time)
-        // State is already cleaned up below, this is just for final sync
+        // ========================================================================
+        // [DIAGNOSTIC] Log success callback execution
+        // ========================================================================
+        console.log('[DIAG] ========================================');
+        console.log('[DIAG] createStackPostTransaction SUCCESS CALLBACK FIRED');
+        console.log('[DIAG] ========================================');
+        
         this.postState.published = true;
+        console.log('[DIAG] Set postState.published = true');
+        
+        this.app.connection.emit('saito-header-update-message', { msg: '' });
+        siteMessage('Stack post published', 1500);
+        this.overlay.hide();
+        console.log('[DIAG] Overlay hidden');
+        
+        // Update publish trigger state
+        if (this.mod.create_post_ui) {
+          console.log('[DIAG] Updating create_post_ui state:');
+          console.log('[DIAG]   - Setting isPublished = true');
+          this.mod.create_post_ui.isPublished = true;
+          console.log('[DIAG]   - Calling updatePublishTriggerState()');
+          this.mod.create_post_ui.updatePublishTriggerState();
+          console.log('[DIAG]   - Final activeDraftId:', this.mod.create_post_ui.activeDraftId);
+          console.log('[DIAG]   - Final draftTransaction:', this.mod.create_post_ui.draftTransaction ? 'exists' : 'null');
+        } else {
+          console.warn('[DIAG] create_post_ui is null - cannot update state');
+        }
+
+        // Post will be saved to app.options.stack.posts in receiveStackPostTransaction
+        console.log('[DIAG] Success callback completed');
       });
       
-      // ========================================================================
-      // OPTIMISTIC CACHE UPDATE: Add post to postsCache immediately
-      // ========================================================================
-      // Add to cache so it appears in Explore → My Posts immediately
-      // receiveStackPostTransaction will handle this again on confirmation, but
-      // it checks for duplicates, so it's safe to add optimistically here
-      if (publishedTx && publishedTx.signature) {
-        const txmsg = publishedTx.returnMessage();
-        const from = publishedTx.from && publishedTx.from.length > 0 ? publishedTx.from[0].publicKey : this.mod.publicKey;
-        
-        if (txmsg && txmsg.data && from) {
-          const post = {
-            ...txmsg.data,
-            sig: publishedTx.signature,
-            publicKey: from,
-            timestamp: txmsg.data.timestamp || publishedTx.timestamp,
-            lastEdited: txmsg.data.timestamp || publishedTx.timestamp
-          };
-          
-          // Add to transactionCache for immediate access
-          this.mod.transactionCache[publishedTx.signature] = publishedTx;
-          
-          // Add to allPosts (check for duplicates first)
-          if (this.mod.postsCache && this.mod.postsCache.allPosts) {
-            const existingIndex = this.mod.postsCache.allPosts.findIndex(p => p.sig === publishedTx.signature);
-            if (existingIndex < 0) {
-              this.mod.postsCache.allPosts.push(post);
-            }
-          }
-          
-          // Add to byAuthor cache (check for duplicates first)
-          if (this.mod.postsCache && this.mod.postsCache.byAuthor) {
-            if (!this.mod.postsCache.byAuthor.has(from)) {
-              this.mod.postsCache.byAuthor.set(from, []);
-            }
-            const authorPosts = this.mod.postsCache.byAuthor.get(from);
-            const existingIndex = authorPosts.findIndex(p => p.sig === publishedTx.signature);
-            if (existingIndex < 0) {
-              authorPosts.push(post);
-            }
-          }
-        }
-      }
-      
-      // ========================================================================
-      // PUBLISH CONSUMES DRAFT: Delete draft immediately after broadcasting
-      // ========================================================================
-      // [DRAFT-CHECK] Log draft deletion on publish
-      console.log('[DRAFT-CHECK] Publishing post - deleting draft:', draftIdToDelete || 'N/A');
-      
-      if (draftIdToDelete && this.mod.deleteDraft) {
-        // Delete from archive and refresh in-memory draft list
-        const deleted = await this.mod.deleteDraft(draftIdToDelete);
-        console.log('[DRAFT-CHECK] Draft deleted from archive and memory:', deleted);
-        // After deletion, draft will not be returned by hasValidDrafts()
-      } else if (draftTxToDelete) {
-        // Fallback: delete by transaction if we have it but no draftId
-        try {
-          await this.app.storage.deleteTransaction(draftTxToDelete, null, 'localhost');
-          if (this.mod.refreshDrafts) {
-            await this.mod.refreshDrafts();
-          }
-          console.log('[DRAFT-CHECK] Draft transaction deleted via fallback');
-        } catch (err) {
-          console.warn('Stack: Error deleting draft transaction:', err);
-        }
-      }
-      
-      // ========================================================================
-      // CLEAR SESSION-SCOPED DRAFT STATE
-      // ========================================================================
-      if (this.mod.create_post_ui) {
-        this.mod.create_post_ui.activeDraftId = null;
-        this.mod.create_post_ui.draftTransaction = null;
-        this.mod.create_post_ui.sessionIntent = null;
-        this.mod.create_post_ui.isPublished = true;
-      }
-      
-      // Hide overlay
-      this.overlay.hide();
-      
-      // ========================================================================
-      // IMMEDIATE TRANSITION TO VIEW POST
-      // ========================================================================
-      // Unmount editor before navigating to viewer
-      if (this.mod.create_post_ui && typeof this.mod.create_post_ui.onEditorUnmount === 'function') {
-        this.mod.create_post_ui.onEditorUnmount();
-      }
-      
-      // Initialize ViewPost component if needed
-      if (!this.mod.viewPostComponent) {
-        const ViewPost = require('../view-post');
-        this.mod.viewPostComponent = new ViewPost(this.app, this.mod, '.saito-container');
-      }
-      
-      // Render View Post with the just-broadcast transaction
-      this.mod.viewPostComponent.render(publishedTx);
-      
-      // Update URL to reflect the published post
-      if (publishedTx && publishedTx.signature) {
-        const authorPublicKey = this.mod.publicKey;
-        if (authorPublicKey) {
-          const canonicalUrl = `/${this.mod.slug}/${authorPublicKey}/${publishedTx.signature}`;
-          window.history.pushState(
-            { view: 'stack_post', publicKey: authorPublicKey, signature: publishedTx.signature },
-            null,
-            canonicalUrl
-          );
-        }
-      }
-      
-      // Success message
-      this.app.connection.emit('saito-header-update-message', { msg: 'Post published' });
-      siteMessage('Stack post published', 1500);
-      
+      console.log('[DIAG] createStackPostTransaction() call completed (await resolved)');
     } catch (error) {
+      // ========================================================================
+      // [DIAGNOSTIC] Log error details
+      // ========================================================================
+      console.error('[DIAG] ========================================');
+      console.error('[DIAG] ERROR IN handlePublish()');
+      console.error('[DIAG] ========================================');
+      console.error('[DIAG] Error object:', error);
+      console.error('[DIAG] Error message:', error.message);
+      console.error('[DIAG] Error stack:', error.stack);
       console.error('Error publishing post:', error);
       this.app.connection.emit('saito-header-update-message', {
         msg: 'Error publishing post',

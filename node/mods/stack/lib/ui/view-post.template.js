@@ -112,8 +112,8 @@ module.exports = (app, mod, tx) => {
             </div>
             
             <div class="stack-view-post-actions">
-              <a href="#" id="stack-view-post-build-on" class="stack-view-post-action-badge" aria-label="Build on this post" title="Build on this post">
-                <i class="fa-solid fa-code-branch"></i>
+              <a href="#" id="stack-view-post-build-on" class="stack-view-post-action-badge" aria-label="Edit" title="Edit" style="display: none;">
+                <i class="fa-solid fa-pencil"></i>
               </a>
               <a href="#" id="stack-view-post-copy-link" class="stack-view-post-action-badge" aria-label="Copy link" title="Copy link">
                 <i class="fa-solid fa-link"></i>

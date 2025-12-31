@@ -1,6 +1,6 @@
 module.exports = (app, mod, author, subscription = null) => {
   const isSubscribed = subscription !== null;
-  const tier = subscription?.tier || 'free';
+  const tier = (subscription && subscription.tier) || 'free';
 
   return `
     <div class="stack-subscription-item" data-author="${author}">
