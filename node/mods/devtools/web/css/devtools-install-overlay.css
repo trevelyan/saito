@@ -1,0 +1,89 @@
+/*
+ * Install Module preview overlay — presentation after a .saito file is parsed.
+ * Shell sizing from .saito-module-overlay; appearance from Saito tokens/buttons.
+ */
+
+.saito-app-install-overlay {
+  gap: var(--saito-space-lg);
+}
+
+.saito-app-install-overlay .banner {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  aspect-ratio: 16 / 7;
+  min-height: 12rem;
+  overflow: hidden;
+  border-radius: var(--saito-radius);
+  border: 1px solid var(--saito-border);
+  background-color: var(--saito-secondary);
+  background-size: cover;
+  background-position: center;
+}
+
+.saito-app-install-overlay .banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent 40%, rgba(0, 0, 0, 0.65));
+  pointer-events: none;
+}
+
+.saito-app-install-overlay .title {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: var(--saito-space-md) var(--saito-space-lg);
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--saito-secondary-foreground, #fff);
+}
+
+.saito-app-install-overlay .description {
+  margin: 0;
+  font-size: 1.6rem;
+  line-height: 1.5;
+  color: var(--saito-foreground);
+}
+
+.saito-app-install-overlay .meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--saito-space-sm);
+  padding-top: var(--saito-space-sm);
+  border-top: 1px solid var(--saito-border);
+}
+
+.saito-app-install-overlay .meta .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--saito-space-xs) var(--saito-space-md);
+  align-items: baseline;
+  min-width: 0;
+}
+
+.saito-app-install-overlay .meta .label {
+  flex: 0 0 8rem;
+  font-size: 1.3rem;
+  color: var(--saito-muted-foreground);
+}
+
+.saito-app-install-overlay .meta .value,
+.saito-app-install-overlay .meta .unknown {
+  flex: 1 1 12rem;
+  min-width: 0;
+  font-size: 1.4rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.saito-app-install-overlay .meta .unknown {
+  color: var(--saito-muted-foreground);
+}
+
+.saito-app-install-overlay .saito-button-row {
+  justify-content: center;
+  margin-top: var(--saito-space-sm);
+}

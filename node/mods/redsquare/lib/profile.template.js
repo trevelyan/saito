@@ -12,7 +12,7 @@ module.exports = (profile) => {
       <div class="key-row">
         <span class="public-key" title="${publicKey}">${publicKey}</span>
         <button
-          class="copy-key"
+          class="copy-key saito-icon-button"
           type="button"
           data-profile-key="${publicKey}"
           aria-label="Copy address"

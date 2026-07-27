@@ -1,5 +1,6 @@
 /* Namespace: .redsquare-leaderboard — row layout only.
- * Title (.sidebar-header) and surface (.saito-sidebar-element / league table) stay in Saito/League.
+ * Title (.saito-sidebar-header / legacy .sidebar-header) and surface
+ * (.saito-sidebar-element / league table) stay in Saito/League.
  */
 
 .redsquare-leaderboard {

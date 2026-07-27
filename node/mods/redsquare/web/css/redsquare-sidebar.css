@@ -1,11 +1,11 @@
 /* Namespace: .sidebar — stack + Who to Follow / legal footer.
- * One section rhythm: title → gap → panel → gap → next title (same --saito-space-sm).
+ * Right-rail section rhythm: title → panel → next section (gap --saito-space-lg).
  */
 
 .sidebar {
   display: flex;
   flex-direction: column;
-  gap: var(--saito-space-sm);
+  gap: var(--saito-space-lg);
   min-width: 0;
 }
 

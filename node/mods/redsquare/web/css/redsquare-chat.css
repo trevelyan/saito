@@ -11,11 +11,6 @@
   background: transparent;
 }
 
-.sidebar-left .close-chat-manager,
-.sidebar-left .alternate-close-button {
-  display: none;
-}
-
 .sidebar-left .chat-manager-list {
   flex: 1 1 auto;
   min-height: 0;
@@ -50,11 +45,6 @@
     min-height: 0;
     max-height: none;
     overflow-y: auto;
-  }
-
-  .redsquare-mobile-chat .close-chat-manager,
-  .redsquare-mobile-chat .alternate-close-button {
-    display: none;
   }
 
   .redsquare-mobile-chat > .chat-static {

@@ -24,7 +24,7 @@
   flex: 0 0 auto;
   min-height: 5.6rem;
   padding: 0 var(--saito-space-lg);
-  background: var(--saito-background);
+  background: var(--saito-card-wash);
   border-bottom: 1px solid var(--saito-border);
 }
 
@@ -46,18 +46,9 @@
   flex: 1 1 auto;
 }
 
-/* display must not override the HTML [hidden] attribute — Home has no Back */
-.manager > .header .back:not([hidden]) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  width: 3.2rem;
-  height: 3.2rem;
-  padding: 0;
-  border: none;
-  background: transparent;
-  cursor: pointer;
+/* Shared .saito-button-square owns appearance; keep [hidden] from being overridden. */
+.manager > .header .back[hidden] {
+  display: none;
 }
 
 .manager > .header .title {

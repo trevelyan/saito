@@ -317,13 +317,20 @@ span.saito-anchor {
   opacity: 1;
   transition:
     border-color 0.16s ease,
-    color 0.16s ease;
+    color 0.16s ease,
+    background-color 0.16s ease,
+    transform 0.16s ease;
 }
 
 .saito-icon-button:hover {
   border-color: var(--saito-border);
   color: var(--saito-foreground);
   background: var(--saito-secondary);
+}
+
+.saito-icon-button:active {
+  color: var(--saito-foreground);
+  transform: scale(0.94);
 }
 
 .saito-icon-button:focus-visible {

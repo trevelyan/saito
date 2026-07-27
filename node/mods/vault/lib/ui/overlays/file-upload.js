@@ -40,7 +40,7 @@ class FileUpload {
     }
 
     const keyStep = root.querySelector('.key-step');
-    const uploadStep = root.querySelector('.textarea-container');
+    const uploadStep = root.querySelector('.saito-file-drop-zone-wrap');
     if (keyStep) {
       keyStep.style.display = 'flex';
       keyStep.classList.remove('is-uploading');
@@ -109,7 +109,7 @@ class FileUpload {
     }
 
     const keyStep = root.querySelector('.key-step');
-    const uploadStep = root.querySelector('.textarea-container');
+    const uploadStep = root.querySelector('.saito-file-drop-zone-wrap');
     if (keyStep) {
       keyStep.style.display = 'none';
     }

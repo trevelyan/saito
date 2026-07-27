@@ -93,10 +93,8 @@
   grid-template-rows: none;
 }
 
-.chat-main-container .chat-manager-header.sidebar-header {
+.chat-main-container .chat-manager .saito-sidebar-header {
   flex: 0 0 auto;
-  min-height: 0;
-  margin: 0;
 }
 
 .chat-main-container .chat-manager-list {

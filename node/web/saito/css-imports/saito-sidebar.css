@@ -1,0 +1,81 @@
+/*
+ * Shared sidebar presentation components.
+ *
+ * Official roots:
+ *   .saito-sidebar-header  — section title row for embedded panels
+ *   .saito-sidebar-element — bordered body surface
+ *
+ * Header contract:
+ *   .title            — always present; may contain optional .icon + text
+ *   .actions          — optional; zero or more module controls
+ *
+ * Legacy class names remain as aliases so unmigrated markup keeps working.
+ */
+
+/* ----------------------------------------------------------------
+   Header
+----------------------------------------------------------------- */
+
+.saito-sidebar-header,
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--saito-space-sm);
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  margin: 0;
+  font-size: 2rem;
+  font-family: var(--saito-font);
+  color: var(--saito-foreground);
+  text-transform: uppercase;
+}
+
+.saito-sidebar-header > *,
+.sidebar-header > * {
+  width: fit-content;
+  cursor: pointer;
+}
+
+/* Title — optional .icon aligns with text */
+.saito-sidebar-header .title,
+.saito-sidebar-header .sidebar-title,
+.sidebar-header .title,
+.sidebar-header .sidebar-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--saito-space-sm);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.saito-sidebar-header .title .icon,
+.sidebar-header .title .icon {
+  flex-shrink: 0;
+  cursor: default;
+}
+
+/* Actions — one or more module controls */
+.saito-sidebar-header .actions,
+.sidebar-header .actions {
+  display: flex;
+  align-items: center;
+  gap: var(--saito-space-xs);
+  flex-shrink: 0;
+  cursor: default;
+}
+
+/* ----------------------------------------------------------------
+   Body surface
+----------------------------------------------------------------- */
+
+.saito-sidebar-element {
+  padding: var(--border-padding-normal);
+  border: 1px solid var(--saito-border);
+  border-radius: var(--saito-radius);
+  background: var(--saito-card-wash);
+}

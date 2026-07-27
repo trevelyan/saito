@@ -6,9 +6,14 @@
   grid-template-columns: auto minmax(0, 1fr);
   column-gap: var(--saito-space-md);
   align-items: start;
-  padding: var(--saito-space-md) var(--saito-space-lg);
+  padding: var(--saito-space-md);
   border-bottom: 1px solid var(--saito-border);
   cursor: pointer;
+}
+
+/* Connector continues into the next tweet — no divider between them. */
+.tweet.chain-next {
+  border-bottom: none;
 }
 
 .tweet.slot {
@@ -26,7 +31,7 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  left: var(--saito-space-lg);
+  left: var(--saito-space-md);
   width: 3.5rem;
   pointer-events: none;
 }
@@ -251,15 +256,14 @@
 
 .tweet .controls {
   display: flex;
+  justify-content: space-between;
   user-select: none;
 }
 
 .tweet .controls .tool {
   display: flex;
-  flex: 1 1 0;
   align-items: center;
-  justify-content: center;
-  min-width: 0;
+  flex: 0 0 auto;
   padding: var(--saito-space-xs) 0;
   cursor: pointer;
   color: var(--saito-muted-foreground);
@@ -275,7 +279,6 @@
 }
 
 .tweet.focused {
-  padding-bottom: var(--saito-space-lg);
   cursor: default;
 }
 
@@ -376,11 +379,19 @@
 
 @media (max-width: 600px) {
   .tweet {
-    padding: var(--saito-space-md) var(--saito-space-sm);
+    padding: var(--saito-space-sm);
     column-gap: var(--saito-space-sm);
   }
 
   .tweet .chain {
     left: var(--saito-space-sm);
+  }
+
+  .tweet.chain-prev .chain::before {
+    bottom: calc(100% - var(--saito-space-sm));
+  }
+
+  .tweet.chain-next .chain::after {
+    top: calc(var(--saito-space-sm) + 3.5rem);
   }
 }

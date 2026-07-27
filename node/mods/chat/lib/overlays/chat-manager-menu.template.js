@@ -44,10 +44,11 @@ module.exports = (app, mod) => {
 			<label>add contact</label>
 		</fieldset>`;
 
-  html += `<fieldset id="add-contacts" class="saito-grid settings-link">
-			<i class="fa-solid fa-user-group"></i>
-			<label>new/open chat</label>
-		</fieldset>`;
+  /* Intentionally disabled for now — restore by uncommenting. Handler remains in chat-manager-menu.js. */
+  // html += `<fieldset id="add-contacts" class="saito-grid settings-link">
+  // 		<i class="fa-solid fa-user-group"></i>
+  // 		<label>new/open chat</label>
+  // 	</fieldset>`;
 
   html += `<fieldset id="create-group" class="saito-grid settings-link">
 			<i class="fa-solid fa-users"></i>

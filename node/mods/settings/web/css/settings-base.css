@@ -135,22 +135,6 @@
   width: 100%;
   min-width: 0;
   margin: 0;
-  color: var(--saito-foreground);
-  background: color-mix(in srgb, var(--saito-status-success) 12%, var(--saito-secondary));
-  border-color: color-mix(in srgb, var(--saito-status-success) 32%, var(--saito-border));
-  filter: none;
-}
-
-.settings-appspace-header .settings-actions-container .saito-button-secondary:hover {
-  color: var(--saito-foreground);
-  background: color-mix(in srgb, var(--saito-status-success) 20%, var(--saito-secondary));
-  border-color: color-mix(in srgb, var(--saito-status-success) 48%, var(--saito-border));
-  filter: none;
-}
-
-.settings-appspace-header .settings-actions-container .saito-button-secondary:active {
-  background: color-mix(in srgb, var(--saito-status-success) 26%, var(--saito-secondary));
-  border-color: color-mix(in srgb, var(--saito-status-success) 55%, var(--saito-border));
 }
 
 /* Wallet fields — consistent form/table rhythm */

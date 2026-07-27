@@ -118,17 +118,28 @@
   user-select: none;
 }
 
-/* Lightweight shell used when modules inject settings into an overlay */
+/* Lightweight shell used when modules inject settings into an overlay.
+ * Density aligns with RedSquare `.settings` (title --font-size-large, ~52rem width). */
 .module-settings-overlay {
   display: flex;
   flex-direction: column;
-  min-width: min(800px, 95vw);
-  min-height: min(400px, 90vh);
+  width: min(52rem, 92vw);
+  min-width: 0;
+  min-height: 0;
   max-width: 95vw;
-  max-height: 95vh;
-  padding: var(--saito-space-xl);
+  max-height: min(88vh, 72rem);
+  padding: var(--saito-space-lg);
   border-radius: var(--saito-radius);
-  border: 2px solid var(--saito-border);
+  border: 1px solid var(--saito-border);
+  gap: var(--saito-space-md);
+}
+
+.module-settings-overlay > h2 {
+  margin: 0;
+  font-size: var(--font-size-large);
+  font-family: var(--saito-font-medium);
+  font-weight: normal;
+  line-height: 1.2;
 }
 
 .module-settings-overlay .saito-module-settings {
@@ -144,6 +155,8 @@
 
 @media screen and (max-width: 600px) {
   .module-settings-overlay {
+    width: 100%;
+    max-height: 100vh;
     padding: var(--saito-space-md);
   }
 }
@@ -168,7 +181,7 @@
 
 .saito-module-details,
 fieldset.saito-grid {
-  padding: var(--saito-space-xl);
+  padding: 1.25rem var(--saito-space-md);
   border-radius: var(--saito-radius);
   border: 1px solid var(--saito-border);
 }
@@ -191,7 +204,7 @@ fieldset.saito-grid {
 fieldset.saito-grid {
   display: grid;
   grid-template-columns: 2rem 1fr;
-  gap: var(--saito-space-xl);
+  gap: var(--saito-space-md);
   align-items: center;
   margin: var(--saito-space-md) 0;
   position: relative;
@@ -215,6 +228,16 @@ fieldset.saito-grid .note {
   cursor: pointer;
 }
 
+/* Same leading column for icons and checkboxes — drop form-control side margins. */
+fieldset.saito-grid > i,
+fieldset.saito-grid > .saito-checkbox,
+fieldset.saito-grid > input.saito-checkbox[type='checkbox'],
+fieldset.saito-grid > .saito-radio,
+fieldset.saito-grid > input.saito-radio[type='radio'] {
+  margin: 0;
+  justify-self: start;
+}
+
 .saito-grid-extra-button {
   position: absolute;
   right: 1rem;
@@ -224,9 +247,10 @@ fieldset.saito-grid .note {
 }
 
 .saito-grid i {
-  margin: 0 0.5rem;
-  font-size: 1.8rem;
+  margin: 0;
+  font-size: var(--font-size-medium);
   cursor: pointer;
+  color: var(--saito-muted-foreground);
 }
 
 .settings-link,
@@ -244,5 +268,5 @@ fieldset.saito-grid .note {
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
-  gap: 2rem;
+  gap: var(--saito-space-md);
 }

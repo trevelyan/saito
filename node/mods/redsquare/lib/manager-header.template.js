@@ -5,7 +5,7 @@ module.exports = () => {
         <div class="start">
           <button
             type="button"
-            class="back"
+            class="back saito-button-square"
             aria-label="Back"
             hidden
           >
@@ -16,7 +16,7 @@ module.exports = () => {
         <div class="actions">
           <button class="new-post saito-button-primary small" type="button">
             <i class="fa-solid fa-plus" aria-hidden="true"></i>
-            <span>New Post</span>
+            <span>Post</span>
           </button>
         </div>
       </header>

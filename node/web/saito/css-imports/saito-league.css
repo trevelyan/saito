@@ -435,14 +435,6 @@ span.attention {
 	}
 }
 
-.league-rankings .sidebar-title {
-	display: flex;
-	justify-content: space-between;
-	width: 100%;
-	padding-right: 1rem;
-	color: var(--saito-foreground);
-}
-
 .ranking-overlay {
 	max-width: 95vw;
 	width: 450px;

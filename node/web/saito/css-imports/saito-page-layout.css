@@ -43,32 +43,7 @@
   margin: 0;
 }
 
-.saito-sidebar-element {
-  padding: var(--border-padding-normal);
-  border: 1px solid var(--saito-border);
-  border-radius: var(--saito-radius);
-  background: var(--saito-card-wash);
-}
-
-.sidebar-header {
-  display: flex;
-  align-items: center;
-  font-size: 2rem;
-  justify-content: space-between;
-  min-height: 40px;
-  color: var(--saito-foreground);
-  text-transform: uppercase;
-  font-family: var(--saito-font);
-}
-
-.sidebar-header > * {
-  width: fit-content;
-  cursor: pointer;
-}
-
-.sidebar-header .sidebar-title {
-  cursor: default;
-}
+/* Sidebar header + .saito-sidebar-element → saito-sidebar.css */
 
 /* This should be handled module by module...
 @media screen and (max-width: 900px) {

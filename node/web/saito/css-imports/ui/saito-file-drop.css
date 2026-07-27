@@ -1,0 +1,73 @@
+/*
+ * Shared file-drop overlay — layout for Vault Upload / Install Module dropzones.
+ * Appearance from Saito tokens. Modules do not re-skin this surface.
+ */
+
+.saito-file-drop-overlay {
+  width: min(42rem, 95vw);
+  gap: var(--saito-space-md);
+}
+
+.saito-file-drop-body {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+}
+
+.saito-file-drop-zone-wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: min(32rem, 50vh);
+}
+
+.saito-file-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--saito-space-md);
+  width: 100%;
+  max-width: 100%;
+  height: min(32rem, 50vh);
+  min-height: min(32rem, 50vh);
+  padding: var(--saito-space-xl);
+  box-sizing: border-box;
+  border: 1px solid var(--saito-border);
+  border-radius: var(--saito-radius);
+  background-color: var(--saito-secondary);
+  color: var(--saito-muted-foreground);
+  text-align: center;
+  font-size: 1.6rem;
+  cursor: pointer;
+  transition:
+    border-color 0.16s ease,
+    background-color 0.16s ease;
+}
+
+.saito-file-dropzone:hover {
+  border-color: var(--saito-primary);
+}
+
+.saito-file-dropzone i {
+  display: block;
+  font-size: 3.2rem;
+  line-height: 1;
+  color: var(--saito-muted-foreground);
+}
+
+.saito-file-dropzone-text {
+  margin: 0;
+  font-size: 1.6rem;
+  line-height: 1.4;
+  color: var(--saito-muted-foreground);
+}
+
+@media (max-width: 768px) {
+  .saito-file-drop-overlay .saito-file-drop-body,
+  .saito-file-drop-overlay .saito-file-drop-zone-wrap {
+    width: 100%;
+    min-width: 0;
+  }
+}

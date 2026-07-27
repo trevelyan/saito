@@ -8,7 +8,6 @@
 .sidebar-right {
   display: flex;
   flex-direction: column;
-  gap: var(--saito-space-sm);
   height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
@@ -16,10 +15,13 @@
 }
 
 .sidebar-left {
+  gap: var(--saito-space-sm);
   padding-inline: var(--saito-space-md) var(--saito-space-sm);
 }
 
 .sidebar-right {
+  /* Same rhythm as `.sidebar` module stack (Profile → Leaderboard → …). */
+  gap: var(--saito-space-lg);
   padding-inline: var(--saito-space-sm) var(--saito-space-md);
 }
 
@@ -29,10 +31,11 @@
 }
 
 /*
- * Quieter section titles — match left-nav scale; casing from markup (not uppercase).
- * Zero margin: Saito h1–h6 { margin-bottom: 1rem } still applies in .sidebar
- * (unlike .saito-sidebar h5 { margin: 0 }). Long-term this belongs on Saito.
+ * Quieter section titles — same treatment for right-rail panels and left Chat.
+ * Casing from markup (not uppercase). Zero margin for h5 defaults in .sidebar.
  */
+body.redsquare-body .sidebar-left .saito-sidebar-header,
+body.redsquare-body .sidebar .saito-sidebar-header,
 body.redsquare-body .sidebar .sidebar-header {
   margin: 0;
   margin-block: 0;

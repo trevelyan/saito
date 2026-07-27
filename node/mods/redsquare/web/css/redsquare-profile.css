@@ -85,13 +85,6 @@
 
 .redsquare-profile .copy-key {
   flex: 0 0 auto;
-  width: 2.2rem;
-  height: 2.2rem;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
 }
 
 .redsquare-profile-description {

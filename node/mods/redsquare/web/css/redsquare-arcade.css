@@ -11,11 +11,14 @@
   min-width: 0;
 }
 
+.redsquare-arcade .saito-sidebar-header,
 .redsquare-arcade .sidebar-header {
   text-transform: none;
 }
 
 .redsquare-arcade:empty,
-.redsquare-arcade:not(:has(.sidebar-header)):not(:has(.arcade-invite)) {
+.redsquare-arcade:not(:has(.saito-sidebar-header)):not(:has(.sidebar-header)):not(
+    :has(.arcade-invite)
+  ) {
   display: none;
 }

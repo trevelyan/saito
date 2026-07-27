@@ -16,7 +16,11 @@ class AddAppOverlay {
   }
 
   render() {
-    this.overlay.show(AddAppOverlayTemplate(this.app, this.mod));
+    const isMobile =
+      this.app.browser.isMobileBrowser() ||
+      (typeof window !== 'undefined' && window.innerWidth <= 768);
+
+    this.overlay.show(AddAppOverlayTemplate(this.app, this.mod, isMobile));
     this.attachEvents();
   }
 
@@ -26,7 +30,10 @@ class AddAppOverlay {
       this.app.browser.addDragAndDropFileUploadToElement(
         `saito-app-upload`,
         async (filesrc) => {
-          document.querySelector('.saito-app-upload').innerHTML = 'Uploading file...';
+          const dropzone = document.querySelector('#saito-app-upload');
+          if (dropzone) {
+            dropzone.innerHTML = 'Installing module...';
+          }
 
           let data = '';
           if (filesrc && filesrc.indexOf('data:application/octet-stream;base64,') >= 0) {
