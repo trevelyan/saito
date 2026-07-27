@@ -1456,7 +1456,7 @@ class League extends ModTemplate {
             tweetContent += ` ${txmsg.options.stake[player.publicKey]} |`;
           }
         } else {
-          tweetContent += `\n\n ${txmsg.options.stake} ${txmsg.options.crypto} were staked on the game!`;
+          tweetContent += `\n\n${txmsg.options.stake} ${txmsg.options.crypto} were staked on the game!`;
         }
       }
 
