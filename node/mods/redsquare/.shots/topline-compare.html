@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Three-column top baseline</title>
+<link rel="stylesheet" href="../../../web/saito/saito.css" />
+<link rel="stylesheet" href="../web/style.css" />
+<style>
+  body.page { margin: 0; padding: 24px; background: #111; color: #ddd; font-family: system-ui, sans-serif; }
+  h1 { font-size: 16px; margin: 0 0 6px; }
+  .lead { font-size: 12px; opacity: 0.65; margin: 0 0 16px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.6; margin-bottom: 6px; }
+  .stage { position: relative; border: 1px solid #333; border-radius: 8px; overflow: hidden; background: var(--saito-background, #0d0d0d); }
+  .cols {
+    display: grid;
+    grid-template-columns: 200px 1fr 220px;
+    height: 160px;
+  }
+  .col { position: relative; min-width: 0; overflow: hidden; }
+  .col.main-col { border-inline: 1px solid var(--saito-border, #333); }
+  /* BEFORE: sidebars padded, feed flush */
+  .before .sidebar-left,
+  .before .sidebar-right {
+    padding-top: var(--saito-space-sm);
+    padding-bottom: var(--saito-space-sm);
+    padding-inline: var(--saito-space-sm);
+  }
+  .before .main-col { padding-top: 0; }
+  /* AFTER: shared y=0 (live CSS already on .sidebar-*) */
+  .after .sidebar-left,
+  .after .sidebar-right {
+    /* uses stylesheet: padding-top 0 */
+    padding-inline: var(--saito-space-sm);
+  }
+  .guide {
+    position: absolute;
+    left: 0; right: 0;
+    top: 0;
+    height: 0;
+    border-top: 1px dashed #e11;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .after .guide { border-top-color: #2dd4bf; }
+  .home-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: var(--saito-accent, #333);
+  }
+  .tweet-row {
+    display: flex;
+    gap: 10px;
+    padding: var(--saito-space-md);
+    border-bottom: 1px solid var(--saito-border);
+  }
+  .avatar { width: 22px; height: 22px; background: #2a5; border-radius: 4px; flex: 0 0 auto; }
+  .cover {
+    height: 52px;
+    background: #c33;
+    border-radius: 6px 6px 0 0;
+  }
+  .card {
+    border: 1px solid var(--saito-border);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--saito-card-wash, #1a1a1a);
+  }
+</style>
+</head>
+<body class="page redsquare-body">
+  <h1>Desktop column top baseline</h1>
+  <p class="lead">Red/teal dashed line = shared y=0 content topline across the three columns.</p>
+  <div class="grid">
+    <div data-shot="before">
+      <div class="label">Before — sidebars padding-block; feed at y=0</div>
+      <div class="stage before">
+        <div class="guide" style="top: 0"></div>
+        <div class="cols">
+          <div class="col sidebar-left" style="display:flex;flex-direction:column;">
+            <div class="home-pill">Home</div>
+          </div>
+          <div class="col main-col">
+            <div class="tweet-row"><div class="avatar"></div><div>Anon · first tweet</div></div>
+          </div>
+          <div class="col sidebar-right" style="display:flex;flex-direction:column;">
+            <div class="card"><div class="cover"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div data-shot="after">
+      <div class="label">After — all columns content at y=0</div>
+      <div class="stage after">
+        <div class="guide"></div>
+        <div class="cols">
+          <div class="col sidebar-left" style="display:flex;flex-direction:column;padding-top:0;padding-bottom:var(--saito-space-sm);">
+            <div class="home-pill">Home</div>
+          </div>
+          <div class="col main-col">
+            <div class="tweet-row"><div class="avatar"></div><div>Anon · first tweet</div></div>
+          </div>
+          <div class="col sidebar-right" style="display:flex;flex-direction:column;padding-top:0;padding-bottom:var(--saito-space-sm);">
+            <div class="card"><div class="cover"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

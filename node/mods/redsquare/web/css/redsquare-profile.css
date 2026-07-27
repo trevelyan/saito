@@ -38,7 +38,11 @@
   column-gap: var(--saito-space-sm);
   align-items: start;
   min-width: 0;
-  margin: -2.2rem 0 var(--saito-space-sm);
+  /*
+   * Reference (DevTools screenshot): ~41% of the identicon overlaps the
+   * cover → pull-up 2.8rem. Space above biography matches ~1.6rem.
+   */
+  margin: -2.8rem 0 var(--saito-space-lg);
   padding-inline: var(--saito-space-md);
 }
 
@@ -54,8 +58,13 @@
 .redsquare-profile .text {
   display: flex;
   flex-direction: column;
+  gap: 0;
   min-width: 0;
-  padding-top: 2.4rem;
+  /*
+   * Clear the cover (2.8rem), then ~0.85rem air above the username —
+   * measured from the reference screenshot.
+   */
+  padding-top: calc(2.8rem + 0.85rem);
 }
 
 .redsquare-profile .name {
@@ -63,27 +72,52 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: var(--saito-font-medium);
+  line-height: 1.15;
+}
+
+/* Slightly denser than the base hierarchy step; stays dominant over the key. */
+@media (min-width: 601px) {
+  body.redsquare-body .redsquare-profile .name {
+    font-size: 1.33rem;
+    line-height: 1.15;
+  }
 }
 
 .redsquare-profile .key-row {
   display: flex;
   align-items: center;
-  gap: var(--saito-space-xs);
+  gap: 0;
+  width: 100%;
   min-width: 0;
-  min-height: 2.2rem;
+  min-height: 0;
+  margin: 0;
 }
 
 .redsquare-profile .public-key {
   flex: 1 1 0;
+  width: 0;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  line-height: 1.15;
   color: var(--saito-muted-foreground);
 }
 
 .redsquare-profile .copy-key {
   flex: 0 0 auto;
+  margin: 0;
+  /* Raise from the key line to the name+key centerline (reference). */
+  margin-top: -0.95rem;
+  align-self: flex-start;
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
+}
+
+.redsquare-profile .copy-key i {
+  font-size: 1.15rem;
 }
 
 .redsquare-profile-description {

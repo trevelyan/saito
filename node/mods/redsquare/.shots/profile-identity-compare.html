@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Profile identity — reference vs implementation</title>
+<link rel="stylesheet" href="../../../web/saito/saito.css" />
+<link rel="stylesheet" href="../web/style.css" />
+<style>
+  body.page { margin:0; padding:20px; background:#111; color:#ccc; font:12px/1.4 system-ui,sans-serif; }
+  h1 { font-size:15px; margin:0 0 6px; color:#eee; }
+  .lead { margin:0 0 16px; opacity:.65; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; }
+  .label { font-size:11px; text-transform:uppercase; letter-spacing:.04em; opacity:.55; margin-bottom:6px; }
+  .stage { border:1px solid #333; border-radius:8px; overflow:hidden; background:#0a0a0a; }
+  .stage img { display:block; width:100%; height:auto; }
+  .rail { width:310px; margin:12px auto; }
+  /* Force desktop name size in fixture */
+  .redsquare-profile .name { font-size:1.33rem; line-height:1.15; }
+</style>
+</head>
+<body class="page redsquare-body">
+  <h1>Profile identity row</h1>
+  <p class="lead">Left: your DevTools reference. Right: CSS implementation (same structure).</p>
+  <div class="grid">
+    <div data-shot="reference">
+      <div class="label">Reference (Chrome DevTools)</div>
+      <div class="stage"><img src="profile-identity-reference.png" alt="reference" /></div>
+    </div>
+    <div data-shot="after">
+      <div class="label">Implementation</div>
+      <div class="stage">
+        <div class="rail">
+          <div class="redsquare-profile">
+            <div class="card">
+              <div class="redsquare-profile-banner" style="background-image:linear-gradient(90deg,#f41f3e,#f5a623);"></div>
+              <div class="body">
+                <div class="identity">
+                  <img class="avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect fill='%23fff' width='80' height='80'/%3E%3Crect fill='%23603' x='10' y='10' width='25' height='25'/%3E%3Crect fill='%23603' x='45' y='45' width='25' height='25'/%3E%3C/svg%3E" alt="" />
+                  <div class="text">
+                    <span class="name">Anon-voeDAJ</span>
+                    <div class="key-row">
+                      <span class="public-key">voeDAJKjo3ny3gdpny9jY…</span>
+                      <button class="copy-key saito-icon-button" type="button" aria-label="Copy"><i class="fas fa-copy" aria-hidden="true"></i></button>
+                    </div>
+                  </div>
+                </div>
+                <div class="redsquare-profile-description">Once an idea has taken hold of the brain</div>
+                <nav class="nav" aria-label="Profile navigation">
+                  <div class="item active">Posts</div>
+                  <div class="item">Replies</div>
+                  <div class="item">Likes</div>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>RedSquare — Create vs Navigation (before / after)</title>
+<link rel="stylesheet" href="../../../web/saito/saito.css" />
+<link rel="stylesheet" href="../web/style.css" />
+<style>
+  body.compare {
+    margin: 0;
+    padding: 24px;
+    background: #1a1a1a;
+    color: #eee;
+    font-family: system-ui, sans-serif;
+  }
+  h1 { font-size: 18px; font-weight: 600; margin: 0 0 8px; }
+  .lead { margin: 0 0 20px; opacity: 0.7; font-size: 13px; }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .case { display: flex; flex-direction: column; gap: 8px; }
+  .label {
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0.65;
+  }
+  .stage {
+    background: var(--saito-background, #111);
+    border: 1px solid #333;
+    border-radius: 8px;
+    overflow: hidden;
+    min-height: 420px;
+  }
+  /* Mini desktop shell for fixtures */
+  .shell {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    height: 420px;
+    font-size: 12px;
+  }
+  .shell .main-col {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border-right: 1px solid var(--saito-border, #333);
+    background: var(--saito-background);
+  }
+  .shell .rail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--saito-space-lg, 1.2rem);
+    padding: var(--saito-space-sm, 0.8rem);
+    overflow: hidden;
+    background: var(--saito-background);
+  }
+  .tweet-stub {
+    padding: 1.2rem 1.6rem;
+    border-bottom: 1px solid var(--saito-border, #333);
+  }
+  .tweet-stub .author { font-family: var(--saito-font-medium); margin-bottom: 0.35rem; }
+  .tweet-stub .body { line-height: 1.4; opacity: 0.9; }
+  .profile-stub.card {
+    border: 1px solid var(--saito-border);
+    border-radius: var(--saito-radius);
+    background: var(--saito-card-wash);
+    overflow: hidden;
+  }
+  .profile-stub .banner {
+    height: 64px;
+    background: linear-gradient(120deg, #2a2a2a, #3d3d3d);
+  }
+  .profile-stub .body { padding: 0.8rem; }
+  .profile-stub .name { font-family: var(--saito-font-medium); font-size: 1.4rem; }
+  .section-title {
+    margin: 0;
+    font-size: 1.67rem;
+    font-family: var(--saito-font-medium);
+    text-transform: none;
+  }
+</style>
+</head>
+<body class="compare redsquare-body">
+  <h1>Separate creation from navigation</h1>
+  <p class="lead">Left = before (Home header owns + Post). Right = after (Create under Profile; Home has no header).</p>
+
+  <div class="grid">
+    <!-- BEFORE: Home -->
+    <div class="case" data-shot="before-home">
+      <div class="label">Before — Home</div>
+      <div class="stage">
+        <div class="shell">
+          <div class="main-col">
+            <div class="manager has-header timeline">
+              <header class="header">
+                <div class="start">
+                  <h2 class="title">Home</h2>
+                </div>
+                <div class="actions">
+                  <button class="new-post saito-button-primary compact" type="button">
+                    <span aria-hidden="true">+</span>
+                    <span>Post</span>
+                  </button>
+                </div>
+              </header>
+              <div class="body">
+                <article class="tweet-stub">
+                  <div class="author">Alice</div>
+                  <div class="body">First tweet in the feed sits under the Home chrome.</div>
+                </article>
+                <article class="tweet-stub">
+                  <div class="author">Bob</div>
+                  <div class="body">Creation and navigation shared one header.</div>
+                </article>
+              </div>
+            </div>
+          </div>
+          <aside class="rail sidebar-right">
+            <div class="redsquare-profile">
+              <div class="profile-stub card">
+                <div class="banner"></div>
+                <div class="body"><div class="name">You</div></div>
+              </div>
+            </div>
+            <div class="sidebar">
+              <h5 class="saito-sidebar-header"><div class="sidebar-title section-title">Who to Follow</div></h5>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <!-- AFTER: Home -->
+    <div class="case" data-shot="after-home">
+      <div class="label">After — Home</div>
+      <div class="stage">
+        <div class="shell">
+          <div class="main-col">
+            <div class="manager timeline">
+              <div class="body">
+                <article class="tweet-stub">
+                  <div class="author">Alice</div>
+                  <div class="body">First tweet begins the feed — no Home header.</div>
+                </article>
+                <article class="tweet-stub">
+                  <div class="author">Bob</div>
+                  <div class="body">Creation moved to the sidebar Create card.</div>
+                </article>
+              </div>
+            </div>
+          </div>
+          <aside class="rail sidebar-right">
+            <div class="redsquare-profile">
+              <div class="profile-stub card">
+                <div class="banner"></div>
+                <div class="body"><div class="name">You</div></div>
+              </div>
+            </div>
+            <div class="redsquare-create">
+              <h5 class="saito-sidebar-header">
+                <div class="sidebar-title">Create</div>
+              </h5>
+              <div class="actions saito-sidebar-element">
+                <button type="button" class="action saito-button-secondary compact" data-create="tweet">
+                  <span aria-hidden="true">+</span>
+                  <span>Tweet</span>
+                </button>
+                <button type="button" class="action saito-button-secondary compact" data-create="post">
+                  <span aria-hidden="true">+</span>
+                  <span>Post</span>
+                </button>
+              </div>
+            </div>
+            <div class="sidebar">
+              <h5 class="saito-sidebar-header"><div class="sidebar-title">Who to Follow</div></h5>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <!-- BEFORE: Conversation -->
+    <div class="case" data-shot="before-thread">
+      <div class="label">Before — Conversation</div>
+      <div class="stage">
+        <div class="shell">
+          <div class="main-col">
+            <div class="manager has-header has-back detail">
+              <header class="header">
+                <div class="start">
+                  <button type="button" class="back saito-button-square" aria-label="Back">
+                    <span aria-hidden="true">←</span>
+                  </button>
+                  <h2 class="title">Post</h2>
+                </div>
+                <div class="actions">
+                  <button class="new-post saito-button-primary compact" type="button">
+                    <span aria-hidden="true">+</span>
+                    <span>Post</span>
+                  </button>
+                </div>
+              </header>
+              <div class="body">
+                <article class="tweet-stub">
+                  <div class="author">Alice</div>
+                  <div class="body">Thread root — header mixed navigation with create.</div>
+                </article>
+              </div>
+            </div>
+          </div>
+          <aside class="rail sidebar-right">
+            <div class="redsquare-profile">
+              <div class="profile-stub card">
+                <div class="banner"></div>
+                <div class="body"><div class="name">You</div></div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <!-- AFTER: Conversation -->
+    <div class="case" data-shot="after-thread">
+      <div class="label">After — Conversation</div>
+      <div class="stage">
+        <div class="shell">
+          <div class="main-col">
+            <div class="manager has-header has-back detail">
+              <header class="header">
+                <div class="start">
+                  <button type="button" class="back saito-button-square" aria-label="Back">
+                    <span aria-hidden="true">←</span>
+                  </button>
+                  <h2 class="title">Post</h2>
+                </div>
+              </header>
+              <div class="body">
+                <article class="tweet-stub">
+                  <div class="author">Alice</div>
+                  <div class="body">Header is navigation only — back + title.</div>
+                </article>
+              </div>
+            </div>
+          </div>
+          <aside class="rail sidebar-right">
+            <div class="redsquare-profile">
+              <div class="profile-stub card">
+                <div class="banner"></div>
+                <div class="body"><div class="name">You</div></div>
+              </div>
+            </div>
+            <div class="redsquare-create">
+              <h5 class="saito-sidebar-header">
+                <div class="sidebar-title">Create</div>
+              </h5>
+              <div class="actions saito-sidebar-element">
+                <button type="button" class="action saito-button-secondary compact" data-create="tweet">
+                  <span aria-hidden="true">+</span>
+                  <span>Tweet</span>
+                </button>
+                <button type="button" class="action saito-button-secondary compact" data-create="post">
+                  <span aria-hidden="true">+</span>
+                  <span>Post</span>
+                </button>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

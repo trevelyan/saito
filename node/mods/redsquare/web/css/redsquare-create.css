@@ -1,0 +1,19 @@
+/* Namespace: .redsquare-create — compact horizontal publishing action bar. */
+
+.redsquare-create {
+  min-width: 0;
+}
+
+.redsquare-create .actions {
+  display: flex;
+  gap: var(--saito-space-xs);
+  align-items: stretch;
+  /* Hug the buttons — tighter than default sidebar-element padding. */
+  padding: var(--saito-space-xs);
+}
+
+.redsquare-create .action {
+  flex: 1 1 0;
+  margin: 0;
+  min-width: 0;
+}

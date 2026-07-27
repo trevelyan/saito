@@ -33,9 +33,9 @@ class Manager {
     this._timeline_bootstrapping = false;
     this._notifications_bootstrapping = false;
 
-    // Per-view Manager chrome. Desktop always shows the header.
-    // On compact viewports, header renders only when `header: true`
-    // (navigation and/or context the bottom nav does not already provide).
+    // Per-view Manager chrome. Header is navigation only (back + title).
+    // Home / notifications omit it so the feed begins with content.
+    // Thread and profile detail views keep it for back navigation.
     this.viewChrome = {
       timeline: { header: false },
       notifications: { header: false },
@@ -203,7 +203,6 @@ class Manager {
     this.attachEvents();
     this.syncScrollFooter();
     this.syncProfileNav();
-    this.mod.main?.new_post?.render();
   }
 
   ensureShell() {
@@ -266,9 +265,8 @@ class Manager {
   }
 
   /**
-   * Feed-header chrome — mounted only when the active view requires it.
-   * Decision point: after mode is set, before/with paint. Desktop always mounts;
-   * compact viewports respect each view's `viewChrome.header` declaration.
+   * Feed-header chrome — mounted only when the active view needs navigation.
+   * Creation lives in the sidebar Create component, not here.
    */
   syncFeedHeader() {
     const root = document.querySelector(this.container);
@@ -291,13 +289,6 @@ class Manager {
         }
 
         header = root.querySelector(':scope > .header');
-
-        // Fresh actions slot — allow New Post to bind again.
-        const actions = header?.querySelector('.actions');
-
-        if (actions) {
-          delete actions.dataset.newPostBound;
-        }
       }
 
       const title = header?.querySelector('.title');
@@ -337,14 +328,10 @@ class Manager {
   }
 
   /**
-   * Whether the active view requires Manager header chrome.
-   * Desktop: always. Compact: only when the view declares `header: true`.
+   * Whether the active view requires Manager header chrome (back + title).
+   * Driven by `viewChrome.header` on all viewports.
    */
   requiresHeader(mode = this.mode) {
-    if (!this.isCompactViewport()) {
-      return true;
-    }
-
     const chrome = this.viewChrome[mode];
 
     if (chrome && typeof chrome.header === 'boolean') {

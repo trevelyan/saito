@@ -30,17 +30,12 @@
 
 /*
  * Desktop Option A — page title anchors the feed chrome.
- * Content-sized height (no empty min-height), title-weighted, feed edge tighter.
+ * Content-sized height (no empty min-height), title-weighted.
  */
 @media (min-width: 601px) {
   .manager > .header {
     min-height: 0;
     padding: 0.7rem var(--saito-space-md) 0.55rem;
-  }
-
-  /* Same horizontal inset as tweets; slightly less top pad so title → first post reads as one beat */
-  .manager > .body > .tweet:first-of-type {
-    padding-top: var(--saito-space-sm);
   }
 }
 
@@ -73,7 +68,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  /* Visuelt Medium — page-title ink so Home outranks the compact Post CTA */
+  /* Visuelt Medium — page-title for conversation / profile navigation chrome */
   font-family: var(--saito-font-heavy);
   line-height: 1.2;
 }

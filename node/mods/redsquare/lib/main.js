@@ -2,7 +2,7 @@ const MainTemplate = require('./main.template');
 const Menu = require('./menu');
 const Composer = require('./composer');
 const Profile = require('./profile');
-const NewPost = require('./new-post');
+const Create = require('./create');
 const Sidebar = require('./sidebar');
 
 class Main {
@@ -16,7 +16,7 @@ class Main {
     this.manager = mod.manager;
     this.manager.container = '.manager';
     this.profile = new Profile(app, mod, '.sidebar-right > .redsquare-profile');
-    this.new_post = new NewPost(app, mod, '.manager .actions');
+    this.create = new Create(app, mod, '.sidebar-right > .redsquare-create');
     this.sidebar = new Sidebar(app, mod, '.sidebar-right > .sidebar');
     this.active_mobile_view = 'feed';
     this.chat_manager = null;
@@ -106,7 +106,7 @@ class Main {
     this.menu.render();
     this.manager.render();
     this.profile.render();
-    this.new_post.render();
+    this.create.render();
     this.sidebar.render();
 
     if (this.isCompactViewport()) {
@@ -226,7 +226,7 @@ class Main {
     this.menu.attachEvents();
     this.manager.attachEvents();
     this.profile.attachEvents();
-    this.new_post.attachEvents();
+    this.create.attachEvents();
     this.sidebar.attachEvents();
     this.attachSidebarScrollSync();
     this.attachFeedWheelScroll();

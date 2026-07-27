@@ -11,7 +11,13 @@
   height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
-  padding-block: var(--saito-space-sm);
+  /*
+   * Shared top baseline with the feed: `.tweet` uses padding-top
+   * `--saito-space-md`, which is the visible gap above the first tweet.
+   * Side rails use the same column inset so Home / tweet / Profile align.
+   */
+  padding-top: var(--saito-space-md);
+  padding-bottom: var(--saito-space-sm);
 }
 
 .sidebar-left {
@@ -26,6 +32,7 @@
 }
 
 .sidebar-right > .redsquare-profile,
+.sidebar-right > .redsquare-create,
 .sidebar-right > .sidebar {
   flex-shrink: 0;
 }

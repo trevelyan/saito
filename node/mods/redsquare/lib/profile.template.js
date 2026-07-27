@@ -52,7 +52,7 @@ module.exports = (profile) => {
 
   // Injected into `.sidebar-right > .redsquare-profile` — no outer wrapper here.
   // Posts / Replies / Likes are navigation destinations, not tabs.
-  // Compose lives in the feed header (`.actions`), not here.
+  // Compose lives in Create (`.redsquare-create`), not here.
   return `
       <div class="card" data-profile-key="${publicKey}">
         <div id="banner-${publicKey}" class="redsquare-profile-banner banner-${publicKey}" data-id="${publicKey}"${bannerStyle}>

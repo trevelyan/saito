@@ -10,6 +10,7 @@ module.exports = () => {
 
     <aside class="sidebar-right hide-scrollbar">
       <div class="redsquare-profile"></div>
+      <div class="redsquare-create"></div>
       <div class="sidebar"></div>
     </aside>
   `;
