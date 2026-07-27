@@ -105,7 +105,7 @@ module.exports = (compose) => {
             <span class="max">${compose.char_limit}</span>
           </div>
 
-          <button class="submit saito-button-primary" type="button">
+          <button class="submit saito-button-primary compact" type="button">
             <span class="label">${submitLabel}</span>
             <span class="spinner" aria-hidden="true"></span>
           </button>

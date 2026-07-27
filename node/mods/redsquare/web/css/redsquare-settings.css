@@ -16,7 +16,6 @@
 
 .settings > .header .title {
   margin: 0;
-  font-size: var(--font-size-large);
   font-family: var(--saito-font-medium);
   line-height: 1.2;
 }
@@ -40,7 +39,6 @@
 
 .settings .section > .title {
   margin: 0;
-  font-size: var(--font-size-medium);
   font-family: var(--saito-font-medium);
   line-height: 1.3;
 }

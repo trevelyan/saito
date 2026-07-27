@@ -132,7 +132,7 @@
   .menu .label {
     display: block;
     max-width: 100%;
-    font-size: var(--font-size-tiny);
+    font-size: 1.083rem;
     line-height: 1.15;
     text-align: center;
   }

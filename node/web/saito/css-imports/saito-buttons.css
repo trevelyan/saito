@@ -127,6 +127,19 @@ button.disabled {
   min-height: 2.8rem;
 }
 
+/* Normal height, content-width — tighter horizontal padding only */
+.saito-button-primary.compact,
+.saito-button-secondary.compact {
+  min-width: 0;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.saito-button-primary.compact i,
+.saito-button-secondary.compact i {
+  margin: 0 0.45rem 0 0;
+}
+
 .saito-button-secondary.small {
   color: unset;
 }

@@ -55,7 +55,6 @@
 
 .compose .header.compose .secondary {
   color: var(--saito-muted-foreground);
-  font-size: var(--font-size-tiny);
 }
 
 .compose .surface {
@@ -243,7 +242,6 @@
   display: flex;
   gap: 0.1rem;
   color: var(--saito-muted-foreground);
-  font-size: var(--font-size-tiny);
 }
 
 .compose .char-count.warning {

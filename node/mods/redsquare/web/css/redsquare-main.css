@@ -48,6 +48,16 @@ body.redsquare-body .sidebar .sidebar-header {
   color: inherit;
 }
 
+/* Desktop: section titles one step above body (Chats / Leaderboard / Who to Follow) */
+@media (min-width: 601px) {
+  body.redsquare-body .sidebar-left .saito-sidebar-header,
+  body.redsquare-body .sidebar .saito-sidebar-header,
+  body.redsquare-body .sidebar .sidebar-header {
+    font-size: 1.67rem;
+    font-family: var(--saito-font-medium);
+  }
+}
+
 @media (max-width: 1200px) {
   .sidebar-left {
     padding-inline: var(--saito-space-xs);

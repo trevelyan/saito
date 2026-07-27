@@ -20,12 +20,28 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--saito-space-sm);
+  gap: var(--saito-space-md);
   flex: 0 0 auto;
-  min-height: 5.6rem;
-  padding: 0 var(--saito-space-lg);
+  min-height: 5.2rem;
+  padding: 0.8rem var(--saito-space-md);
   background: var(--saito-card-wash);
   border-bottom: 1px solid var(--saito-border);
+}
+
+/*
+ * Desktop Option A — page title anchors the feed chrome.
+ * Content-sized height (no empty min-height), title-weighted, feed edge tighter.
+ */
+@media (min-width: 601px) {
+  .manager > .header {
+    min-height: 0;
+    padding: 0.7rem var(--saito-space-md) 0.55rem;
+  }
+
+  /* Same horizontal inset as tweets; slightly less top pad so title → first post reads as one beat */
+  .manager > .body > .tweet:first-of-type {
+    padding-top: var(--saito-space-sm);
+  }
 }
 
 /* Header is omitted from the DOM when the view does not require chrome. */
@@ -57,8 +73,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: var(--font-size-large);
-  font-family: var(--saito-font-medium);
+  /* Visuelt Medium — page-title ink so Home outranks the compact Post CTA */
+  font-family: var(--saito-font-heavy);
   line-height: 1.2;
 }
 
@@ -133,7 +149,7 @@
 
 @media (max-width: 600px) {
   .manager > .header {
-    padding: 0 var(--saito-space-sm);
+    padding: 0.8rem var(--saito-space-sm);
   }
 
   /* Floating + is the only compose affordance on mobile */

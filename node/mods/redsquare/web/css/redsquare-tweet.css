@@ -129,7 +129,6 @@
 .tweet .header.expanded .handle {
   grid-column: 1 / -1;
   grid-row: 2;
-  font-size: var(--font-size-tiny);
   font-family: var(--saito-font);
   font-weight: normal;
   line-height: 1.2;
@@ -156,7 +155,6 @@
   grid-column: 2;
   grid-row: 1;
   justify-self: end;
-  font-size: var(--font-size-tiny);
 }
 
 /* Body starts immediately under the identity block */
@@ -271,7 +269,6 @@
 
 .tweet .controls .count {
   margin-right: var(--saito-space-xs);
-  font-size: var(--font-size-tiny);
 }
 
 .tweet .show-more {

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"/>
+<link rel="stylesheet" href="http://127.0.0.1:12101/saito/lib/font-awesome-6/css/fontawesome.min.css"/>
+<link rel="stylesheet" href="http://127.0.0.1:12101/saito/lib/font-awesome-6/css/solid.min.css"/>
+<link rel="stylesheet" href="http://127.0.0.1:12101/saito/saito.css"/>
+<link rel="stylesheet" href="http://127.0.0.1:12101/redsquare/style.css"/>
+<style>
+  html { font-size: 12px; }
+  body { margin: 0; background: #090a09; }
+  .page { display: grid; grid-template-columns: 270px 620px 310px; max-width: 1200px; margin: 0 auto; min-height: 100vh; }
+  .rail { padding: 1rem 0.75rem; border-right: 1px solid var(--saito-border); }
+  .feed { border-right: 1px solid var(--saito-border); }
+  .right { padding: 1rem; }
+  .tweet .avatar, .suggestion .avatar, .redsquare-profile .avatar {
+    width: 3.5rem; height: 3.5rem; border-radius: 50%; background: #3a3a38;
+  }
+  .redsquare-profile .avatar { width: 6.8rem; height: 6.8rem; border-radius: var(--saito-radius); }
+  .measure { position: fixed; bottom: 8px; left: 8px; font: 11px/1.4 monospace; color: #9e9990; background: #121312; padding: 8px 10px; border-radius: 6px; z-index: 9; white-space: pre; }
+</style>
+</head>
+<body class="redsquare-body">
+<div class="page">
+  <aside class="rail">
+    <nav class="menu">
+      <ul class="list">
+        <li class="item active" data-nav="home"><div class="icon"><i class="fa-solid fa-house"></i></div><div class="label">Home</div></li>
+        <li class="item" data-nav="notifications"><div class="icon"><i class="fa-solid fa-bell"></i></div><div class="label">Notifications</div></li>
+        <li class="item" data-nav="profile"><div class="icon"><i class="fa-solid fa-user"></i></div><div class="label">Profile</div></li>
+        <li class="item" data-nav="settings"><div class="icon"><i class="fa-solid fa-gear"></i></div><div class="label">Settings</div></li>
+      </ul>
+    </nav>
+    <div class="sidebar-left" style="display:block;padding:1rem 0 0;height:auto;overflow:visible">
+      <div class="chat-manager">
+        <div class="saito-sidebar-header"><div class="title">Chats</div></div>
+        <div class="chat-manager-list" style="padding-top:0.5rem">
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:0.75rem;padding:0.4rem 0;align-items:center">
+            <div class="avatar" style="width:3.2rem;height:3.2rem"></div>
+            <div><div class="saito-address">alice.saito</div><div class="saito-userline">hey — are you free?</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <main class="feed">
+    <div class="manager">
+      <header class="header">
+        <div class="start"><h2 class="title">Home</h2></div>
+        <div class="actions"><button class="new-post saito-button-primary compact" type="button"><i class="fa-solid fa-plus"></i><span>Post</span></button></div>
+      </header>
+      <div class="body">
+        <article class="tweet">
+          <div class="avatar"></div>
+          <div class="content">
+            <header class="header compact"><span class="primary">Tweet Author</span><span class="sep">·</span><span class="time">2h</span></header>
+            <div class="body">Tweet body stays at the body step — hierarchy rises above it, not through it.</div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </main>
+  <aside class="right sidebar">
+    <div class="redsquare-profile">
+      <div class="card">
+        <div class="redsquare-profile-banner"></div>
+        <div class="identity">
+          <div class="avatar"></div>
+          <div class="text">
+            <div class="name">Profile Name</div>
+            <div class="key-row"><div class="public-key">abc123…pubkey</div></div>
+          </div>
+        </div>
+        <p class="redsquare-profile-description">Bio remains at body size.</p>
+      </div>
+    </div>
+    <div class="redsquare-leaderboard" style="margin-top:1.6rem">
+      <div class="saito-sidebar-header"><div class="title">Leaderboard</div></div>
+      <div class="league-leaderboard-ranking" style="padding:0.5rem 0;display:flex;justify-content:space-between"><span>Player One</span><span>1</span></div>
+    </div>
+    <section class="suggestions" style="margin-top:1.6rem">
+      <h5 class="sidebar-header"><div class="sidebar-title">Who to Follow</div></h5>
+      <ul class="suggestion-list">
+        <li class="suggestion">
+          <div class="avatar" style="width:3rem;height:3rem"></div>
+          <div class="name">Suggested</div>
+          <div class="handle">@suggested</div>
+        </li>
+      </ul>
+    </section>
+  </aside>
+</div>
+<pre class="measure" id="m"></pre>
+<script>
+document.fonts.ready.then(() => {
+  const q = (s) => document.querySelector(s);
+  const line = (label, el) => {
+    if (!el) return label + ': MISSING';
+    const cs = getComputedStyle(el);
+    return `${label}: ${cs.fontSize} / ${cs.fontFamily.split(',')[0].replace(/['\"]/g,'')}`;
+  };
+  document.getElementById('m').textContent = [
+    line('Nav Home', q('.menu .label')),
+    line('Page Home', q('.manager > .header .title')),
+    line('Author', q('.tweet .primary')),
+    line('Body', q('.tweet .content > .body')),
+    line('Meta', q('.tweet .time')),
+    line('Profile', q('.redsquare-profile .name')),
+    line('Chats', q('.chat-manager .saito-sidebar-header .title')),
+    line('Leaderboard', q('.redsquare-leaderboard .saito-sidebar-header .title')),
+    line('Who to Follow', q('.sidebar-header .sidebar-title')),
+  ].join('\n');
+});
+</script>
+</body>
+</html>

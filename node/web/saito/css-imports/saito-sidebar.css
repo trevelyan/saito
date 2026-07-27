@@ -6,8 +6,8 @@
  *   .saito-sidebar-element — bordered body surface
  *
  * Header contract:
- *   .title            — always present; may contain optional .icon + text
- *   .actions          — optional; zero or more module controls
+ *   .title            — always present (text)
+ *   .actions          — optional; zero or more controls / decorative icons
  *
  * Legacy class names remain as aliases so unmigrated markup keeps working.
  */
@@ -38,14 +38,13 @@
   cursor: pointer;
 }
 
-/* Title — optional .icon aligns with text */
+/* Title — left-aligned text */
 .saito-sidebar-header .title,
 .saito-sidebar-header .sidebar-title,
 .sidebar-header .title,
 .sidebar-header .sidebar-title {
   display: inline-flex;
   align-items: center;
-  gap: var(--saito-space-sm);
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -53,13 +52,7 @@
   cursor: default;
 }
 
-.saito-sidebar-header .title .icon,
-.sidebar-header .title .icon {
-  flex-shrink: 0;
-  cursor: default;
-}
-
-/* Actions — one or more module controls */
+/* Actions — right-aligned controls (Chat ellipsis, Leaderboard icon, …) */
 .saito-sidebar-header .actions,
 .sidebar-header .actions {
   display: flex;
@@ -67,6 +60,18 @@
   gap: var(--saito-space-xs);
   flex-shrink: 0;
   cursor: default;
+}
+
+/*
+ * Full-bleed mobile hosts (e.g. RedSquare Chat) have no rail padding.
+ * Match #saito-header mobile inset (1rem @ ≤620px) so title ↔ logo,
+ * actions ↔ hamburger share one horizontal grid.
+ */
+@media (max-width: 600px) {
+  .saito-sidebar-header,
+  .sidebar-header {
+    padding-inline: 1rem;
+  }
 }
 
 /* ----------------------------------------------------------------

@@ -41,7 +41,6 @@
 
 .notification .time {
   color: var(--saito-muted-foreground);
-  font-size: var(--font-size-tiny);
 }
 
 .notification .slot {

@@ -41,3 +41,9 @@
 .redsquare-leaderboard .saito-table-rank {
   text-align: right;
 }
+
+/* Inherit RS body scale — Saito table defaults to 1.5rem. */
+.redsquare-leaderboard .saito-table-body,
+.redsquare-leaderboard .saito-table-rank {
+  font-size: inherit;
+}

@@ -55,6 +55,7 @@
   grid-column: 2;
   grid-row: 1;
   min-width: 0;
+  font-family: var(--saito-font-medium);
 }
 
 .sidebar .suggestion .handle {
@@ -83,7 +84,6 @@
   flex-wrap: wrap;
   gap: var(--saito-space-xs) var(--saito-space-sm);
   color: var(--saito-muted-foreground);
-  font-size: var(--font-size-tiny);
 }
 
 .sidebar .footer a {

@@ -31,6 +31,9 @@
   min-width: 0;
   height: auto;
   line-height: 1.55;
+  color: var(--saito-muted-foreground);
+  font-style: normal;
+  transition: color 0.2s;
 }
 
 .chat-manager .saito-userline .img-prev {
@@ -57,29 +60,17 @@
 }
 
 .chat-manager .saito-user {
-  grid-template-columns: 4rem minmax(0, 1fr) min-content;
+  grid-template-columns: min-content minmax(0, 1fr) min-content;
   grid-template-rows: 2rem 1.8rem;
   align-items: center;
-  column-gap: 1.1rem;
+  column-gap: 1rem;
   padding: 0.75rem 0.8rem;
   border-radius: var(--saito-radius);
   overflow: hidden;
-  min-height: 5.35rem;
   cursor: pointer;
   transition:
     background-color 0.2s,
     color 0.2s;
-}
-
-.chat-manager .saito-identicon-box {
-  width: 4rem;
-  height: 4rem;
-}
-
-.chat-manager .online-status-indicator:after,
-.chat-manager .stun .online-status-indicator i {
-  top: 3.85rem;
-  left: 3.85rem;
 }
 
 .chat-manager .saito-address {
@@ -95,7 +86,10 @@
   text-overflow: ellipsis;
 }
 
-/* Hover from shared .saito-menu-select-heavy (same as Leaderboard rows). */
+/* Hover from shared .saito-menu-select-heavy; keep secondary line in the active row. */
+.chat-manager .saito-user:hover .saito-userline {
+  color: inherit;
+}
 
 .chat-manager-list {
   gap: 0.2rem;
@@ -503,11 +497,6 @@
 
 .chat-body .saito-identicon-box {
   align-self: end;
-}
-
-.chat-manager .saito-userline {
-  color: var(--saito-muted-foreground);
-  font-style: normal;
 }
 
 .saito-time-stamp {

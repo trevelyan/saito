@@ -12,6 +12,78 @@ body.redsquare-body {
       transparent 68%
     ),
     var(--saito-background);
+
+  /*
+   * Typography — Twitter/X hierarchy on the shared Saito root (12px).
+   * Body/author inherit 1.25rem (15px). Meta / titles are the only scale steps.
+   * Colors stay on Saito theme tokens.
+   */
+  font-size: 1.25rem;
+}
+
+/* Undo Saito `p { font-size: medium }` so prose inherits the RS body step. */
+body.redsquare-body p {
+  font-size: inherit;
+}
+
+/* Page / modal titles — ~20px */
+body.redsquare-body .manager > .header .title,
+body.redsquare-body .settings > .header .title {
+  font-size: 1.67rem;
+}
+
+/*
+ * Desktop hierarchy (first pass) — sizes only; cuts stay on components.
+ * Steps: page/nav/section 1.67rem (~20px) → profile name 1.4rem → body 1.25rem → meta 1.083rem.
+ * Tweet author/body/meta unchanged. Mobile keeps the inherited body band.
+ */
+@media (min-width: 601px) {
+  body.redsquare-body .menu .label {
+    font-size: 1.67rem;
+  }
+
+  body.redsquare-body .redsquare-profile .name {
+    font-size: 1.4rem;
+  }
+}
+
+/* Settings section labels — body size, medium weight (weight from component). */
+body.redsquare-body .settings .section > .title {
+  font-size: inherit;
+}
+
+/* Metadata — ~13px (timestamps, handles, counts, keys, legal, counters) */
+body.redsquare-body .tweet .time,
+body.redsquare-body .tweet .sep,
+body.redsquare-body .tweet .handle,
+body.redsquare-body .tweet .controls .count,
+body.redsquare-body .notification .time,
+body.redsquare-body .redsquare-profile .public-key,
+body.redsquare-body .sidebar .footer,
+body.redsquare-body .sidebar .suggestion .handle,
+body.redsquare-body .compose .char-count,
+body.redsquare-body .compose .header.compose .secondary {
+  font-size: 1.083rem;
+}
+
+/* Quoted / embedded tweet body — one step below feed body (~14px) */
+body.redsquare-body .tweet.embedded .body {
+  font-size: 1.167rem;
+}
+
+/* Link previews — must not dominate the tweet (Saito defaults are larger) */
+body.redsquare-body .saito-link-preview-title {
+  font-size: 1.25rem;
+}
+
+body.redsquare-body .saito-link-preview-info,
+body.redsquare-body .saito-link-preview-display-url {
+  font-size: 1.083rem;
+}
+
+/* Compose field — X uses a larger writing surface than feed body (~20px) */
+body.redsquare-body .compose .input {
+  font-size: 1.67rem;
 }
 
 /*
